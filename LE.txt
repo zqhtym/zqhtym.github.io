@@ -520,6 +520,68 @@ BTV北京卫视,http://114.241.111.4:85/tsfile/live/16/1016_1.m3u8?key=txiptv
 [BD]tvbs亚洲,https://stream1.freetv.fun/5d67b3e9131d07f6e7da4e6fafda09cc609ee7fefb2e14ca14cf5bd6da5e4107.m3u8
 环球电视台,http://utv1.hqtvzb.com:9999/hls/world.m3u8
 
+ 欧美（54条） ,#group# 
+
+欧美 高清/HD（17条） ,#group# 
+
+WKAQ-DT1 (Telemundo PR) (1080p),https://nbculocallive.akamaized.net/hls/live/2037499/puertorico/stream1/master.m3u8
+Majid Al Mohandis (1080p),https://shls-live-mood-ak.akamaized.net/out/v1/8e2419c6c7494dbba478be025af490ee/index.m3u8
+TG Junior (1080p),https://stream-us-east-1.getpublica.com/playlist.m3u8?network_id=31
+Global Punjab (1080p),https://server.livelegitpro.in/globalpunjab/globalpunjab/index.m3u8
+Azteca Internacional (1080p),https://azt-mun.otteravision.com/azt/mun/mun.m3u8
+Sky News Extra 3 (1080p),https://skynewsau-live.akamaized.net/hls/live/2002691/skynewsau-extra3/master.m3u8
+InfoWars The Alex Jones Show (1080p),https://freespeech.akamaized.net/hls/live/2024573/live2/playlist.m3u8
+Shalom Global (1080p),https://d28xtgmk9tfk6b.cloudfront.net/master.m3u8
+India TV Speed News (1080p),https://cc-lyf4c0hwzg5dd.akamaized.net/v1/vglive-sk-479089/main.m3u8
+Trace Urban (Australia) (1080p),https://lightning-traceurban-samsungau.amagi.tv/playlist.m3u8
+InfoWars The American Journal (1080p),https://freespeech.akamaized.net/hls/live/2016873/live3/playlist.m3u8
+Zoo Moo (Australia) (1080p),https://zoomoo-samsungau.amagi.tv/playlist.m3u8
+Zee News (1080p),https://dknttpxmr0dwf.cloudfront.net/index_57.m3u8
+Prime9 News (1080p),https://mumbai-edge.smartplaytv.in/Prime9News/index.m3u8
+OUN (1080p),https://live.knou.ac.kr/knou1/live1/playlist.m3u8
+Trace Sport Stars (Australia) (1080p),https://lightning-tracesport-samsungau.amagi.tv/playlist.m3u8
+NBC News Now (1080p),https://aegis-cloudfront-1.tubi.video/605fb6ea-f89c-451a-873c-030cb726b493/master.m3u8
+欧美 SD（37条） ,#group# 
+
+UniNettuno University TV (720p),https://stream6-rai-it.akamaized.net/live/uninettuno/playlist.m3u8
+Chifeng Comprehensive News Chanel,http://play1-qk.nmtv.cn/live/1735546697341033.m3u8
+ABC News Live 10 (720p),https://abcnews-streams.akamaized.net/hls/live/2023569/abcnewshudson10/master_4000.m3u8
+泰国 ASTV News 1,http://news1.live14.com/stream/news1_hi.m3u8
+ABC Australia,https://abc-news-dmd-streams-1.akamaized.net/out/v1/701126012d044971b3fa89406a440133/index.m3u8
+Runtime Espanol (720p),https://run-rt-uh-roku.otteravision.com/run/rt_uh/rt_uh.m3u8
+Angel TV Australia (720p),https://janya-digimix.akamaized.net/vglive-sk-310787/australia/ngrp:angelaustralia_all/playlist.m3u8
+ANN News (720p),https://cdn.ottlive.co.in/annnews/index.m3u8
+Global Christian Network America (GCN) (720p),http://liveen24-manminglobal3.ktcdn.co.kr/liveen24/gcnus_1300k.stream/playlist.m3u8
+STAR International (720p),https://livestar.siliconweb.com/starvod/star_int/star_int.m3u8
+ABC News Live 7 (720p),https://abcnews-streams.akamaized.net/hls/live/2023566/abcnewshudson7/master_4000.m3u8
+ABC News Live 1 (720p),https://abcnews-streams.akamaized.net/hls/live/2023560/abcnewshudson1/master_4000.m3u8
+Mundo Series,https://streams2.sofast.tv/v1/master/611d79b11b77e2f571934fd80ca1413453772ac7/e3189902-0967-48a7-9d32-9401e34471c6/manifest.m3u8
+Polimer News (576p),https://segment.yuppcdn.net/110322/polimernews/playlist.m3u8
+Twenty Four News (396p),https://segment.yuppcdn.net/110322/channel24/playlist.m3u8
+Kalaignar TV (576p),https://segment.yuppcdn.net/240122/kalaignartv/playlist.m3u8
+Global News Lethbridge (720p),https://live.corusdigitaldev.com/groupc/live/cea96246-9af2-4373-932f-cdd3f8db2bc0/live.isml/.m3u8
+Global News Saskatoon (720p),https://live.corusdigitaldev.com/groupc/live/f191ef59-6c28-42ba-86d0-d47df5280249/live.isml/.m3u8
+ABC News Live 6 (720p),https://abcnews-streams.akamaized.net/hls/live/2023565/abcnewshudson6/master_4000.m3u8
+Global News Halifax (720p),https://live.corusdigitaldev.com/groupa/live/b60d1d57-2851-4c29-bf5c-36feed988e57/live.isml/.m3u8
+Sky News Extra 1 (540p),https://skynewsau-live.akamaized.net/hls/live/2002689/skynewsau-extra1/master.m3u8
+ABC News Live 9 (720p),https://abcnews-streams.akamaized.net/hls/live/2023568/abcnewshudson9/master_4000.m3u8
+Anshun Comprehensive News Channel,https://hplayer1.juyun.tv/camera/154379194.m3u8
+CBS News Miami (720p),https://cbsn-mia.cbsnstream.cbsnews.com/out/v1/ac174b7938264d24ae27e56f6584bca0/master.m3u8
+Global News Okanagan (720p),https://live.corusdigitaldev.com/groupc/live/9fd97fb0-baa8-4191-bd2c-59aa5c9a1d48/live.isml/.m3u8
+Global News Calgary (720p),https://live.corusdigitaldev.com/groupd/live/8970c668-40cd-4ca9-8c4d-25fd04f619b5/live.isml/.m3u8
+Kashish News (720p),https://server.thelegitpro.in/kashishnews/kashishnews/index.m3u8
+Global News Toronto (720p),https://live.corusdigitaldev.com/groupd/live/deb8cec5-87fb-460a-ab82-0929374fc5fb/live.isml/.m3u8
+Puthiya Thalaimurai (576p),https://segment.yuppcdn.net/240122/puthiya/playlist.m3u8
+NBC 11 Baltimore MD (WBAL) (720p),https://aegis-cloudfront-1.tubi.video/888aedca-93fb-4aed-bb92-4beb8f1323c6/playlist.m3u8
+FORTUNE TV (720p),http://103.215.194.93:8282/hls/fortunetv/vmix.m3u8
+BBC News (540p),https://vs-hls-push-ww-live.akamaized.net/x=4/i=urn:bbc:pips:service:bbc_news_channel_hd/mobile_wifi_main_sd_abr_v2.m3u8
+Zee Kannada News (720p),https://d3vzwoqcbpfm8p.cloudfront.net/index_4.m3u8
+Global News Peterborough (720p),https://live.corusdigitaldev.com/groupa/live/5eb39b64-58e8-47d2-97ca-25e8cd760b63/live.isml/.m3u8
+Gongyoung Shopping (720p),https://etv.publichs.com/live5.stream/playlist.m3u8
+NBC 8 Salinas CA (KSBW) (720p),https://aegis-cloudfront-1.tubi.video/8e6af50d-76df-4208-ab8d-3ff8f512cd38/playlist.m3u8
+NBC 26 Green Bay WI (WGBA) (720p),https://aegis-cloudfront-1.tubi.video/b32c0573-4add-4b47-b826-24412d952164/playlist.m3u8
+ 
+
  
  其它（126条） ,#group# 
 
