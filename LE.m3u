@@ -55,17 +55,17 @@ http://61.178.227.57:9901/tsfile/live/0003_1.m3u8?key=txiptv&amp;playlive=1&amp;
 http://119.190.201.210:85/tsfile/live/28/2003_1.m3u8?key=txiptv
 #EXTINF:-1 tvg-name="CCTV3" group-title="央视 SD（128条） ",CCTV3
 http://113.241.133.223:85/tsfile/live/0003_1.m3u8?key=txiptv&playlive=1&authid=0
-#EXTINF:-1 tvg-name="CCTV4" group-title="央视 SD（128条） ",CCTV4
+#EXTINF:-1 tvg-name="CCTV 4" group-title="央视 SD（128条） ",CCTV4
 http://111.56.90.51/gslbserv.iptv.nm.chinamobile.com/PLTV/88888890/224/3221226340/1.m3u8?fmt=ts2hls$2160p
 #EXTINF:-1 tvg-name="CCTV4" group-title="央视 SD（128条） ",CCTV4
 http://223.95.198.3:8000/hls/4/index.m3u8
-#EXTINF:-1 tvg-name="CCTV4" group-title="央视 SD（128条） ",CCTV4
+#EXTINF:-1 tvg-name="CCTV4国际" group-title="央视 SD（128条） ",CCTV4
 http://111.56.90.5/000000000000/5000000011000031102/index.m3u8
 #EXTINF:-1 tvg-name="CCTV4中文国际" group-title="央视 SD（128条） ",CCTV4中文国际
 http://61.178.227.57:9901/tsfile/live/0004_1.m3u8?key=txiptv&amp;playlive=1&amp;authid=0
 #EXTINF:-1 tvg-name="CCTV4" group-title="央视 SD（128条） ",CCTV4
 http://112.27.235.94:8000/hls/4/index.m3u8
-#EXTINF:-1 tvg-name="CCTV4" group-title="央视 SD（128条） ",CCTV4
+#EXTINF:-1 tvg-name="CCTV 4" group-title="央视 SD（128条） ",CCTV4
 http://119.190.201.210:85/tsfile/live/29/2004_1.m3u8?key=txiptv
 #EXTINF:-1 tvg-name="CCTV5+" group-title="央视 SD（128条） ",CCTV5+
 http://183.129.255.66:8480/hls/6/index.m3u8
