@@ -651,8 +651,6 @@ https://t.freetv.fun/live/bbc-2.m3u8
 https://t.freetv.fun/live/bloomberg-tv-1.m3u8
 #EXTINF:-1 group-title="News" tvg-logo="https://epg.pw/media/images/channel/2022/05/06/large/20220506164224699889_88.png",[BD]trt world
 https://t.freetv.fun/live/trt-world-1.m3u8
-#EXTINF:-1 group-title="News" tvg-logo="https://epg.pw/media/images/channel/2022/11/26/large/20221126155629392519_70.jpg",[SD]taiwan plus
-https://t.freetv.fun/live/taiwan-plus.m3u8
 #EXTINF:-1 ,ABC Australia
 https://abc-news-dmd-streams-1.akamaized.net/out/v1/701126012d044971b3fa89406a440133/index.m3u8
 #EXTINF:-1 ,BBC America
@@ -1129,6 +1127,8 @@ http://115.29.208.41:34567/gd.php?id=1224
 http://tvpull.dxhmt.cn:9081/tv/11282-1.m3u8
 #EXTINF:-1 tvg-name="牟平新闻|澜露直播" group-title="其它 SD（173条） ",牟平新闻|澜露直播
 http://43.138.196.212/q0l.php?id=ytmpxw
+#EXTINF:-1 tvg-name="电影_斯坦森" group-title="其它 SD（173条） ",电影_斯坦森
+http://cfss.cc/cdn/huya/21059588.flv
 #EXTINF:-1 tvg-name="电影_不挤影院" group-title="其它 SD（173条） ",电影_不挤影院
 http://cfss.cc/cdn/huya/11352897.flv
 #EXTINF:-1 tvg-name="电影_功夫片" group-title="其它 SD（173条） ",电影_功夫片
