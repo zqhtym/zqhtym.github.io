@@ -173,7 +173,7 @@ class Config:
         '港澳台': re.compile(r'凤凰|无线|明珠|环球|美亚|翡翠|台视|中视|华视|中天|亚洲', re.I),
         # 欧美：排除unknown + 匹配关键词 + 排除非中英字符 + 排除指定敏感词
         #'欧美': re.compile(r'^(?!.*(unknown|geo-block|persian|firefox))[\u4e00-\u9fff0-9a-zA-Z\s\(\)\-_\.!]+(al|ABC|BBC|Bloom|CBS|City|FOX|GB|go2|NBC|News|NTD|UN|Yah|trt|Hollywood)[\u4e00-\u9fffa-zA-Z0-9\s\(\)\-_\.!]+$', re.I),
-        '欧美': re.compile( r'^(Camp Spoopy|ABC|BBC|Bloomberg|CBS|City|FOX|GB|Go2|NBC|News|NTD|UN|Yahoo|Real)', re.IGNORECASE),
+        '欧美': re.compile( r'^(Camp Spoopy|ABC|BBC|Bloomberg|CBS|City|FOX|LiveNOW|GB|Go2|NBC|News|NTD|UN|Yahoo|Real)', re.IGNORECASE),
         # 其它：匹配关键词 + 排除非中英字符 + 排除指定敏感词
         '其它': re.compile(r'4K|电影|四川|成都|上海|江苏|南京|新闻|高清|1080p', re.I)
     }
