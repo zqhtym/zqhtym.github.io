@@ -1,0 +1,124 @@
+name: 自动部署直播流检测
+
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    # 每天北京时间3:00运行 (UTC时间19:00)
+    - cron: '0 19 * * *'
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: 设置Python环境
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: 安装系统依赖
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          python3-pip \
+          python3-dev \
+          build-essential \
+          cmake \
+          pkg-config \
+          libjpeg-dev \
+          libpng-dev \
+          libtiff-dev \
+          libavcodec-dev \
+          libavformat-dev \
+          libswscale-dev \
+          libv4l-dev \
+          libxvidcore-dev \
+          libx264-dev \
+          libgtk-3-dev \
+          libatlas-base-dev \
+          gfortran \
+          wget \
+          unzip
+          
+    - name: 安装FFmpeg
+      run: |
+        # 下载并安装静态编译的FFmpeg
+        wget -q https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
+        tar -xf ffmpeg-release-amd64-static.tar.xz
+        sudo mv ffmpeg-*/ffmpeg /usr/local/bin/
+        sudo mv ffmpeg-*/ffprobe /usr/local/bin/
+        ffmpeg -version
+        
+    - name: 安装Python依赖
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: 下载txt_to_m3u8b工具
+      run: |
+        # 创建工具目录
+        mkdir -p tools
+        # 下载txt_to_m3u8b.exe (需要预先上传到GitHub releases或其他位置)
+        wget -O tools/txt_to_m3u8b.exe https://github.com/zqhtym/zqhtym.github.io/releases/download/tools/txt_to_m3u8b.exe
+        chmod +x tools/txt_to_m3u8b.exe
+        
+    - name: 运行直播流检测
+      run: |
+        python url-check_v-txt10.py
+        
+    - name: 处理输出文件
+      run: |
+        # 获取当前时间戳
+        TIMESTAMP=$(date +%Y%m%d%H%M)
+        
+        # 查找生成的文件
+        EXCELLENT_FILE=$(ls live+excellent+*.txt | head -1)
+        USEFUL_FILE=$(ls live+useful+*.txt | head -1)
+        
+        if [ -n "$EXCELLENT_FILE" ]; then
+          echo "找到excellent文件: $EXCELLENT_FILE"
+          cp "$EXCELLENT_FILE" LE.txt
+        fi
+        
+        if [ -n "$USEFUL_FILE" ]; then
+          echo "找到useful文件: $USEFUL_FILE"
+          cp "$USEFUL_FILE" LU.txt
+        fi
+        
+        # 生成M3U文件
+        if [ -f "LE.txt" ]; then
+          echo "生成LE.m3u"
+          tools/txt_to_m3u8b.exe LE.txt LE.m3u
+        fi
+        
+        if [ -f "LU.txt" ]; then
+          echo "生成LU.m3u"
+          tools/txt_to_m3u8b.exe LU.txt LU.m3u
+        fi
+        
+    - name: 部署到GitHub Pages
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add LE.txt LU.txt LE.m3u LU.m3u live+*.txt
+        git commit -m "自动更新直播流列表 - $(date '+%Y-%m-%d %H:%M:%S')" || exit 0
+        git push
+        
+    - name: 上传构建产物
+      uses: actions/upload-artifact@v3
+      with:
+        name: livestream-results
+        path: |
+          LE.txt
+          LU.txt
+          LE.m3u
+          LU.m3u
+          live+*.txt
+        retention-days: 7
