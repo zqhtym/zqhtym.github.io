@@ -15,8 +15,6 @@ jobs:
     steps:
     - name: 检出代码
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
         
     - name: 设置Python环境
       uses: actions/setup-python@v4
@@ -49,11 +47,7 @@ jobs:
           
     - name: 安装FFmpeg
       run: |
-        # 下载并安装静态编译的FFmpeg
-        wget -q https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
-        tar -xf ffmpeg-release-amd64-static.tar.xz
-        sudo mv ffmpeg-*/ffmpeg /usr/local/bin/
-        sudo mv ffmpeg-*/ffprobe /usr/local/bin/
+        sudo apt-get install -y ffmpeg
         ffmpeg -version
         
     - name: 安装Python依赖
@@ -61,17 +55,9 @@ jobs:
         pip install --upgrade pip
         pip install -r requirements.txt
         
-    - name: 下载txt_to_m3u8b工具
-      run: |
-        # 创建工具目录
-        mkdir -p tools
-        # 下载txt_to_m3u8b.exe (需要预先上传到GitHub releases或其他位置)
-        wget -O tools/txt_to_m3u8b.exe https://github.com/zqhtym/zqhtym.github.io/releases/download/tools/txt_to_m3u8b.exe
-        chmod +x tools/txt_to_m3u8b.exe
-        
     - name: 运行直播流检测
       run: |
-        python url-check_v-pro.py
+        python url-check_v-txt10.py
         
     - name: 处理输出文件
       run: |
@@ -79,8 +65,8 @@ jobs:
         TIMESTAMP=$(date +%Y%m%d%H%M)
         
         # 查找生成的文件
-        EXCELLENT_FILE=$(ls live+excellent+*.txt | head -1)
-        USEFUL_FILE=$(ls live+useful+*.txt | head -1)
+        EXCELLENT_FILE=$(ls live+excellent+*.txt | head -1 || echo "")
+        USEFUL_FILE=$(ls live+useful+*.txt | head -1 || echo "")
         
         if [ -n "$EXCELLENT_FILE" ]; then
           echo "找到excellent文件: $EXCELLENT_FILE"

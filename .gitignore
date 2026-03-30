@@ -57,8 +57,9 @@ live+*.txt
 tools/*
 !tools/*.exe
 
-# 配置文件（保留示例）
+# 配置文件（保留重要文件）
 *.txt
+!requirements.txt
 !resources.txt
 !white.txt
 !LE.txt

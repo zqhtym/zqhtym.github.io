@@ -1,0 +1,12 @@
+# 直播流检测工具核心依赖
+opencv-python>=4.8.0
+pytz>=2023.3
+pymediainfo>=6.0.1
+numpy>=1.24.0
+
+# 网络请求库
+requests>=2.31.0
+urllib3>=2.0.0
+
+# 系统工具
+psutil>=5.9.0
