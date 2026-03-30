@@ -57,6 +57,15 @@ jobs:
         
     - name: 运行直播流检测
       run: |
+        # 设置资源限制
+        ulimit -v 4194304  # 限制虚拟内存为4GB
+        ulimit -t 3600     # 限制CPU时间为1小时
+        
+        # 设置Python优化参数
+        export PYTHONOPTIMIZE=1
+        export PYTHONHASHSEED=0
+        
+        # 运行优化版检测程序
         python url-check_v-pro.py
         
     - name: 处理输出文件
