@@ -57,7 +57,7 @@ jobs:
         
     - name: 运行直播流检测
       run: |
-        python url-check_v-txt10.py
+        python url-check_v-pro.py
         
     - name: 处理输出文件
       run: |
