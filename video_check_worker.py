@@ -33,11 +33,13 @@ class Config:
 
     # 画面检测配置
     VIDEO_CHECK = {
-        'frame_interval': 2,  # 每隔2秒取一帧
-        'min_diff': 5000,     # 帧差异阈值（低于此值视为画面无变化）
+        'frame_interval': 1,  # 每隔1秒取一帧（更频繁采样）
+        'min_diff': 1000,     # 帧差异阈值（降低阈值）
         'min_width': 320,     # 最小有效宽度
         'min_height': 240,    # 最小有效高度
-        'audio_check': True   # 是否检测音频
+        'audio_check': True,   # 是否检测音频
+        'min_frames': 3,      # 最少需要3帧进行对比
+        'max_frames': 8       # 最多取8帧进行对比
     }
 
 
@@ -182,8 +184,8 @@ def check_video_changes(url):
                 frames.append(gray)
                 last_frame_time = current_time
 
-            # 最多取5帧（足够判断变化，避免耗时过长）
-            if len(frames) >= 5:
+            # 最多取8帧（更准确的判断）
+            if len(frames) >= Config.VIDEO_CHECK['max_frames']:
                 break
 
         cap.release()
@@ -195,8 +197,8 @@ def check_video_changes(url):
             result['reason'] = reason
             return result
 
-        if len(frames) < 2:
-            reason = f"URL: {url} | 错误: 有效帧数不足（共读取{frame_read_count}帧，需至少2帧对比）"
+        if len(frames) < Config.VIDEO_CHECK['min_frames']:
+            reason = f"URL: {url} | 错误: 有效帧数不足（共读取{frame_read_count}帧，需至少{Config.VIDEO_CHECK['min_frames']}帧对比）"
             print(f"[调试] 画面变化检测失败 | {reason}")
             result['reason'] = reason
             return result

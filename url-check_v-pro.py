@@ -1166,12 +1166,25 @@ def check_video_changes(url):
 def check_video_changes(url):
     """
     检测画面变化（进程级3分钟超时）
-    适配改写后的video_check_worker.py返回值接口
+    自动检测环境并选择合适的检测策略
     :param url: 视频流URL
     :return: True=画面变化，False=无变化/超时/失败
     """
-    # 1. 获取独立脚本路径
-    worker_script = os.path.join(os.path.dirname(__file__), 'video_check_worker.py')
+    # 1. 检测运行环境并选择合适的worker脚本
+    is_github_actions = os.environ.get('GITHUB_ACTIONS') == 'true'
+    
+    if is_github_actions:
+        worker_script = os.path.join(os.path.dirname(__file__), 'video_check_worker_github.py')
+        print(f"[环境检测] 使用GitHub Actions优化版本 | URL: {url}")
+    else:
+        worker_script = os.path.join(os.path.dirname(__file__), 'video_check_worker.py')
+        print(f"[环境检测] 使用标准版本 | URL: {url}")
+    
+    # 如果GitHub Actions版本不存在，回退到自动版本
+    if not os.path.exists(worker_script):
+        worker_script = os.path.join(os.path.dirname(__file__), 'video_check_worker_auto.py')
+        print(f"[环境检测] 回退到自动版本 | URL: {url}")
+    
     if not os.path.exists(worker_script):
         print(f"[调试] 画面检测失败 | URL: {url} | 错误: 找不到worker脚本 {worker_script}")
         return False
@@ -2071,9 +2084,32 @@ def main():
         
         # ========== 新增：画面有效性检测 ==========
         # 使用多线程并发检测所有有效测速条目
-        max_threads = 3  # 减少线程数以节省内存
+        max_threads = 2  # 进一步减少线程数以节省内存
         
-        video_valid_items = check_video_validity(valid_speed_items , max_threads=max_threads)
+        # 分批处理以避免内存溢出
+        batch_size = 100  # 每批处理100个
+        video_valid_items = []
+        
+        for i in range(0, len(valid_speed_items), batch_size):
+            batch = valid_speed_items[i:i+batch_size]
+            print(f"\n【画面检测批次】{i//batch_size + 1}/{(len(valid_speed_items)-1)//batch_size + 1} | 本批数量: {len(batch)}")
+            
+            batch_results = check_video_validity(batch, max_threads=max_threads)
+            video_valid_items.extend(batch_results)
+            
+            # 强制垃圾回收
+            gc.collect()
+            
+            # 内存检查
+            import psutil
+            memory_percent = psutil.virtual_memory().percent
+            print(f"[内存监控] 当前内存使用: {memory_percent:.1f}%")
+            
+            if memory_percent > 80:
+                print("[内存警告] 内存使用过高，暂停5秒")
+                time.sleep(5)
+                gc.collect()
+        
         gc.collect()  # 强制垃圾回收
 
         # 结果整理（仅保留视频有效条目）
