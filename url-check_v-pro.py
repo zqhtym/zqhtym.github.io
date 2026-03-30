@@ -2083,34 +2083,123 @@ def main():
         
         
         # ========== 新增：画面有效性检测 ==========
-        # 使用多线程并发检测所有有效测速条目
-        max_threads = 2  # 进一步减少线程数以节省内存
+        # 基于IPTV API模式的异步内存管理
+        print(f"\n【画面检测】基于IPTV API模式处理 {len(valid_speed_items)} 个条目")
         
-        # 分批处理以避免内存溢出
-        batch_size = 100  # 每批处理100个
-        video_valid_items = []
-        
-        for i in range(0, len(valid_speed_items), batch_size):
-            batch = valid_speed_items[i:i+batch_size]
-            print(f"\n【画面检测批次】{i//batch_size + 1}/{(len(valid_speed_items)-1)//batch_size + 1} | 本批数量: {len(batch)}")
+        # 尝试导入异步内存管理器
+        try:
+            import asyncio
+            from async_memory_manager import AsyncMemoryManager
             
-            batch_results = check_video_validity(batch, max_threads=max_threads)
-            video_valid_items.extend(batch_results)
+            async def async_video_detection():
+                """异步画面检测"""
+                manager = AsyncMemoryManager(max_concurrent=5, memory_threshold=75.0)
+                
+                def check_video_wrapper(item):
+                    """画面检测包装器"""
+                    try:
+                        # 单线程检测避免内存问题
+                        result = check_video_validity([item], max_threads=1)
+                        return result[0] if result else None
+                    except Exception as e:
+                        print(f"[异步检测] 处理失败: {e}")
+                        return None
+                
+                try:
+                    # 异步批量处理
+                    video_valid_items = await manager.process_with_memory_control(
+                        valid_speed_items,
+                        check_video_wrapper,
+                        max_memory_mb=1200  # 限制内存使用
+                    )
+                    
+                    # 过滤有效结果
+                    video_valid_items = [item for item in video_valid_items if item is not None]
+                    
+                    # 打印统计
+                    stats = manager.get_stats()
+                    print(f"[异步统计] 处理{stats['total_processed']}个, "
+                          f"有效{len(video_valid_items)}个, "
+                          f"内存警告{stats['memory_warnings']}次")
+                    
+                    return video_valid_items
+                    
+                finally:
+                    manager.cleanup()
             
-            # 强制垃圾回收
-            gc.collect()
+            # 运行异步检测
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            video_valid_items = loop.run_until_complete(async_video_detection())
+            loop.close()
             
-            # 内存检查
-            import psutil
-            memory_percent = psutil.virtual_memory().percent
-            print(f"[内存监控] 当前内存使用: {memory_percent:.1f}%")
+        except ImportError as e:
+            print(f"[异步检测] 异步管理器不可用: {e}")
+            print(f"[画面检测] 使用同步模式处理 {len(valid_speed_items)} 个条目")
             
-            if memory_percent > 80:
-                print("[内存警告] 内存使用过高，暂停5秒")
-                time.sleep(5)
+            # 同步模式 - 基于IPTV API的批量处理
+            import copy
+            
+            # 深拷贝避免内存污染
+            items_copy = copy.deepcopy(valid_speed_items)
+            
+            # 分批处理
+            batch_size = 30  # 较小批次
+            video_valid_items = []
+            
+            for i in range(0, len(items_copy), batch_size):
+                batch = items_copy[i:i+batch_size]
+                batch_num = i // batch_size + 1
+                total_batches = (len(items_copy) - 1) // batch_size + 1
+                
+                print(f"\n【画面检测批次】{batch_num}/{total_batches} | 本批数量: {len(batch)}")
+                
+                # 内存检查
+                try:
+                    import psutil
+                    memory_percent = psutil.virtual_memory().percent
+                    print(f"[内存监控] 批次开始前内存: {memory_percent:.1f}%")
+                    
+                    if memory_percent > 75:
+                        print("[内存警告] 批次前内存过高，强制垃圾回收")
+                        gc.collect()
+                        time.sleep(2)
+                except ImportError:
+                    pass
+                
+                # 处理批次
+                try:
+                    batch_results = check_video_validity(batch, max_threads=1)
+                    video_valid_items.extend(batch_results)
+                except Exception as e:
+                    print(f"[批次错误] 处理失败: {e}")
+                
+                # 强制垃圾回收
                 gc.collect()
+                
+                # 批次后内存检查
+                try:
+                    import psutil
+                    memory_percent = psutil.virtual_memory().percent
+                    print(f"[内存监控] 批次完成后内存: {memory_percent:.1f}%")
+                    
+                    if memory_percent > 80:
+                        print("[内存警告] 内存使用过高，暂停5秒")
+                        time.sleep(5)
+                        gc.collect()
+                except ImportError:
+                    pass
+                
+                # 清理批次数据
+                del batch
+                gc.collect()
+            
+            # 清理拷贝数据
+            del items_copy
+            gc.collect()
         
-        gc.collect()  # 强制垃圾回收
+        # 最终垃圾回收
+        gc.collect()
 
         # 结果整理（仅保留视频有效条目）
         
