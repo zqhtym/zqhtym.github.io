@@ -2,6 +2,23 @@
 # -*- coding: utf-8 -*-
 # Author: chaichunyang@outlook.com
 
+# 优化配置：解决GitHub Actions内存和编码问题
+import os
+import sys
+import gc
+
+# 设置环境变量
+os.environ['PYTHONIOENCODING'] = 'utf-8'
+os.environ['LANG'] = 'C.UTF-8'
+os.environ['LC_ALL'] = 'C.UTF-8'
+
+# 配置stdout编码
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+
+# 内存优化配置
+gc.set_threshold(700, 10, 10)
+
 '''
 
 
@@ -196,10 +213,10 @@ class Config:
         'video_check': 15,  # 画面检测超时（秒）
         'video_total_timeout': 180  # 画面检测总超时（3分钟=180秒）
     }
-    # 多进程配置（修复Windows进程数异常）
+    # 多进程配置（优化：减少进程数以节省内存）
     MULTIPROCESS = {
-        '404_processes': max(8, multiprocessing.cpu_count() * 2),  # 自适应CPU核心 multiprocessing.cpu_count() * 4
-        'speed_processes': max(6, multiprocessing.cpu_count()),      # 修复：从0改为合理值
+        '404_processes': max(4, multiprocessing.cpu_count() // 2),  # 减少进程数
+        'speed_processes': max(3, multiprocessing.cpu_count() // 3),   # 减少进程数
         'max_total_time': 1800
     }
     # 请求头
@@ -224,7 +241,7 @@ class Config:
 class StreamItem:
     """直播流数据模型"""
     def __init__(self, name, url):
-        self.name = name.strip()
+        self.name = self._clean_text(name.strip())
         self.url = url.strip()
         self.speed = -1
         self.category = self._get_category()
@@ -234,6 +251,14 @@ class StreamItem:
         self.test_duration = 0
         self.error_info = None
         self.is_whitelist = False  # 白名单标记
+    
+    def _clean_text(self, text):
+        """清理文本，移除特殊字符"""
+        if not text:
+            return text
+        # 移除可能导致编码问题的字符
+        cleaned = re.sub(r'[^\x00-\x7F\u4e00-\u9FFF\u3000-\u303F\uFF00-\uFFEF]', '', text)
+        return cleaned
 
     def _get_category(self):
         """获取分类"""
@@ -1999,12 +2024,19 @@ def main():
     
     try:
         raw_items = load_resources()
+        gc.collect()  # 强制垃圾回收
+        
         #raw_items = []
 
         
         dedup_items = deduplicate_items(raw_items)
+        gc.collect()  # 强制垃圾回收
+        
         filtered_items = filter_items(dedup_items)
+        gc.collect()  # 强制垃圾回收
+        
         no_404_items = check_404(filtered_items)
+        gc.collect()  # 强制垃圾回收
         
         # ========== 命令1：保存到temp.txt ==========
         #save_no_404_to_temp(no_404_items, "temp.txt")  # 保存到当前目录
@@ -2022,6 +2054,7 @@ def main():
         
         
         speed_test_items = test_speed(no_404_items)
+        gc.collect()  # 强制垃圾回收
         
         # 过滤出有效测速的条目（speed > 0）
         valid_speed_items = [item for item in speed_test_items if item.speed > 204800]
@@ -2038,9 +2071,10 @@ def main():
         
         # ========== 新增：画面有效性检测 ==========
         # 使用多线程并发检测所有有效测速条目
-        max_threads = 6  # 使用4个线程并发检测
+        max_threads = 3  # 减少线程数以节省内存
         
         video_valid_items = check_video_validity(valid_speed_items , max_threads=max_threads)
+        gc.collect()  # 强制垃圾回收
 
         # 结果整理（仅保留视频有效条目）
         
@@ -2058,6 +2092,9 @@ def main():
         import traceback
         traceback.print_exc()
         sys.exit(1)
+    finally:
+        # 最终强制垃圾回收
+        gc.collect()
         
 if __name__ == "__main__":
     if sys.platform == 'win32':
