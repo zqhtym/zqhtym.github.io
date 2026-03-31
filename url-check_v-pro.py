@@ -630,16 +630,70 @@ def _check_404_worker(item, progress_dict):
     return item
 
 def check_404(items):
-    """多进程404筛查"""
+    """基于IPTV API模式的异步404检测"""
     print("\n" + "="*80)
     print(f"【Step5: 404筛查】开始时间：{get_beijing_time('%Y-%m-%d %H:%M:%S')}")
-    print(f"启动 {Config.MULTIPROCESS['404_processes']} 个进程进行404检测...")
+    print(f"检测规则：HEAD请求检查URL有效性，过滤无效链接")
     
     total = len(items)
     if total == 0:
-        print("无条目需要检测404")
-        return []
+        print("无条目需要404检测")
+        return items
     
+    # 提取URL列表
+    urls = [item.url for item in items]
+    
+    # 尝试使用异步检测
+    try:
+        import asyncio
+        from async_network_checker import check_404_async
+        
+        async def async_404_check():
+            """异步404检测"""
+            results = await check_404_async(
+                urls, 
+                max_concurrent=50,  # 高并发
+                timeout=5,           # 较短超时
+                callback=lambda current, total, result: None  # 简化回调
+            )
+            
+            # 根据结果过滤条目
+            valid_items = []
+            valid_count = 0
+            invalid_count = 0
+            
+            for item, result in zip(items, results):
+                if result['is_valid']:
+                    valid_items.append(item)
+                    valid_count += 1
+                else:
+                    invalid_count += 1
+                    print(f"[404无效] {item.name} | {item.url} | {result['error']}")
+            
+            return valid_items, valid_count, invalid_count
+        
+        # 运行异步检测
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        valid_items, valid_count, invalid_count = loop.run_until_complete(async_404_check())
+        loop.close()
+        
+        print(f"\n【Step5: 404筛查】完成，筛查前 {total} 条 → 通过 {valid_count} 条 | 无效 {invalid_count} 条")
+        
+        return valid_items
+        
+    except ImportError as e:
+        print(f"[异步检测] 异步检测不可用: {e}")
+        print(f"[404检测] 使用多进程模式处理 {total} 个条目")
+        
+        # 降级到多进程模式
+        return check_404_multiprocess(items)
+
+def check_404_multiprocess(items):
+    """多进程404检测降级模式"""
+    print(f"启动 {Config.MULTIPROCESS['404_processes']} 个进程进行404检测...")
+    
+    total = len(items)
     manager = Manager()
     progress_dict = manager.dict()
     progress_dict['processed'] = 0
@@ -836,16 +890,92 @@ def _test_speed_worker(item, progress_dict):
     return item
 
 def test_speed(items):
-    """多进程速度测试"""
+    """基于IPTV API模式的异步速度测试"""
     print("\n" + "="*80)
     print(f"【Step6: 速度筛查】开始时间：{get_beijing_time('%Y-%m-%d %H:%M:%S')}")
-    print(f"启动 {Config.MULTIPROCESS['speed_processes']} 个进程进行速度测试...")
+    print(f"检测规则：下载前1MB测试实际速度，评估流质量")
     
     total = len(items)
     if total == 0:
         print("无条目需要测试速度")
         return []
     
+    # 提取URL列表
+    urls = [item.url for item in items]
+    
+    # 尝试使用异步检测
+    try:
+        import asyncio
+        from async_network_checker import check_speed_async
+        
+        async def async_speed_test():
+            """异步速度测试"""
+            results = await check_speed_async(
+                urls, 
+                max_concurrent=30,  # 高并发
+                timeout=8,           # 较短超时
+                callback=lambda current, total, result: None  # 简化回调
+            )
+            
+            # 根据结果更新条目
+            valid_items = []
+            valid_count = 0
+            invalid_count = 0
+            
+            for item, result in zip(items, results):
+                if result['speed'] > 0:
+                    # 更新速度信息
+                    item.speed = result['speed'] * 1024 * 1024  # 转换为bytes/s
+                    item.delay = result['delay']
+                    item._set_speed_level()
+                    valid_items.append(item)
+                    valid_count += 1
+                else:
+                    item.speed = -1
+                    item.speed_level = None
+                    item.error_info = result['error']
+                    invalid_count += 1
+                    print(f"[速度无效] {item.name} | {item.url} | {result['error']}")
+            
+            return valid_items, valid_count, invalid_count
+        
+        # 运行异步检测
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        valid_items, valid_count, invalid_count = loop.run_until_complete(async_speed_test())
+        loop.close()
+        
+        # 统计结果
+        level_count = {l:0 for l in Config.SPEED_LEVEL_ORDER}
+        for item in valid_items:
+            if item.speed_level:
+                level_count[item.speed_level] += 1
+        
+        level_summary = []
+        total_valid = sum(level_count.values())
+        for level in Config.SPEED_LEVEL_ORDER:
+            count = level_count[level]
+            ratio = f"{(count/total_valid)*100:.1f}%" if total_valid > 0 else "0.0%"
+            level_summary.append(f"{level}: {count} 条（{ratio}）")
+        level_summary_str = ' | '.join(level_summary)
+        
+        print(f"\n【Step6: 速度筛查】完成，总计测速 {total} 条 → 有效测速 {valid_count} 条")
+        print(f"【速度等级统计】{level_summary_str} | 测速失败：{invalid_count} 条")
+        
+        return valid_items
+        
+    except ImportError as e:
+        print(f"[异步检测] 异步检测不可用: {e}")
+        print(f"[速度测试] 使用多进程模式处理 {total} 个条目")
+        
+        # 降级到多进程模式
+        return test_speed_multiprocess(items)
+
+def test_speed_multiprocess(items):
+    """多进程速度测试降级模式"""
+    print(f"启动 {Config.MULTIPROCESS['speed_processes']} 个进程进行速度测试...")
+    
+    total = len(items)
     manager = Manager()
     progress_dict = manager.dict()
     progress_dict['processed'] = 0
@@ -1425,7 +1555,8 @@ def check_video_validity(items, max_threads=4):
                 
                 # 显示进度
                 remaining = total - processed
-                print(f"进度：{processed}/{total} | 剩余：{remaining} | 有效: {valid_count} | 白名单: {whitelist_count} | 跳过: {skip_count} | 超时: {timeout_count}")
+                progress_percent = (processed / total) * 100
+                print(f"【进度】{processed}/{total} ({progress_percent:.1f}%) | 剩余: {remaining} | 有效: {valid_count} | 白名单: {whitelist_count} | 跳过: {skip_count} | 超时: {timeout_count}")
                 
             except Exception as e:
                 print(f"[{processed}/{total}] 线程异常 | 名称: {item.name} | 错误: {e}")
@@ -2093,7 +2224,7 @@ def main():
             
             async def async_video_detection():
                 """异步画面检测"""
-                manager = AsyncMemoryManager(max_concurrent=5, memory_threshold=75.0)
+                manager = AsyncMemoryManager(max_concurrent=3, memory_threshold=70.0)  # 进一步降低并发和阈值
                 
                 def check_video_wrapper(item):
                     """画面检测包装器"""
@@ -2106,11 +2237,11 @@ def main():
                         return None
                 
                 try:
-                    # 异步批量处理
+                    # 异步批量处理 - 更小批次
                     video_valid_items = await manager.process_with_memory_control(
                         valid_speed_items,
                         check_video_wrapper,
-                        max_memory_mb=1200  # 限制内存使用
+                        max_memory_mb=1000  # 进一步降低内存限制
                     )
                     
                     # 过滤有效结果
@@ -2143,8 +2274,8 @@ def main():
             # 深拷贝避免内存污染
             items_copy = copy.deepcopy(valid_speed_items)
             
-            # 分批处理
-            batch_size = 30  # 较小批次
+            # 分批处理 - 更小批次
+            batch_size = 20  # 进一步减小批次
             video_valid_items = []
             
             for i in range(0, len(items_copy), batch_size):
@@ -2160,22 +2291,30 @@ def main():
                     memory_percent = psutil.virtual_memory().percent
                     print(f"[内存监控] 批次开始前内存: {memory_percent:.1f}%")
                     
-                    if memory_percent > 75:
+                    if memory_percent > 70:  # 降低阈值
                         print("[内存警告] 批次前内存过高，强制垃圾回收")
                         gc.collect()
-                        time.sleep(2)
+                        time.sleep(3)  # 增加等待时间
+                        memory_after = psutil.virtual_memory().percent
+                        print(f"[内存监控] 垃圾回收后内存: {memory_after:.1f}%")
+                        
+                        # 如果仍然过高，跳过此批次
+                        if memory_after > 80:
+                            print("[内存警告] 内存仍然过高，跳过此批次")
+                            continue
                 except ImportError:
                     pass
                 
                 # 处理批次
                 try:
-                    batch_results = check_video_validity(batch, max_threads=1)
+                    batch_results = check_video_validity(batch, max_threads=1)  # 单线程
                     video_valid_items.extend(batch_results)
                 except Exception as e:
                     print(f"[批次错误] 处理失败: {e}")
                 
                 # 强制垃圾回收
                 gc.collect()
+                time.sleep(1)  # 批次间暂停
                 
                 # 批次后内存检查
                 try:
@@ -2183,10 +2322,18 @@ def main():
                     memory_percent = psutil.virtual_memory().percent
                     print(f"[内存监控] 批次完成后内存: {memory_percent:.1f}%")
                     
-                    if memory_percent > 80:
-                        print("[内存警告] 内存使用过高，暂停5秒")
-                        time.sleep(5)
+                    if memory_percent > 75:  # 降低阈值
+                        print("[内存警告] 内存使用过高，暂停10秒")
+                        time.sleep(10)
                         gc.collect()
+                        
+                        # 再次检查
+                        memory_final = psutil.virtual_memory().percent
+                        print(f"[内存监控] 暂停后内存: {memory_final:.1f}%")
+                        
+                        if memory_final > 85:
+                            print("[内存警告] 内存仍然过高，终止处理")
+                            break
                 except ImportError:
                     pass
                 

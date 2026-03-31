@@ -68,15 +68,15 @@ class Config:
 
     VIDEO_CHECK = {
 
-        'frame_interval': 2,  # 每隔2秒取一帧
+        'frame_interval': 3,  # 每隔3秒取一帧（降低采样频率）
 
-        'min_diff': 5000,     # 帧差异阈值（低于此值视为画面无变化）
+        'min_diff': 3000,     # 帧差异阈值（进一步降低阈值）
 
-        'min_width': 320,     # 最小有效宽度
+        'min_width': 240,     # 最小有效宽度（降低要求）
 
-        'min_height': 240,    # 最小有效高度
+        'min_height': 180,    # 最小有效高度（降低要求）
 
-        'audio_check': True   # 是否检测音频
+        'audio_check': False   # 关闭音频检测，减少复杂性
 
     }
 

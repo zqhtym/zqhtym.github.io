@@ -57,18 +57,20 @@ jobs:
         
     - name: 运行直播流检测
       run: |
-        # 设置资源限制
-        ulimit -v 3145728  # 限制虚拟内存为3GB（进一步减少）
+        # 设置更严格的资源限制
+        ulimit -v 2097152  # 限制虚拟内存为2GB（进一步减少）
         ulimit -t 3600     # 限制CPU时间为1小时
-        ulimit -m 2097152  # 限制常驻内存为2GB
+        ulimit -m 1048576  # 限制常驻内存为1GB（进一步减少）
+        ulimit -s 8192     # 限制栈大小为8MB
         
         # 设置Python优化参数
-        export PYTHONOPTIMIZE=1
+        export PYTHONOPTIMIZE=2  # 最高优化级别
         export PYTHONHASHSEED=0
-        export MALLOC_TRIM_THRESHOLD_=100000
+        export MALLOC_TRIM_THRESHOLD_=30000  # 更激进的内存回收
+        export PYTHONMALLOC=malloc  # 使用标准malloc
         
         # 设置更严格的垃圾回收
-        python -c "import gc; gc.set_threshold(700, 10, 5)"
+        python -c "import gc; gc.set_threshold(400, 4, 4); gc.collect()"
         
         # 运行优化版检测程序
         python url-check_v-pro.py
