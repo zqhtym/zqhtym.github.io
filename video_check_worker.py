@@ -105,35 +105,65 @@ def timeout_handler():
 
 
 def check_ffmpeg():
-
     """检查FFmpeg是否可用"""
-
+    
+    # 首先检查系统PATH中是否有ffmpeg
     if shutil.which('ffmpeg'):
-
         return True
-
-    # 尝试常见路径
-
-    ffmpeg_paths = [
-
-        r'H:\11 tool\装机\视频\哔哩下载姬（downkyi）-27-1.3.4\ffmpeg.exe',
-
-        r'C:\Users\Administrator\AppData\Roaming\anythingllm-desktop\storage\engines\ffmpeg\windows-x64\ffmpeg.exe',
-
-        r'C:\Program Files\iGameCenter\SAVIConverter\tools\ffmpeg.exe',
-
-        r'C:\Users\Administrator\AppData\Local\Programs\icat\resources\bin\ffmpeg\ffmpeg.exe'
-
-    ]
-
-    for path in ffmpeg_paths:
-
-        if os.path.exists(path):
-
-            os.environ['PATH'] += os.pathsep + os.path.dirname(path)
-
-            return True
-
+    
+    # GitHub Actions环境检查
+    if os.environ.get('GITHUB_ACTIONS'):
+        # 在GitHub Actions中，ffmpeg应该已经通过apt安装
+        # 检查常见的安装位置
+        github_paths = [
+            '/usr/bin/ffmpeg',
+            '/usr/local/bin/ffmpeg',
+            '/opt/ffmpeg/bin/ffmpeg'
+        ]
+        
+        for path in github_paths:
+            if os.path.exists(path):
+                os.environ['PATH'] += os.pathsep + os.path.dirname(path)
+                return True
+        
+        print(f"[GitHub Actions] FFmpeg未找到，请确保已安装ffmpeg")
+        return False
+    
+    # 本地Windows环境检查
+    if sys.platform.startswith('win'):
+        # 尝试常见Windows路径
+        ffmpeg_paths = [
+            r'H:\11 tool\装机\视频\哔哩下载姬（downkyi）-27-1.3.4\ffmpeg.exe',
+            r'C:\Users\Administrator\AppData\Roaming\anythingllm-desktop\storage\engines\ffmpeg\windows-x64\ffmpeg.exe',
+            r'C:\Program Files\iGameCenter\SAVIConverter\tools\ffmpeg.exe',
+            r'C:\Users\Administrator\AppData\Local\Programs\icat\resources\bin\ffmpeg\ffmpeg.exe',
+            r'C:\ffmpeg\ffmpeg.exe',  # 常见安装位置
+            r'C:\ffmpeg\bin\ffmpeg.exe'  # 另一种常见安装位置
+        ]
+        
+        for path in ffmpeg_paths:
+            if os.path.exists(path):
+                os.environ['PATH'] += os.pathsep + os.path.dirname(path)
+                print(f"[FFmpeg] 找到FFmpeg: {path}")
+                return True
+    
+    # Linux/Mac环境检查
+    else:
+        # 尝试常见Unix路径
+        unix_paths = [
+            '/usr/bin/ffmpeg',
+            '/usr/local/bin/ffmpeg',
+            '/opt/homebrew/bin/ffmpeg',  # Mac Homebrew
+            '/opt/ffmpeg/bin/ffmpeg'
+        ]
+        
+        for path in unix_paths:
+            if os.path.exists(path):
+                os.environ['PATH'] += os.pathsep + os.path.dirname(path)
+                print(f"[FFmpeg] 找到FFmpeg: {path}")
+                return True
+    
+    print(f"[FFmpeg] 未找到FFmpeg，画面检测功能将受限")
     return False
 
 
