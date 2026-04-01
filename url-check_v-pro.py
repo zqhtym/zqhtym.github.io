@@ -2223,40 +2223,43 @@ def main():
             from async_memory_manager import AsyncMemoryManager
             
             async def async_video_detection():
-                """异步画面检测"""
-                manager = AsyncMemoryManager(max_concurrent=3, memory_threshold=70.0)  # 进一步降低并发和阈值
+                """基于IPTV API模式的异步画面检测"""
+                # IPTV API风格：使用更保守的并发控制
+                manager = AsyncMemoryManager(max_concurrent=2, memory_threshold=50.0)
                 
                 def check_video_wrapper(item):
                     """画面检测包装器"""
                     try:
-                        # 单线程检测避免内存问题
+                        # IPTV API风格：单线程检测避免内存问题
                         result = check_video_validity([item], max_threads=1)
                         return result[0] if result else None
                     except Exception as e:
-                        print(f"[异步检测] 处理失败: {e}")
+                        print(f"[IPTV风格检测] 处理失败: {e}")
                         return None
                 
                 try:
-                    # 异步批量处理 - 更小批次
+                    # IPTV API风格：更小批次处理
                     video_valid_items = await manager.process_with_memory_control(
                         valid_speed_items,
                         check_video_wrapper,
-                        max_memory_mb=1000  # 进一步降低内存限制
+                        batch_size=8,  # IPTV API风格：更小批次
+                        max_memory_mb=600
                     )
                     
                     # 过滤有效结果
                     video_valid_items = [item for item in video_valid_items if item is not None]
                     
-                    # 打印统计
+                    # IPTV API风格：打印详细统计
                     stats = manager.get_stats()
-                    print(f"[异步统计] 处理{stats['total_processed']}个, "
+                    print(f"[IPTV风格统计] 处理{stats['total_processed']}个, "
                           f"有效{len(video_valid_items)}个, "
-                          f"内存警告{stats['memory_warnings']}次")
+                          f"内存警告{stats['memory_warnings']}次, "
+                          f"缓存命中{stats.get('cache_hits', 0)}次")
                     
                     return video_valid_items
                     
                 finally:
-                    manager.cleanup()
+                    await manager.cleanup()
             
             # 运行异步检测
             loop = asyncio.new_event_loop()
@@ -2275,7 +2278,7 @@ def main():
             items_copy = copy.deepcopy(valid_speed_items)
             
             # 分批处理 - 更小批次
-            batch_size = 20  # 进一步减小批次
+            batch_size = 10  # 进一步减小批次
             video_valid_items = []
             
             for i in range(0, len(items_copy), batch_size):
@@ -2291,15 +2294,15 @@ def main():
                     memory_percent = psutil.virtual_memory().percent
                     print(f"[内存监控] 批次开始前内存: {memory_percent:.1f}%")
                     
-                    if memory_percent > 70:  # 降低阈值
+                    if memory_percent > 60:  # 降低阈值
                         print("[内存警告] 批次前内存过高，强制垃圾回收")
                         gc.collect()
-                        time.sleep(3)  # 增加等待时间
+                        time.sleep(5)  # 增加等待时间
                         memory_after = psutil.virtual_memory().percent
                         print(f"[内存监控] 垃圾回收后内存: {memory_after:.1f}%")
                         
                         # 如果仍然过高，跳过此批次
-                        if memory_after > 80:
+                        if memory_after > 75:
                             print("[内存警告] 内存仍然过高，跳过此批次")
                             continue
                 except ImportError:
@@ -2314,7 +2317,7 @@ def main():
                 
                 # 强制垃圾回收
                 gc.collect()
-                time.sleep(1)  # 批次间暂停
+                time.sleep(2)  # 批次间暂停
                 
                 # 批次后内存检查
                 try:
@@ -2322,7 +2325,7 @@ def main():
                     memory_percent = psutil.virtual_memory().percent
                     print(f"[内存监控] 批次完成后内存: {memory_percent:.1f}%")
                     
-                    if memory_percent > 75:  # 降低阈值
+                    if memory_percent > 65:  # 降低阈值
                         print("[内存警告] 内存使用过高，暂停10秒")
                         time.sleep(10)
                         gc.collect()
@@ -2331,7 +2334,7 @@ def main():
                         memory_final = psutil.virtual_memory().percent
                         print(f"[内存监控] 暂停后内存: {memory_final:.1f}%")
                         
-                        if memory_final > 85:
+                        if memory_final > 80:
                             print("[内存警告] 内存仍然过高，终止处理")
                             break
                 except ImportError:
