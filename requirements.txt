@@ -1,13 +1,23 @@
-# 直播流检测工具核心依赖
-opencv-python>=4.8.0
-pytz>=2023.3
-pymediainfo>=6.0.1
-numpy>=1.24.0
+# IPTV直播流检测工具依赖
+
+# 核心依赖
+aiohttp>=3.8.0
+asyncio-throttle>=1.0.2
+tqdm>=4.64.0
 psutil>=5.9.0
 
-# 网络请求库
+# 视频检测依赖
+opencv-python>=4.8.0
+numpy>=1.24.0
+pymediainfo>=6.0.1
+
+# 网络请求
 requests>=2.31.0
 urllib3>=2.0.0
 
-# 异步处理
-aiohttp>=3.8.0
+# 系统工具
+pathlib2>=2.3.7
+
+# 开发和测试
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
