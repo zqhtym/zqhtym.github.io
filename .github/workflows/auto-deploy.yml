@@ -1,52 +1,31 @@
-name: 自动部署直播流检测
+name: IPTV直播流检测
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
   schedule:
-    # 每天北京时间3:00运行 (UTC时间19:00)
-    - cron: '0 19 * * *'
+    # 每天北京时间 8:00 运行
+    - cron: '0 0 * * *'
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  build-and-test:
     runs-on: ubuntu-latest
     
     steps:
     - name: 检出代码
       uses: actions/checkout@v4
-        
+      
     - name: 设置Python环境
       uses: actions/setup-python@v4
       with:
-        python-version: '3.9'
+        python-version: '3.10'
         
     - name: 安装系统依赖
       run: |
         sudo apt-get update
-        sudo apt-get install -y \
-          python3-pip \
-          python3-dev \
-          build-essential \
-          cmake \
-          pkg-config \
-          libjpeg-dev \
-          libpng-dev \
-          libtiff-dev \
-          libavcodec-dev \
-          libavformat-dev \
-          libswscale-dev \
-          libv4l-dev \
-          libxvidcore-dev \
-          libx264-dev \
-          libgtk-3-dev \
-          libatlas-base-dev \
-          gfortran \
-          wget \
-          unzip
-          
-    - name: 安装FFmpeg
-      run: |
         sudo apt-get install -y ffmpeg
         ffmpeg -version
         
@@ -57,70 +36,84 @@ jobs:
         
     - name: 运行直播流检测
       run: |
-        # 设置极其严格的资源限制
-        ulimit -v 1048576  # 限制虚拟内存为1GB（进一步减少）
+        # 设置资源限制（基于IPTV API成功经验）
+        ulimit -v 2097152  # 限制虚拟内存为2GB
         ulimit -t 3600     # 限制CPU时间为1小时
-        ulimit -m 524288   # 限制常驻内存为512MB（进一步减少）
-        ulimit -s 4096     # 限制栈大小为4MB
+        ulimit -m 1048576  # 限制常驻内存为1GB
+        ulimit -s 8192     # 限制栈大小为8MB
         
         # 设置Python优化参数
-        export PYTHONOPTIMIZE=2  # 最高优化级别
+        export PYTHONOPTIMIZE=2
         export PYTHONHASHSEED=0
-        export MALLOC_TRIM_THRESHOLD_=10000  # 极激进的内存回收
-        export PYTHONMALLOC=malloc  # 使用标准malloc
+        export MALLOC_TRIM_THRESHOLD_=30000
+        export PYTHONMALLOC=malloc
         
-        # 设置极其严格的垃圾回收
-        python -c "import gc; gc.set_threshold(200, 2, 2); gc.collect()"
+        # 设置垃圾回收
+        python -c "import gc; gc.set_threshold(400, 4, 4); gc.collect()"
         
-        # 运行优化版检测程序
-        python url-check_v-pro.py
+        # 运行基于IPTV API框架的检测程序
+        python main.py
         
     - name: 处理输出文件
       run: |
-        # 获取当前时间戳
-        TIMESTAMP=$(date +%Y%m%d%H%M)
+        echo "=== 查找生成的文件 ==="
+        find . -name "live+*.txt" -newer main.py 2>/dev/null || true
+        find . -name "*.m3u" -newer main.py 2>/dev/null || true
         
-        # 查找生成的文件
-        EXCELLENT_FILE=$(ls live+excellent+*.txt | head -1 || echo "")
-        USEFUL_FILE=$(ls live+useful+*.txt | head -1 || echo "")
-        
-        if [ -n "$EXCELLENT_FILE" ]; then
-          echo "找到excellent文件: $EXCELLENT_FILE"
-          cp "$EXCELLENT_FILE" LE.txt
+        # 查找output目录中的文件
+        if [ -d "output" ]; then
+          echo "=== output目录文件 ==="
+          ls -la output/
+          
+          # 复制文件到根目录（保持兼容性）
+          EXCELLENT_FILE=$(find output -name "live+excellent+*.txt" | head -1 || echo "")
+          WONDERFUL_FILE=$(find output -name "live+wonderful+*.txt" | head -1 || echo "")
+          GOOD_FILE=$(find output -name "live+good+*.txt" | head -1 || echo "")
+          USEFUL_FILE=$(find output -name "live+useful+*.txt" | head -1 || echo "")
+          
+          if [ -n "$EXCELLENT_FILE" ]; then
+            echo "找到excellent文件: $EXCELLENT_FILE"
+            cp "$EXCELLENT_FILE" LE.txt
+          fi
+          
+          if [ -n "$WONDERFUL_FILE" ]; then
+            echo "找到wonderful文件: $WONDERFUL_FILE"
+            cp "$WONDERFUL_FILE" LW.txt
+          fi
+          
+          if [ -n "$GOOD_FILE" ]; then
+            echo "找到good文件: $GOOD_FILE"
+            cp "$GOOD_FILE" LG.txt
+          fi
+          
+          if [ -n "$USEFUL_FILE" ]; then
+            echo "找到useful文件: $USEFUL_FILE"
+            cp "$USEFUL_FILE" LU.txt
+          fi
+        else
+          echo "output目录不存在"
         fi
         
-        if [ -n "$USEFUL_FILE" ]; then
-          echo "找到useful文件: $USEFUL_FILE"
-          cp "$USEFUL_FILE" LU.txt
-        fi
-        
-        # 生成M3U文件
-        if [ -f "LE.txt" ]; then
-          echo "生成LE.m3u"
-          tools/txt_to_m3u8b.exe LE.txt LE.m3u
-        fi
-        
-        if [ -f "LU.txt" ]; then
-          echo "生成LU.m3u"
-          tools/txt_to_m3u8b.exe LU.txt LU.m3u
-        fi
+        # 列出最终文件
+        echo "=== 最终文件列表 ==="
+        ls -la *.txt *.m3u 2>/dev/null || echo "无txt或m3u文件"
         
     - name: 部署到GitHub Pages
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add LE.txt LU.txt LE.m3u LU.m3u live+*.txt
+        git add LE.txt LU.txt LE.m3u LU.m3u live+*.txt 2>/dev/null || true
         git commit -m "自动更新直播流列表 - $(date '+%Y-%m-%d %H:%M:%S')" || exit 0
         git push
         
     - name: 上传构建产物
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
+      if: always()
       with:
-        name: livestream-results
+        name: iptv-check-results
         path: |
-          LE.txt
-          LU.txt
-          LE.m3u
-          LU.m3u
-          live+*.txt
-        retention-days: 7
+          output/
+          *.txt
+          *.m3u
+        retention-days: 30
