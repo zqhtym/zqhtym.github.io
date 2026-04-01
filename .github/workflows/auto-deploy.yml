@@ -1,5 +1,4 @@
-name: IPTV直播流检测
-
+name: IPTV直播流检�?
 on:
   push:
     branches: [ main, master ]
@@ -15,8 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: 检出代码
-      uses: actions/checkout@v4
+    - name: 检出代�?      uses: actions/checkout@v4
       
     - name: 设置Python环境
       uses: actions/setup-python@v4
@@ -34,12 +32,10 @@ jobs:
         pip install --upgrade pip
         pip install -r requirements.txt
         
-    - name: 运行直播流检测
-      run: |
-        # 设置资源限制（基于IPTV API成功经验）
-        ulimit -v 2097152  # 限制虚拟内存为2GB
-        ulimit -t 3600     # 限制CPU时间为1小时
-        ulimit -m 1048576  # 限制常驻内存为1GB
+    - name: 运行直播流检�?      run: |
+        # 设置资源限制（基于IPTV API成功经验�?        ulimit -v 2097152  # 限制虚拟内存�?GB
+        ulimit -t 3600     # 限制CPU时间�?小时
+        ulimit -m 1048576  # 限制常驻内存�?GB
         ulimit -s 8192     # 限制栈大小为8MB
         
         # 设置Python优化参数
@@ -51,12 +47,11 @@ jobs:
         # 设置垃圾回收
         python -c "import gc; gc.set_threshold(400, 4, 4); gc.collect()"
         
-        # 运行基于IPTV API框架的检测程序
-        python main.py
+        # 运行基于IPTV API框架的检测程�?        python main.py
         
     - name: 处理输出文件
       run: |
-        echo "=== 查找生成的文件 ==="
+        echo "=== 查找生成的文�?==="
         find . -name "live+*.txt" -newer main.py 2>/dev/null || true
         find . -name "*.m3u" -newer main.py 2>/dev/null || true
         
@@ -91,11 +86,10 @@ jobs:
             cp "$USEFUL_FILE" LU.txt
           fi
         else
-          echo "output目录不存在"
+          echo "output目录不存�?
         fi
         
-        # 列出最终文件
-        echo "=== 最终文件列表 ==="
+        # 列出最终文�?        echo "=== 最终文件列�?==="
         ls -la *.txt *.m3u 2>/dev/null || echo "无txt或m3u文件"
         
     - name: 部署到GitHub Pages
@@ -104,11 +98,11 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add LE.txt LU.txt LE.m3u LU.m3u live+*.txt 2>/dev/null || true
-        git commit -m "自动更新直播流列表 - $(date '+%Y-%m-%d %H:%M:%S')" || exit 0
+        git commit -m "自动更新直播流列�?- $(date '+%Y-%m-%d %H:%M:%S')" || exit 0
         git push
         
     - name: 上传构建产物
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: iptv-check-results
