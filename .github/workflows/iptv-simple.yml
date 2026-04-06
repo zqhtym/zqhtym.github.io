@@ -1,0 +1,125 @@
+name: IPTV Live Stream Detection (Simple)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  run-all-steps:
+    name: Run All Steps (main.py + second.py + third.py)
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Python environment
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ffmpeg
+        
+    - name: Install Python dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run main.py (Step1-Step5)
+      run: |
+        # 优化GitHub Actions环境性能
+        export GITHUB_ACTIONS=true
+        ulimit -v 2097152
+        ulimit -t 3600
+        ulimit -m 1048576
+        ulimit -s 8192
+        
+        export PYTHONOPTIMIZE=2
+        export PYTHONHASHSEED=0
+        export MALLOC_TRIM_THRESHOLD_=30000
+        export PYTHONMALLOC=malloc
+        
+        python -c "import gc; gc.set_threshold(400, 4, 4); gc.collect()"
+        
+        python main.py
+        
+    - name: Run second.py (Step6)
+      run: |
+        # 优化GitHub Actions环境性能
+        export GITHUB_ACTIONS=true
+        ulimit -v 2097152
+        ulimit -t 3600
+        ulimit -m 1048576
+        ulimit -s 8192
+        
+        export PYTHONOPTIMIZE=2
+        export PYTHONHASHSEED=0
+        export MALLOC_TRIM_THRESHOLD_=30000
+        export PYTHONMALLOC=malloc
+        
+        python -c "import gc; gc.set_threshold(400, 4, 4); gc.collect()"
+        
+        python second.py
+        
+    - name: Run third.py (Step7-Step8)
+      run: |
+        # 优化GitHub Actions环境性能
+        export GITHUB_ACTIONS=true
+        ulimit -v 2097152
+        ulimit -t 3600
+        ulimit -m 1048576
+        ulimit -s 8192
+        
+        export PYTHONOPTIMIZE=2
+        export PYTHONHASHSEED=0
+        export MALLOC_TRIM_THRESHOLD_=30000
+        export PYTHONMALLOC=malloc
+        
+        python -c "import gc; gc.set_threshold(400, 4, 4); gc.collect()"
+        
+        python third.py
+        
+    - name: Process output files
+      run: |
+        if [ -d "output" ]; then
+          # 复制最新文件为标准文件名
+          EXCELLENT_FILE=$(find output -name "LE.txt" | head -1)
+          USEFUL_FILE=$(find output -name "LU.txt" | head -1)
+          
+          if [ -n "$EXCELLENT_FILE" ]; then
+            cp "$EXCELLENT_FILE" LE.txt
+          fi
+          
+          if [ -n "$USEFUL_FILE" ]; then
+            cp "$USEFUL_FILE" LU.txt
+          fi
+        fi
+        
+    - name: Deploy to GitHub Pages
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add LE.txt LU.txt LE.m3u LU.m3u *.csv 2>/dev/null || true
+        git commit -m "Auto update live stream list - $(date '+%Y-%m-%d %H:%M:%S')" || exit 0
+        git push
+        
+    - name: Upload final results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: iptv-all-results
+        path: |
+          output/
+          *.txt
+          *.m3u
+          *.csv
+        retention-days: 30
