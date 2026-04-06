@@ -65,6 +65,15 @@ jobs:
         name: step1-5-results
         path: output/
         retention-days: 7
+        
+    - name: Commit CSV files to repository
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add output/*.csv
+        git diff --staged --quiet || git commit -m "Auto update CSV files - $(date '+%Y-%m-%d %H:%M:%S')"
+        git push
 
   run-second:
     name: Run Step6 (second.py)
