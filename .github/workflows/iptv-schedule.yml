@@ -59,13 +59,11 @@ jobs:
         
         python main.py
         
-    - name: Upload Step5 results
+    - name: Upload Step1-5 results
       uses: actions/upload-artifact@v4
       with:
         name: step1-5-results
-        path: |
-          output/
-          *.csv
+        path: output/
         retention-days: 7
 
   run-second:
