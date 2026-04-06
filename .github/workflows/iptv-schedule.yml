@@ -60,7 +60,7 @@ jobs:
         python main.py
         
     - name: Upload Step1-5 results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
         name: step1-5-results
         path: output/
