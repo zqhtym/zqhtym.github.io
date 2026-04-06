@@ -240,7 +240,7 @@ class IPTVChecker:
             main_start_time = time_module.time()
             
             print("=" * 80)
-            print(f"【IPTV直播流检测 - Step1~Step5】开始时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            print(f"🔍 开始执行IPTV直播流检测... [版本: 2026-04-07 v2]")
             print(f"基于IPTV API框架的稳定检测系统")
             print("=" * 80)
             
