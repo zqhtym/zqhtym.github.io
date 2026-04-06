@@ -41,6 +41,10 @@ jobs:
         pip install --upgrade pip
         pip install -r requirements.txt
         
+    - name: Clean old CSV files
+      run: |
+        rm -f output/*.csv || true
+        
     - name: Run main.py (Step1-Step5)
       run: |
         # 优化GitHub Actions环境性能
@@ -60,11 +64,12 @@ jobs:
         python main.py
         
     - name: Upload Step1-5 results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: step1-5-results
         path: output/
         retention-days: 7
+      if: always()
         
     - name: Commit CSV files to repository
       if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
