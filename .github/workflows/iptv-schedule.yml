@@ -17,7 +17,7 @@ on:
 jobs:
   run-main:
     name: Run Step1-Step5 (main.py)
-    runs-on: ubuntu-latest-4-cores
+    runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event_name == 'pull_request'
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -69,7 +69,7 @@ jobs:
 
   run-second:
     name: Run Step6 (second.py)
-    runs-on: ubuntu-latest-4-cores
+    runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event_name == 'pull_request'
     needs: run-main
     env:
@@ -128,7 +128,7 @@ jobs:
 
   run-third:
     name: Run Step7-Step8 (third.py)
-    runs-on: ubuntu-latest-4-cores
+    runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event_name == 'pull_request'
     needs: run-second
     env:
