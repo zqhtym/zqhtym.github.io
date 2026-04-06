@@ -7,7 +7,7 @@ on:
     branches: [ main, master ]
   schedule:
     # main.py: 每两周的周五20:00北京时间运行 (UTC 12:00)
-    - cron: '0 9 * * 1'
+    - cron: '0 22 * * 1'
     # second.py: 每天1:00北京时间运行 (UTC 17:00)
     - cron: '0 17 * * *'
     # third.py: 每天12:00北京时间运行 (UTC 4:00)
@@ -18,7 +18,7 @@ jobs:
   run-main:
     name: Run Step1-Step5 (main.py)
     runs-on: ubuntu-latest-4-cores
-    if: github.event.schedule == '0 12 * * 5' || github.event_name == 'workflow_dispatch'
+    if: github.event.schedule == '0 22 * * 1' || github.event_name == 'workflow_dispatch'
     
     steps:
     - name: Checkout code
