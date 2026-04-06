@@ -6,11 +6,11 @@ on:
   pull_request:
     branches: [ main, master ]
   schedule:
-    # main.py: 每两周的周五20:00北京时间运行 (UTC 12:00)
+    # main.py: 每周一22:00 UTC运行 (周二6:00北京时间)
     - cron: '0 22 * * 1'
-    # second.py: 每天1:00北京时间运行 (UTC 17:00)
+    # second.py: 每天17:00 UTC运行 (次日1:00北京时间)
     - cron: '0 17 * * *'
-    # third.py: 每天12:00北京时间运行 (UTC 4:00)
+    # third.py: 每天4:00 UTC运行 (12:00北京时间)
     - cron: '0 4 * * *'
   workflow_dispatch:
 
@@ -18,7 +18,7 @@ jobs:
   run-main:
     name: Run Step1-Step5 (main.py)
     runs-on: ubuntu-latest-4-cores
-    if: github.event.schedule == '0 22 * * 1' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event_name == 'pull_request'
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     
@@ -70,7 +70,7 @@ jobs:
   run-second:
     name: Run Step6 (second.py)
     runs-on: ubuntu-latest-4-cores
-    if: github.event.schedule == '0 17 * * *' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event_name == 'pull_request'
     needs: run-main
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -129,7 +129,7 @@ jobs:
   run-third:
     name: Run Step7-Step8 (third.py)
     runs-on: ubuntu-latest-4-cores
-    if: github.event.schedule == '0 4 * * *' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event_name == 'pull_request'
     needs: run-second
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
