@@ -317,8 +317,8 @@ class IPTVChecker:
                 if len(all_resources) > 5:
                     print(f"     ... 还有 {len(all_resources) - 5} 个资源")
             
-            # 输出Step1接口文件
-            self._save_step_output("step1_all_resources.txt", all_resources, "Step1: 所有原始资源")
+            # 输出Step1接口文件 (CSV格式)
+            self._save_step_csv_output("step1_all_resources.csv", all_resources, "Step1: 所有原始资源")
             
             # Step2: URL去重，保留有name特征的url
             print("\n📊 Step2: URL去重处理")
@@ -331,8 +331,8 @@ class IPTVChecker:
             self._print_step_resources("Step2", all_resources, unique_resources, 
                                     f"去重成功率: {success_rate:.1f}%")
             
-            # 输出Step2接口文件
-            self._save_step_output("step2_unique_resources.txt", unique_resources, "Step2: 去重后资源")
+            # 输出Step2接口文件 (CSV格式)
+            self._save_step_csv_output("step2_unique_resources.csv", unique_resources, "Step2: 去重后资源")
             
             # Step4: 404筛查
             print("\n📊 Step4: 404筛查")
@@ -346,8 +346,8 @@ class IPTVChecker:
                 self._print_step_resources("Step4", unique_resources, valid_resources, 
                                         f"404筛查成功率: {success_rate:.1f}%")
                 
-                # 输出Step4接口文件
-                self._save_step_output("step4_valid_resources.txt", valid_resources, "Step4: 404筛查后资源")
+                # 输出Step4接口文件 (CSV格式)
+                self._save_step_csv_output("step4_valid_resources.csv", valid_resources, "Step4: 404筛查后资源")
             else:
                 print(f"📊 Step4完成:")
                 print(f"   输入资源: 0")
@@ -418,6 +418,37 @@ class IPTVChecker:
             print(f"❌ 主处理失败: {e}")
             import traceback
             traceback.print_exc()
+
+    def _save_step_csv_output(self, filename: str, resources: List[dict], description: str):
+        """保存步骤输出文件到output目录 (CSV格式)"""
+        try:
+            output_dir = Path("output")
+            output_dir.mkdir(exist_ok=True)
+            
+            filepath = output_dir / filename
+            with open(filepath, 'w', encoding='utf-8') as f:
+                # 写入CSV头部
+                f.write("名称,URL,分类,速度(MB/s),是否白名单\n")
+                
+                # 按名称排序输出
+                sorted_resources = sorted(resources, key=lambda x: x.get('name', ''))
+                
+                for resource in sorted_resources:
+                    name = resource.get('name', '未知频道')
+                    url = resource.get('url', '')
+                    speed = resource.get('speed', 0)
+                    is_whitelist = resource.get('is_whitelist', False)
+                    category = resource.get('category', '')
+                    
+                    # 写入CSV行
+                    f.write(f"{name},{url},{category},{speed:.3f},{is_whitelist}\n")
+            
+            # 统计白名单数量
+            whitelist_count = sum(1 for r in resources if r.get('is_whitelist', False))
+            print(f"📄 生成步骤文件: {filename} ({len(resources)} 个资源, 白名单: {whitelist_count})")
+            
+        except Exception as e:
+            print(f"❌ 生成步骤文件失败: {filename} - {e}")
 
     def _save_step_output(self, filename: str, resources: List[dict], description: str):
         """保存步骤输出文件到output目录"""
