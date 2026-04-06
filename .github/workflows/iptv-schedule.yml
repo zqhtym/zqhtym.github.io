@@ -19,13 +19,15 @@ jobs:
     name: Run Step1-Step5 (main.py)
     runs-on: ubuntu-latest-4-cores
     if: github.event.schedule == '0 12 * * 5' || github.event_name == 'workflow_dispatch'
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       
     - name: Setup Python environment
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
         
@@ -70,13 +72,15 @@ jobs:
     runs-on: ubuntu-latest-4-cores
     if: github.event.schedule == '0 17 * * *' || github.event_name == 'workflow_dispatch'
     needs: run-main
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       
     - name: Setup Python environment
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
         
@@ -127,13 +131,15 @@ jobs:
     runs-on: ubuntu-latest-4-cores
     if: github.event.schedule == '0 4 * * *' || github.event_name == 'workflow_dispatch'
     needs: run-second
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       
     - name: Setup Python environment
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
         
