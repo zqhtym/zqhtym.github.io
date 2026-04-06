@@ -1,0 +1,209 @@
+name: IPTV Live Stream Detection
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  schedule:
+    # main.py: 每两周的周五20:00北京时间运行 (UTC 12:00)
+    - cron: '0 12 * * 5'
+    # second.py: 每天1:00北京时间运行 (UTC 17:00)
+    - cron: '0 17 * * *'
+    # third.py: 每天12:00北京时间运行 (UTC 4:00)
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+jobs:
+  run-main:
+    name: Run Step1-Step5 (main.py)
+    runs-on: ubuntu-latest-4-cores
+    if: github.event.schedule == '0 12 * * 5' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Python environment
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ffmpeg
+        
+    - name: Install Python dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run main.py (Step1-Step5)
+      run: |
+        # 优化GitHub Actions环境性能
+        export GITHUB_ACTIONS=true
+        ulimit -v 2097152
+        ulimit -t 3600
+        ulimit -m 1048576
+        ulimit -s 8192
+        
+        export PYTHONOPTIMIZE=2
+        export PYTHONHASHSEED=0
+        export MALLOC_TRIM_THRESHOLD_=30000
+        export PYTHONMALLOC=malloc
+        
+        python -c "import gc; gc.set_threshold(400, 4, 4); gc.collect()"
+        
+        python main.py
+        
+    - name: Upload Step5 results
+      uses: actions/upload-artifact@v4
+      with:
+        name: step5-results
+        path: |
+          step5_speed_resources.csv
+        retention-days: 7
+
+  run-second:
+    name: Run Step6 (second.py)
+    runs-on: ubuntu-latest-4-cores
+    if: github.event.schedule == '0 17 * * *' || github.event_name == 'workflow_dispatch'
+    needs: run-main
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Python environment
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ffmpeg
+        
+    - name: Install Python dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Download Step5 results
+      uses: actions/download-artifact@v4
+      with:
+        name: step5-results
+        path: ./
+        
+    - name: Run second.py (Step6)
+      run: |
+        # 优化GitHub Actions环境性能
+        export GITHUB_ACTIONS=true
+        ulimit -v 2097152
+        ulimit -t 3600
+        ulimit -m 1048576
+        ulimit -s 8192
+        
+        export PYTHONOPTIMIZE=2
+        export PYTHONHASHSEED=0
+        export MALLOC_TRIM_THRESHOLD_=30000
+        export PYTHONMALLOC=malloc
+        
+        python -c "import gc; gc.set_threshold(400, 4, 4); gc.collect()"
+        
+        python second.py
+        
+    - name: Upload Step6 results
+      uses: actions/upload-artifact@v4
+      with:
+        name: step6-results
+        path: |
+          step6_video_resources.csv
+        retention-days: 7
+
+  run-third:
+    name: Run Step7-Step8 (third.py)
+    runs-on: ubuntu-latest-4-cores
+    if: github.event.schedule == '0 4 * * *' || github.event_name == 'workflow_dispatch'
+    needs: run-second
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Python environment
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ffmpeg
+        
+    - name: Install Python dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Download Step6 results
+      uses: actions/download-artifact@v4
+      with:
+        name: step6-results
+        path: ./
+        
+    - name: Run third.py (Step7-Step8)
+      run: |
+        # 优化GitHub Actions环境性能
+        export GITHUB_ACTIONS=true
+        ulimit -v 2097152
+        ulimit -t 3600
+        ulimit -m 1048576
+        ulimit -s 8192
+        
+        export PYTHONOPTIMIZE=2
+        export PYTHONHASHSEED=0
+        export MALLOC_TRIM_THRESHOLD_=30000
+        export PYTHONMALLOC=malloc
+        
+        python -c "import gc; gc.set_threshold(400, 4, 4); gc.collect()"
+        
+        python third.py
+        
+    - name: Process output files
+      run: |
+        if [ -d "output" ]; then
+          # 复制最新文件为标准文件名
+          EXCELLENT_FILE=$(find output -name "LE.txt" | head -1)
+          USEFUL_FILE=$(find output -name "LU.txt" | head -1)
+          
+          if [ -n "$EXCELLENT_FILE" ]; then
+            cp "$EXCELLENT_FILE" LE.txt
+          fi
+          
+          if [ -n "$USEFUL_FILE" ]; then
+            cp "$USEFUL_FILE" LU.txt
+          fi
+        fi
+        
+    - name: Deploy to GitHub Pages
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add LE.txt LU.txt LE.m3u LU.m3u *.csv 2>/dev/null || true
+        git commit -m "Auto update live stream list - $(date '+%Y-%m-%d %H:%M:%S')" || exit 0
+        git push
+        
+    - name: Upload final results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: iptv-final-results
+        path: |
+          output/
+          *.txt
+          *.m3u
+          *.csv
+        retention-days: 30

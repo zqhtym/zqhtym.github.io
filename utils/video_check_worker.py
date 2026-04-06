@@ -20,9 +20,16 @@ import threading
 
 import numpy as np
 
+import subprocess
+
 from urllib.request import Request, urlopen
 
 from urllib.error import HTTPError, URLError
+
+try:
+    from pymediainfo import MediaInfo
+except ImportError:
+    MediaInfo = None
 
 
 
@@ -76,7 +83,7 @@ class Config:
 
         'min_height': 180,    # 最小有效高度（降低要求）
 
-        'audio_check': False   # 关闭音频检测，减少复杂性
+        'audio_check': True    # 开启音频检测
 
     }
 
@@ -170,43 +177,204 @@ def check_ffmpeg():
 
 
 
+def analyze_media_info_with_mediainfo(url):
+    """
+    使用MediaInfo检测音视频轨道
+    参考url-check_v-pro.py的实现
+    """
+    if not MediaInfo:
+        return False, False
+    
+    def run_with_timeout(func, timeout_seconds):
+        """带超时的执行函数"""
+        result_container = [None]
+        exception_container = [None]
+        
+        def target():
+            try:
+                result_container[0] = func()
+            except Exception as e:
+                exception_container[0] = e
+        
+        thread = threading.Thread(target=target)
+        thread.daemon = True
+        thread.start()
+        thread.join(timeout_seconds)
+        
+        if thread.is_alive():
+            return None, TimeoutError("MediaInfo分析超时")
+        
+        if exception_container[0]:
+            return None, exception_container[0]
+        
+        return result_container[0], None
+    
+    def analyze_without_timeout():
+        """无超时的实际分析函数"""
+        media_info = MediaInfo.parse(url)
+        
+        has_video = False
+        has_audio = False
+        
+        # 兼容不同版本的MediaInfo返回格式
+        if hasattr(media_info, 'tracks'):
+            tracks = media_info.tracks
+        else:
+            tracks = media_info
+        
+        for track in tracks:
+            # 兼容不同版本的属性名
+            track_type = getattr(track, 'track_type', getattr(track, 'type', ''))
+            
+            if track_type == 'Video':
+                width = getattr(track, 'width', 0)
+                height = getattr(track, 'height', 0)
+                if width >= Config.VIDEO_CHECK['min_width'] and height >= Config.VIDEO_CHECK['min_height']:
+                    has_video = True
+            elif track_type == 'Audio':
+                has_audio = True
+        
+        return has_video, has_audio
+    
+    try:
+        # 使用30秒超时执行MediaInfo分析
+        result, error = run_with_timeout(analyze_without_timeout, 30)
+        
+        if error:
+            if isinstance(error, TimeoutError):
+                print(f"[调试] 媒体信息分析超时 | URL: {url} | 错误: {error}")
+            else:
+                print(f"[调试] 媒体信息分析失败 | URL: {url} | 错误: {error}")
+            # 降级方案：使用FFmpeg检测（如果可用）
+            if check_ffmpeg():
+                return analyze_media_info_with_ffmpeg(url)
+            return False, False
+        
+        return result
+    
+    except Exception as e:
+        print(f"[调试] 媒体信息分析异常 | URL: {url} | 错误: {e}")
+        # 降级方案：使用FFmpeg检测（如果可用）
+        if check_ffmpeg():
+            return analyze_media_info_with_ffmpeg(url)
+        return False, False
+
+
+def analyze_media_info_with_ffmpeg(url):
+    """
+    降级方案：使用FFmpeg检测音视频轨道
+    参考url-check_v-pro.py的实现
+    """
+    try:
+        # 检测视频轨道（设置较短超时）
+        cmd = [
+            'ffmpeg', '-i', url,
+            '-hide_banner', '-nostats', '-v', 'error',
+            '-select_streams', 'v:0', '-show_entries', 'stream=width,height', '-of', 'default=noprint_wrappers=1:nokey=1'
+        ]
+        try:
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=15  # 15秒超时
+            )
+        except subprocess.TimeoutExpired:
+            print(f"[调试] FFmpeg视频检测超时 | URL: {url} | 超时时间: 15秒")
+            return False, False
+        
+        has_video = False
+        output = result.stdout.strip()
+        if output and len(output.split()) >= 2:
+            try:
+                width, height = output.split()
+                if int(width) >= Config.VIDEO_CHECK['min_width'] and int(height) >= Config.VIDEO_CHECK['min_height']:
+                    has_video = True
+            except ValueError:
+                print(f"[调试] FFmpeg视频输出解析失败 | URL: {url} | 输出: {output}")
+        
+        # 检测音频轨道（设置较短超时）
+        cmd_audio = [
+            'ffmpeg', '-i', url,
+            '-hide_banner', '-nostats', '-v', 'error',
+            '-select_streams', 'a:0', '-show_entries', 'stream=codec_type', '-of', 'default=noprint_wrappers=1:nokey=1'
+        ]
+        try:
+            result_audio = subprocess.run(
+                cmd_audio,
+                capture_output=True,
+                text=True,
+                timeout=15  # 15秒超时
+            )
+        except subprocess.TimeoutExpired:
+            print(f"[调试] FFmpeg音频检测超时 | URL: {url} | 超时时间: 15秒")
+            return has_video, False
+        
+        has_audio = False
+        output_audio = result_audio.stdout.strip()
+        if output_audio:
+            has_audio = True
+        
+        return has_video, has_audio
+    
+    except Exception as e:
+        print(f"[调试] FFmpeg检测异常 | URL: {url} | 错误: {e}")
+        return False, False
+
+
 def check_video_changes(url):
-
     """
-
-    检测15秒内画面是否变化（新增404前置检测+无效URL容错）
-
-    改写返回值：返回字典包含详细检测结果
-
-    返回格式：
-
-    {
-
-        'success': bool,       # 检测是否成功执行（非结果是否变化）
-
-        'changing': bool,      # 画面是否有变化
-
-        'reason': str,         # 失败原因/备注信息
-
-        'frame_info': {        # 帧信息（成功时有效）
-
-            'total_read': int, # 总读取帧数
-
-            'valid_frames': int,# 有效对比帧数
-
-            'avg_diff': float   # 平均帧差异值
-
-        }
-
-    }
-
+    检测15秒内画面是否变化（参考url-check_v-pro.py实现）
+    优先使用MediaInfo检测，失败后使用画面变化检测
     """
-
     global timeout_flag
-
     timeout_flag = False  # 重置超时标记
 
+    # 初始化返回结果
+    result = {
+        'success': False,
+        'changing': False,
+        'reason': '',
+        'frame_info': {
+            'total_read': 0,
+            'valid_frames': 0,
+            'avg_diff': 0.0
+        }
+    }
 
+    # 1. 首先尝试MediaInfo检测（更准确）
+    print(f"[调试] 开始MediaInfo检测 | URL: {url}")
+    has_video, has_audio = analyze_media_info_with_mediainfo(url)
+    
+    if has_video and has_audio:
+        result['success'] = True
+        result['changing'] = True  # 有视频和音频就认为有效
+        result['reason'] = "MediaInfo检测成功：有视频和音频轨道"
+        result['frame_info'] = {
+            'total_read': 1,
+            'valid_frames': 1,
+            'avg_diff': 0.0
+        }
+        print(f"[调试] MediaInfo检测成功 | URL: {url} | 有视频: {has_video} | 有音频: {has_audio}")
+        
+        # 输出JSON格式结果，方便外部程序解析
+        output_result = {
+            'has_video': has_video,
+            'has_audio': has_audio,
+            'video_changing': True,
+            'error': None
+        }
+        print(json.dumps(output_result, ensure_ascii=False))
+        return result
+    
+    # 2. 如果MediaInfo失败，回退到画面变化检测
+    print(f"[调试] MediaInfo检测失败，回退到画面变化检测 | URL: {url}")
+    
+    # 3. 设置3分钟超时定时器
+
+    timer = threading.Timer(Config.TIMEOUT['video_total_timeout'], timeout_handler)
+
+    timer.start()
 
     # 初始化返回结果
 
@@ -472,7 +640,39 @@ def check_video_changes(url):
 
         }
 
+        # 在画面变化检测前，先检测音频
+        has_audio_detected = False
+        try:
+            # 使用FFmpeg检测音频轨道
+            cmd_audio = [
+                'ffmpeg', '-i', url,
+                '-hide_banner', '-nostats', '-v', 'error',
+                '-select_streams', 'a:0', '-show_entries', 'stream=codec_type', '-of', 'default=noprint_wrappers=1:nokey=1'
+            ]
+            result_audio = subprocess.run(
+                cmd_audio,
+                capture_output=True,
+                text=True,
+                timeout=15  # 15秒超时
+            )
+            output_audio = result_audio.stdout.strip()
+            if output_audio:
+                has_audio_detected = True
+                print(f"[调试] 音频检测成功 | URL: {url}")
+        except subprocess.TimeoutExpired:
+            print(f"[调试] 音频检测超时 | URL: {url}")
+        except Exception as e:
+            print(f"[调试] 音频检测异常 | URL: {url} | 错误: {e}")
 
+        # 输出JSON格式结果，方便外部程序解析
+        output_result = {
+            'has_video': True,
+            'has_audio': has_audio_detected,  # 使用实际检测结果
+            'video_changing': is_changing,
+            'error': None
+        }
+
+        print(json.dumps(output_result, ensure_ascii=False))
 
         print(f"[调试] 画面变化检测成功 | URL: {url} | 读取帧数: {frame_read_count} | 有效对比帧数: {len(frames)} | 平均帧差异: {avg_diff:.0f} | 变化: {is_changing}")
 
@@ -548,8 +748,14 @@ if __name__ == "__main__":
 
     result = check_video_changes(url)
 
-    # 输出JSON格式结果，方便外部程序解析
-
-    print(json.dumps(result, ensure_ascii=False, indent=2))
-
+    if not result['success']:
+        output_result = {
+            'has_video': False,
+            'has_audio': False,
+            'video_changing': False,
+            'error': result['reason']
+        }
+        print(json.dumps(output_result, ensure_ascii=False))
+        sys.exit(1)
+    
     sys.exit(0)

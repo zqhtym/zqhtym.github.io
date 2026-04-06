@@ -88,6 +88,11 @@ class Config:
         return self.get_bool('open_speed_test', True)
     
     @property
+    def whitelist_file(self) -> str:
+        """白名单文件路径"""
+        return self.get('whitelist_file', 'white.txt')
+    
+    @property
     def url_check_timeout(self) -> int:
         """URL检测超时时间"""
         return self.get_int('url_check_timeout', 5)

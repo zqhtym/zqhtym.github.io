@@ -6,7 +6,7 @@
 
 import asyncio
 from aiohttp import web
-from .config import config
+from utils.config import config
 
 
 async def run_service():

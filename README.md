@@ -55,12 +55,28 @@ memory_threshold = 80
 
 ## 📊 输出结果
 
-检测结果会按速度分类输出到 `output/` 目录：
+检测结果会按速度分类输出到 `output/` 目录，**每个文件都包含所有分类内容**：
 
-- `live+excellent+{timestamp}.txt` - 速度 > 1MB/s (央视)
-- `live+wonderful+{timestamp}.txt` - 速度 > 700KB/s (卫视)  
-- `live+good+{timestamp}.txt` - 速度 > 500KB/s (港澳台)
-- `live+useful+{timestamp}.txt` - 速度 > 200KB/s (其它)
+- `live+excellent+{timestamp}.txt` - 速度 > 1MB/s (包含欧美、央视、卫视、港澳台、其它)
+- `live+wonderful+{timestamp}.txt` - 速度 > 700KB/s (包含欧美、央视、卫视、港澳台、其它)  
+- `live+good+{timestamp}.txt` - 速度 > 500KB/s (包含欧美、央视、卫视、港澳台、其它)
+- `live+useful+{timestamp}.txt` - 速度 > 200KB/s (包含欧美、央视、卫视、港澳台、其它)
+
+#### **文件格式示例**
+```
+#genre#欧美
+欧美1,http://example.com/us1.m3u8
+#genre#央视
+央视1,http://example.com/cctv1.m3u8
+#genre#卫视
+卫视1,http://example.com/tv1.m3u8
+#genre#港澳台
+港澳台1,http://example.com/hk1.m3u8
+#genre#其它
+其它1,http://example.com/other1.m3u8
+```
+
+**分类顺序**: 欧美 → 央视 → 卫视 → 港澳台 → 其它
 
 ## 🔧 技术特性
 
@@ -70,6 +86,13 @@ memory_threshold = 80
 - **内存优化**: 智能缓存和垃圾回收机制
 - **并发控制**: 信号量控制防止资源竞争
 - **批次处理**: 分批处理避免内存溢出
+
+### GitHub Actions自动化
+
+- **定时运行**: 每天北京时间3:00自动检测 (UTC 19:00)
+- **手动触发**: 支持workflow_dispatch手动运行
+- **自动部署**: 检测完成后自动部署到GitHub Pages
+- **构建产物**: 自动保存检测结果到Artifacts
 
 ### 异步检测
 

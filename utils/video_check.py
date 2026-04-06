@@ -12,12 +12,12 @@ import subprocess
 import json
 import os
 import sys
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Callable
 import logging
 
-from .config import config
-from .types import VideoResult
-from .tools import is_valid_url
+from utils.config import config
+from utils.types import VideoResult
+from utils.tools import is_valid_url
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +63,7 @@ class VideoChecker:
         logger.info(f"使用视频检测脚本: {worker_path}")
         return worker_path
     
-    async def check_videos_batch(self, urls: List[str]) -> List[str]:
+    async def check_videos_batch(self, urls: List[str], progress_callback: Optional[Callable] = None) -> List[str]:
         """批量检查视频有效性"""
         logger.info(f"开始批量视频检测: {len(urls)}个URL")
         
@@ -80,10 +80,20 @@ class VideoChecker:
         try:
             # 分批处理
             results = []
+            valid_count = 0
             for i in range(0, len(urls_copy), self.batch_size):
                 batch = urls_copy[i:i + self.batch_size]
                 batch_results = await self._check_video_batch(batch)
                 results.extend(batch_results)
+                
+                # 统计有效视频数 - 有画面变化或有声音
+                batch_valid = len([result for result in batch_results if result['has_video'] or result['has_audio']])
+                valid_count += batch_valid
+                
+                # 调用进度回调
+                if progress_callback:
+                    current = min(i + self.batch_size, len(urls_copy))
+                    progress_callback(current, len(urls_copy), valid_count)
                 
                 # IPTV API风格：批次间内存检查
                 await self._check_memory()
@@ -92,8 +102,8 @@ class VideoChecker:
                 del batch
                 gc.collect()
             
-            # 过滤有效结果
-            valid_videos = [result['url'] for result in results if result['has_video'] and result['has_audio']]
+            # 过滤有效结果 - 有画面变化或有声音
+            valid_videos = [result for result in results if result['has_video'] or result['has_audio']]
             
             logger.info(f"视频检测完成: 有效{len(valid_videos)}/{len(urls_copy)}个, "
                        f"缓存命中{self.cache_hits}次")
@@ -113,13 +123,13 @@ class VideoChecker:
         # IPTV API风格：使用asyncio.gather并发执行
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
-        # 处理结果
+        # 处理结果 - 有画面变化或有声音
         valid_results = []
         for result in results:
             if isinstance(result, Exception):
                 logger.error(f"视频检测异常: {result}")
                 self.error_count += 1
-            elif result and result['has_video'] and result['has_audio']:
+            elif result and (result['has_video'] or result['has_audio']):
                 valid_results.append(result)
                 self.success_count += 1
             else:

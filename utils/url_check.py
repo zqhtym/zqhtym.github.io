@@ -8,7 +8,9 @@ import asyncio
 import copy
 import gc
 import time
-from typing import List, Dict, Any, Optional
+import aiohttp
+import logging
+from typing import List, Dict, Any, Optional, Callable
 import logging
 
 from .config import config
@@ -37,47 +39,46 @@ class URLChecker:
         self.success_count = 0
         self.error_count = 0
     
-    async def check_urls_batch(self, urls: List[str]) -> List[str]:
+    async def check_urls_batch(self, urls: List[str], progress_callback: Callable[[int, int, int], None] = None) -> List[str]:
         """批量检查URL有效性"""
-        logger.info(f"开始批量URL检测: {len(urls)}个URL")
-        
-        # 过滤有效URL
-        valid_urls = [url for url in urls if is_valid_url(url)]
-        logger.info(f"过滤后有效URL: {len(valid_urls)}个")
-        
-        if not valid_urls:
-            return []
+        logger.info(f"开始批量URL检测: {len(urls)}个")
         
         # IPTV API风格：深拷贝避免内存污染
-        urls_copy = copy.deepcopy(valid_urls)
+        urls_copy = copy.deepcopy(urls)
         
         try:
             # 分批处理
             results = []
+            processed_count = 0
+            
             for i in range(0, len(urls_copy), self.batch_size):
                 batch = urls_copy[i:i + self.batch_size]
                 batch_results = await self._check_url_batch(batch)
                 results.extend(batch_results)
                 
-                # IPTV API风格：批次间内存检查
-                await self._check_memory()
+                # 更新进度
+                processed_count += len(batch)
+                if progress_callback:
+                    progress_callback(processed_count, len(urls_copy), len(batch_results))
+                
+                # IPTV API风格：批次间内存检查（每5批次检查一次）
+                if i % 5 == 0:
+                    await self._check_memory()
                 
                 # 清理批次数据
                 del batch
                 gc.collect()
             
-            # 过滤有效结果
+            # 过滤有效URL
             valid_urls = [result['url'] for result in results if result['is_valid']]
             
             logger.info(f"URL检测完成: 有效{len(valid_urls)}/{len(urls_copy)}个, "
                        f"缓存命中{self.cache_hits}次")
-            
             return valid_urls
             
-        finally:
-            # 清理拷贝数据
-            del urls_copy
-            gc.collect()
+        except Exception as e:
+            logger.error(f"批量URL检测失败: {e}")
+            return []
     
     async def _check_url_batch(self, urls: List[str]) -> List[CheckResult]:
         """检查单个批次的URL"""
@@ -162,7 +163,7 @@ class URLChecker:
             self.total_processed += 1
             return result
     
-    async def test_speed_batch(self, urls: List[str]) -> List[Any]:
+    async def test_speed_batch(self, urls: List[str], progress_callback: Optional[Callable] = None) -> List[Any]:
         """批量速度测试"""
         logger.info(f"开始批量速度测试: {len(urls)}个URL")
         
@@ -175,13 +176,21 @@ class URLChecker:
         try:
             # 分批处理
             results = []
+            valid_count = 0
             for i in range(0, len(urls_copy), self.batch_size):
                 batch = urls_copy[i:i + self.batch_size]
                 batch_results = await self._test_speed_batch(batch)
                 results.extend(batch_results)
+                valid_count += len([r for r in batch_results if r and r.get('speed', 0) > 0])
                 
-                # IPTV API风格：批次间内存检查
-                await self._check_memory()
+                # 调用进度回调
+                if progress_callback:
+                    current = min(i + self.batch_size, len(urls_copy))
+                    progress_callback(current, len(urls_copy), valid_count)
+                
+                # IPTV API风格：批次间内存检查（每5批次检查一次）
+                if i % 5 == 0:
+                    await self._check_memory()
                 
                 # 清理批次数据
                 del batch
@@ -218,7 +227,7 @@ class URLChecker:
         return valid_results
     
     async def _test_single_speed(self, url: str) -> SpeedResult:
-        """测试单个URL的速度"""
+        """测试单个URL的速度 - 采用url-check-v-pro.py核心逻辑"""
         async with self.semaphore:
             result = {
                 'url': url,
@@ -231,7 +240,8 @@ class URLChecker:
                 # 使用异步HTTP下载测试
                 import aiohttp
                 
-                timeout = aiohttp.ClientTimeout(total=config.speed_test_timeout)
+                # 采用url-check-v-pro.py的参数
+                timeout = aiohttp.ClientTimeout(total=5)  # 5秒连接超时
                 connector = aiohttp.TCPConnector(
                     limit=self.max_concurrent,
                     limit_per_host=5,
@@ -243,26 +253,42 @@ class URLChecker:
                 async with aiohttp.ClientSession(
                     connector=connector,
                     timeout=timeout,
-                    headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+                    headers={'User-Agent': 'Mozilla/5.0'}
                 ) as session:
                     
                     start_time = time.time()
                     total_size = 0
+                    chunk_size = 10240  # url-check-v-pro.py的10KB块大小
                     
                     async with session.get(url) as response:
                         if response.status == 200:
                             result['delay'] = int(round((time.time() - start_time) * 1000))
                             
-                            # 下载前1MB测试速度
-                            async for chunk in response.content.iter_any():
+                            # url-check-v-pro.py核心逻辑：固定时间测试(3秒)
+                            test_start_time = time.time()
+                            chunk_count = 0
+                            
+                            async for chunk in response.content.iter_chunked(chunk_size):
                                 if chunk:
                                     total_size += len(chunk)
-                                    if total_size >= 1024 * 1024:  # 1MB
+                                    chunk_count += 1
+                                
+                                # 每读取10块检查一次时间，避免阻塞
+                                if chunk_count >= 10:
+                                    chunk_count = 0
+                                    if time.time() - test_start_time >= 3:  # 3秒测试时间
                                         break
+                                
+                                # 严格3秒时间限制
+                                if time.time() - test_start_time >= 3:
+                                    break
                             
-                            total_time = time.time() - start_time
-                            if total_time > 0:
-                                result['speed'] = (total_size / total_time) / (1024 * 1024)  # MB/s
+                            # url-check-v-pro.py速度计算：bytes/s
+                            test_time = time.time() - test_start_time
+                            if test_time > 0:
+                                speed_bytes_per_sec = total_size / test_time
+                                # 转换为MB/s保持与Step5一致
+                                result['speed'] = speed_bytes_per_sec / (1024 * 1024)
                 
             except asyncio.TimeoutError:
                 result['error'] = "Timeout"

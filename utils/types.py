@@ -53,3 +53,11 @@ class ProcessStats(TypedDict):
     error_count: int
     cache_hits: int
     memory_warnings: int
+
+
+class ChannelItem:
+    """频道项目类"""
+    def __init__(self, name: str, urls: List[str], category: str):
+        self.name = name
+        self.urls = urls
+        self.category = category
