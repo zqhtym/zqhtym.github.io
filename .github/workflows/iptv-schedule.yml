@@ -42,6 +42,14 @@ jobs:
         pip install --upgrade pip
         pip install -r requirements.txt
         
+    - name: Verify ffmpeg installation
+      run: |
+        echo "🔍 检查ffmpeg安装位置"
+        which ffmpeg || echo "ffmpeg不在PATH中"
+        ffmpeg -version || echo "ffmpeg版本检查失败"
+        ls -la /usr/bin/ffmpeg || echo "/usr/bin/ffmpeg不存在"
+        ls -la /usr/local/bin/ffmpeg || echo "/usr/local/bin/ffmpeg不存在"
+        
     - name: Clean old CSV files
       run: |
         rm -f output1/*.csv || true
