@@ -477,17 +477,15 @@ def check_video_changes(url):
 
 
         # 尝试读取视频流
-
-        ffmpeg_url = f'ffmpeg://{url}' if check_ffmpeg() else url
-
-        cap = cv2.VideoCapture(ffmpeg_url)
-
-
-
+        # GitHub Actions中不使用ffmpeg://前缀，直接使用URL
+        cap = cv2.VideoCapture(url)
+        
+        # 在GitHub Actions中设置环境变量，避免GUI相关错误
+        if IS_GITHUB_ACTIONS:
+            os.environ['OPENCV_LOG_LEVEL'] = 'ERROR'
+        
         # 设置超时和缓冲参数
-
         cap.set(cv2.CAP_PROP_OPEN_TIMEOUT_MSEC, 5000)  # 5秒打开超时
-
         cap.set(cv2.CAP_PROP_READ_TIMEOUT_MSEC, 5000)   # 5秒读取超时
 
 
@@ -678,7 +676,7 @@ def check_video_changes(url):
             'error': None
         }
 
-        print(json.dumps(output_result, ensure_ascii=False))
+        print(json.dumps(output_result, ensure_ascii=True))
 
         print(f"[调试] 画面变化检测成功 | URL: {url} | 读取帧数: {frame_read_count} | 有效对比帧数: {len(frames)} | 平均帧差异: {avg_diff:.0f} | 变化: {is_changing}")
 
@@ -761,7 +759,7 @@ if __name__ == "__main__":
             'video_changing': False,
             'error': result['reason']
         }
-        print(json.dumps(output_result, ensure_ascii=False))
+        print(json.dumps(output_result, ensure_ascii=True))
         sys.exit(1)
     
     sys.exit(0)
