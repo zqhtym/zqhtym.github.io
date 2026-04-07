@@ -79,13 +79,13 @@ class Config:
 
     VIDEO_CHECK = {
 
-        'frame_interval': 3,  # 每隔3秒取一帧（降低采样频率）
+        'frame_interval': 2,  # 每隔2秒取一帧（更快采样）
 
-        'min_diff': 3000,     # 帧差异阈值（进一步降低阈值）
+        'min_diff': 1000,     # 帧差异阈值（大幅降低阈值，适应GitHub Actions环境）
 
-        'min_width': 240,     # 最小有效宽度（降低要求）
+        'min_width': 160,     # 最小有效宽度（进一步降低要求）
 
-        'min_height': 180,    # 最小有效高度（降低要求）
+        'min_height': 120,    # 最小有效高度（进一步降低要求）
 
         'audio_check': True    # 开启音频检测
 

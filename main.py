@@ -1654,9 +1654,11 @@ class IPTVChecker:
             try:
                 # 调用video_check_worker.py脚本
                 script_path = 'utils/video_check_worker.py'
+                # 使用环境变量配置的超时时间
+                timeout = int(os.environ.get('VIDEO_TOTAL_TIMEOUT', 180))
                 result = subprocess.run([
                     'python', script_path, url
-                ], capture_output=True, timeout=180)  # 3分钟超时
+                ], capture_output=True, timeout=timeout)
                 
                 if result.returncode == 0:
                     # 处理输出编码
@@ -1710,7 +1712,7 @@ class IPTVChecker:
                 return {
                     'has_video': False,
                     'has_audio': False,
-                    'reason': '画面检测超时（3分钟）',
+                    'reason': f'画面检测超时（{timeout}秒）',
                     'success': False
                 }
             except Exception as e:
@@ -1726,10 +1728,10 @@ class IPTVChecker:
         
         print(f"开始画面变化与声音检测，共{len(urls_to_check)}个URL...")
         
-        # GitHub Actions环境使用更高的并发数
+        # GitHub Actions环境使用优化的并发数
         if os.environ.get('GITHUB_ACTIONS'):
-            # GitHub Actions: 2核CPU，但网络性能好，可以使用更多并发
-            max_workers = 25
+            # GitHub Actions: 使用环境变量配置的并发数，默认为5（减少资源竞争）
+            max_workers = int(os.environ.get('GITHUB_ACTIONS_WORKERS', 5))
             print(f"GitHub Actions环境，使用并发数: {max_workers}")
         else:
             # 本地环境：根据CPU核心数调整

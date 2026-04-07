@@ -94,9 +94,10 @@ jobs:
         export MALLOC_TRIM_THRESHOLD_=30000
         export PYTHONMALLOC=malloc
         
-        # 设置更长的超时时间
-        export VIDEO_CHECK_TIMEOUT=300  # 5分钟每个视频
-        export VIDEO_TOTAL_TIMEOUT=600  # 10分钟总超时
+        # 设置更适合GitHub Actions的参数
+        export VIDEO_CHECK_TIMEOUT=60  # 1分钟每个视频（减少超时）
+        export VIDEO_TOTAL_TIMEOUT=120  # 2分钟总超时
+        export GITHUB_ACTIONS_WORKERS=5  # 减少并发数，避免资源竞争
         
         python -c "import gc; gc.set_threshold(400, 4, 4); gc.collect()"
         
