@@ -26,11 +26,15 @@ from urllib.request import Request, urlopen
 
 from urllib.error import HTTPError, URLError
 
+# 环境检测
+IS_GITHUB_ACTIONS = os.environ.get('GITHUB_ACTIONS') == 'true'
+
 try:
     from pymediainfo import MediaInfo
 except ImportError:
     MediaInfo = None
-
+    if IS_GITHUB_ACTIONS:
+        print("[GitHub Actions] Warning: pymediainfo not available, will use fallback detection")
 
 
 
@@ -366,7 +370,7 @@ def check_video_changes(url):
             'video_changing': True,
             'error': None
         }
-        print(json.dumps(output_result, ensure_ascii=False))
+        print(json.dumps(output_result, ensure_ascii=True))
         return result
     
     # 2. 如果MediaInfo失败，回退到画面变化检测
@@ -742,7 +746,7 @@ if __name__ == "__main__":
 
         }
 
-        print(json.dumps(output, ensure_ascii=False))
+        print(json.dumps(output, ensure_ascii=True))
 
         sys.exit(1)
 
