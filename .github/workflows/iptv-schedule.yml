@@ -18,7 +18,7 @@ jobs:
   run-main:
     name: Run Step1-Step5 (main.py)
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event_name == 'pull_request'
+    if: github.event_name == 'workflow_dispatch' 
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     
@@ -35,6 +35,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y ffmpeg
+        sudo apt-get install -y libgl1-mesa-glx libglib2.0-0 libsm6 libxext6 libxrender-dev libgomp1
         
     - name: Install Python dependencies
       run: |
@@ -117,6 +118,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y ffmpeg
+        sudo apt-get install -y libgl1-mesa-glx libglib2.0-0 libsm6 libxext6 libxrender-dev libgomp1
         
     - name: Install Python dependencies
       run: |
@@ -177,6 +179,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y ffmpeg
+        sudo apt-get install -y libgl1-mesa-glx libglib2.0-0 libsm6 libxext6 libxrender-dev libgomp1
         
     - name: Install Python dependencies
       run: |
