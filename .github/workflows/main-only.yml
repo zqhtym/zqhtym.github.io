@@ -1,4 +1,4 @@
-name: Run main.py Only
+name: Run main.py Only (Updated Dependencies - v2)
 
 on:
   workflow_dispatch:
@@ -29,6 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      CACHE_INVALIDATION: $(date +%s)
     
     steps:
     - name: Checkout code
