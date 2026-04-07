@@ -67,9 +67,9 @@ class Config:
 
         'stream_read': 5,
 
-        'video_check': 15,  # 画面检测超时（秒）
+        'video_check': int(os.environ.get('VIDEO_CHECK_TIMEOUT', 15)),  # 画面检测超时（秒），可通过环境变量配置
 
-        'video_total_timeout': 180  # 画面检测总超时（3分钟=180秒）
+        'video_total_timeout': int(os.environ.get('VIDEO_TOTAL_TIMEOUT', 180))  # 画面检测总超时，可通过环境变量配置
 
     }
 

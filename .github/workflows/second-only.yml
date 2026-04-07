@@ -74,19 +74,18 @@ jobs:
           exit 1
         fi
         
-    - name: Download main.py results (if available)
-      uses: actions/download-artifact@v4
-      with:
-        name: main-results
-        path: ./
-      continue-on-error: true
+    - name: Skip artifact download (files are in repository)
+      run: |
+        echo "📦 跳过工件下载 - 文件已在仓库中"
+        echo "🔍 确认必要文件存在:"
+        ls -la output1/step5_speed_resources.csv && echo "✅ step5_speed_resources.csv 存在" || echo "❌ 文件不存在"
         
     - name: Run second.py (Step6)
       run: |
         # 优化GitHub Actions环境性能
         export GITHUB_ACTIONS=true
         ulimit -v 2097152
-        ulimit -t 3600
+        ulimit -t 7200  # 增加超时到2小时
         ulimit -m 1048576
         ulimit -s 8192
         
@@ -95,7 +94,19 @@ jobs:
         export MALLOC_TRIM_THRESHOLD_=30000
         export PYTHONMALLOC=malloc
         
+        # 设置更长的超时时间
+        export VIDEO_CHECK_TIMEOUT=300  # 5分钟每个视频
+        export VIDEO_TOTAL_TIMEOUT=600  # 10分钟总超时
+        
         python -c "import gc; gc.set_threshold(400, 4, 4); gc.collect()"
+        
+        echo "🚀 开始运行 second.py (Step6) - GitHub Actions环境"
+        echo "📊 环境信息:"
+        echo "   Python版本: $(python --version)"
+        echo "   FFmpeg版本: $(ffmpeg -version | head -1)"
+        echo "   OpenCV版本: $(python -c 'import cv2; print(cv2.__version__)')"
+        echo "   内存限制: $(ulimit -m) KB"
+        echo "   时间限制: $(ulimit -t) 秒"
         
         python second.py
         
