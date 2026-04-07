@@ -420,9 +420,9 @@ class IPTVChecker:
             traceback.print_exc()
 
     def _save_step_csv_output(self, filename: str, resources: List[dict], description: str):
-        """保存步骤输出文件到output目录 (CSV格式)"""
+        """保存步骤输出文件到output1目录 (CSV格式)"""
         try:
-            output_dir = Path("output")
+            output_dir = Path("output1")
             output_dir.mkdir(exist_ok=True)
             
             filepath = output_dir / filename
@@ -451,9 +451,9 @@ class IPTVChecker:
             print(f"❌ 生成步骤文件失败: {filename} - {e}")
 
     def _save_step_output(self, filename: str, resources: List[dict], description: str):
-        """保存步骤输出文件到output目录"""
+        """保存步骤输出文件到output1目录"""
         try:
-            output_dir = Path("output")
+            output_dir = Path("output1")
             output_dir.mkdir(exist_ok=True)
             
             filepath = output_dir / filename
@@ -1653,8 +1653,9 @@ class IPTVChecker:
             """检测15秒内画面是否变化（调用video_check_worker.py）"""
             try:
                 # 调用video_check_worker.py脚本
+                script_path = 'utils/video_check_worker.py'
                 result = subprocess.run([
-                    'python', 'C:\\exe\\try\\video_check_worker.py', url
+                    'python', script_path, url
                 ], capture_output=True, timeout=180)  # 3分钟超时
                 
                 if result.returncode == 0:

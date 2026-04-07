@@ -145,7 +145,9 @@ def check_ffmpeg():
             r'C:\Program Files\iGameCenter\SAVIConverter\tools\ffmpeg.exe',
             r'C:\Users\Administrator\AppData\Local\Programs\icat\resources\bin\ffmpeg\ffmpeg.exe',
             r'C:\ffmpeg\ffmpeg.exe',  # 常见安装位置
-            r'C:\ffmpeg\bin\ffmpeg.exe'  # 另一种常见安装位置
+            r'C:\ffmpeg\bin\ffmpeg.exe',  # 另一种常见安装位置
+            r'ffmpeg.exe',  # 项目根目录
+            r'.\ffmpeg.exe'  # 当前目录
         ]
         
         for path in ffmpeg_paths:

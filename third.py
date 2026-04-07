@@ -31,7 +31,7 @@ class ThirdChecker(IPTVChecker):
             print("=" * 80)
             
             # 读取Step6结果文件
-            step6_csv_path = "output/step6_video_resources.csv"
+            step6_csv_path = "output1/step6_video_resources.csv"
             if not os.path.exists(step6_csv_path):
                 print(f"❌ Step6结果文件不存在：{step6_csv_path}")
                 print(f"请先运行second.py完成Step6的工作")
