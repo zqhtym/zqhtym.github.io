@@ -1,25 +1,35 @@
-name: Run second.py Only (Fixed Dependencies)
+name: Run main.py + second.py (Complete Step1-Step6)
 
 on:
   workflow_dispatch:
   push:
     branches: [ main, master ]
     paths:
+      - 'main.py'
       - 'second.py'
       - 'utils/video_check_worker.py'
+      - 'resources.txt'
+      - 'resources.m3u'
+      - 'resources_remote.txt'
+      - 'white.txt'
       - 'requirements.txt'
   pull_request:
     branches: [ main, master ]
     paths:
+      - 'main.py'
       - 'second.py'
       - 'utils/video_check_worker.py'
+      - 'resources.txt'
+      - 'resources.m3u'
+      - 'resources_remote.txt'
+      - 'white.txt'
       - 'requirements.txt'
   schedule:
-    - cron: '0 17 * * *'  # 每天17:00 UTC
+    - cron: '0 18 * * *'  # 每天18:00 UTC
 
 jobs:
-  run-second:
-    name: Run second.py (Step6)
+  run-main-and-second:
+    name: Run main.py (Step1-5) + second.py (Step6)
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -51,35 +61,35 @@ jobs:
         which ffmpeg || echo "ffmpeg不在PATH中"
         ffmpeg -version || echo "ffmpeg版本检查失败"
         
-    - name: Check for required files
+    - name: Run main.py (Step1-Step5)
       run: |
-        echo "🔍 检查必要文件是否存在"
-        echo "📁 当前目录内容:"
-        ls -la
+        # 优化GitHub Actions环境性能
+        export GITHUB_ACTIONS=true
+        ulimit -v 2097152
+        ulimit -t 3600
+        ulimit -m 1048576
+        ulimit -s 8192
         
-        echo "📁 output1目录内容:"
-        ls -la output1/ || echo "output1目录不存在"
+        export PYTHONOPTIMIZE=2
+        export PYTHONHASHSEED=0
+        export MALLOC_TRIM_THRESHOLD_=30000
+        export PYTHONMALLOC=malloc
         
+        python -c "import gc; gc.set_threshold(400, 4, 4); gc.collect()"
+        
+        echo "🚀 开始运行 main.py (Step1-Step5)"
+        python main.py
+        
+    - name: Check Step5 results
+      run: |
+        echo "🔍 检查Step5结果文件"
         if [ -f "output1/step5_speed_resources.csv" ]; then
           echo "✅ 找到 step5_speed_resources.csv"
-          echo "📊 文件信息:"
-          ls -la output1/step5_speed_resources.csv
-          echo "📝 文件前几行:"
-          head -10 output1/step5_speed_resources.csv
+          wc -l output1/step5_speed_resources.csv
         else
           echo "❌ 未找到 step5_speed_resources.csv"
-          echo "🔍 尝试查找所有CSV文件:"
-          find . -name "*.csv" -type f || echo "未找到任何CSV文件"
-          echo "请先运行 main-only.yml 或确保文件已提交到仓库"
           exit 1
         fi
-        
-    - name: Download main.py results (if available)
-      uses: actions/download-artifact@v4
-      with:
-        name: main-results
-        path: ./
-      continue-on-error: true
         
     - name: Run second.py (Step6)
       run: |
@@ -97,6 +107,7 @@ jobs:
         
         python -c "import gc; gc.set_threshold(400, 4, 4); gc.collect()"
         
+        echo "🚀 开始运行 second.py (Step6)"
         python second.py
         
     - name: Upload Step6 results
@@ -108,27 +119,27 @@ jobs:
         retention-days: 7
       if: always()
         
-    - name: Commit Step6 CSV files to repository
+    - name: Commit all CSV files to repository
       if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
       run: |
         echo "🔍 检查output1目录内容"
         ls -la output1/ || echo "output1目录不存在"
         
-        echo "🔍 检查Step6 CSV文件"
-        find output1/ -name "step6_video_resources.csv" -type f || echo "未找到step6 CSV文件"
+        echo "🔍 检查所有CSV文件"
+        find output1/ -name "*.csv" -type f || echo "未找到CSV文件"
         
         echo "🔧 配置Git"
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         
-        echo "📦 添加Step6 CSV文件到Git"
-        git add output1/step6_video_resources.csv || echo "添加Step6 CSV文件失败"
+        echo "📦 添加所有CSV文件到Git"
+        git add output1/*.csv || echo "添加CSV文件失败"
         
         echo "🔍 检查Git状态"
         git status
         
         echo "📝 提交更改"
-        git diff --staged --quiet || git commit -m "Auto update second.py Step6 CSV - $(date '+%Y-%m-%d %H:%M:%S')"
+        git diff --staged --quiet || git commit -m "Auto update main.py + second.py CSV files - $(date '+%Y-%m-%d %H:%M:%S')"
         
         echo "🚀 推送到仓库"
         git push || echo "推送失败"
