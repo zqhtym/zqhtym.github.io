@@ -1,0 +1,110 @@
+name: Run second.py Only
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'second.py'
+      - 'utils/video_check_worker.py'
+      - 'requirements.txt'
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'second.py'
+      - 'utils/video_check_worker.py'
+      - 'requirements.txt'
+  schedule:
+    - cron: '0 17 * * *'  # 每天17:00 UTC
+
+jobs:
+  run-second:
+    name: Run second.py (Step6)
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Python environment
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ffmpeg
+        sudo apt-get install -y libgl1-mesa-glx libglib2.0-0 libsm6 libxext6 libxrender-dev libgomp1
+        
+    - name: Install Python dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Verify ffmpeg installation
+      run: |
+        echo "🔍 检查ffmpeg安装位置"
+        which ffmpeg || echo "ffmpeg不在PATH中"
+        ffmpeg -version || echo "ffmpeg版本检查失败"
+        
+    - name: Download main.py results
+      uses: actions/download-artifact@v4
+      with:
+        name: main-results
+        path: ./
+      continue-on-error: true
+        
+    - name: Run second.py (Step6)
+      run: |
+        # 优化GitHub Actions环境性能
+        export GITHUB_ACTIONS=true
+        ulimit -v 2097152
+        ulimit -t 3600
+        ulimit -m 1048576
+        ulimit -s 8192
+        
+        export PYTHONOPTIMIZE=2
+        export PYTHONHASHSEED=0
+        export MALLOC_TRIM_THRESHOLD_=30000
+        export PYTHONMALLOC=malloc
+        
+        python -c "import gc; gc.set_threshold(400, 4, 4); gc.collect()"
+        
+        python second.py
+        
+    - name: Upload Step6 results
+      uses: actions/upload-artifact@v4
+      with:
+        name: second-results
+        path: |
+          output1/step6_video_resources.csv
+        retention-days: 7
+      if: always()
+        
+    - name: Commit Step6 CSV files to repository
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      run: |
+        echo "🔍 检查output1目录内容"
+        ls -la output1/ || echo "output1目录不存在"
+        
+        echo "🔍 检查Step6 CSV文件"
+        find output1/ -name "step6_video_resources.csv" -type f || echo "未找到step6 CSV文件"
+        
+        echo "🔧 配置Git"
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        echo "📦 添加Step6 CSV文件到Git"
+        git add output1/step6_video_resources.csv || echo "添加Step6 CSV文件失败"
+        
+        echo "🔍 检查Git状态"
+        git status
+        
+        echo "📝 提交更改"
+        git diff --staged --quiet || git commit -m "Auto update second.py Step6 CSV - $(date '+%Y-%m-%d %H:%M:%S')"
+        
+        echo "🚀 推送到仓库"
+        git push || echo "推送失败"
