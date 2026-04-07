@@ -3,8 +3,5 @@
 https://gh-proxy.com/https://raw.githubusercontent.com/zqhtym/iptv-api/refs/heads/master/output/xp_result.txt
 https://gh-proxy.com/https://raw.githubusercontent.com/alantang1977/iptv_api/refs/heads/main/output/live_ipv4.txt
 https://gh-proxy.com/https://raw.githubusercontent.com/alantang1977/iptv-auto/refs/heads/main/my.txt
-https://gh-proxy.com/https://raw.githubusercontent.com/develop202/migu_video/main/interface.txt
-https://gh-proxy.com/https://raw.githubusercontent.com/fafa002/yf2025/refs/heads/main/yiyifafa.txt
-https://gh-proxy.com/https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u       
-https://gh-proxy.com/https://raw.githubusercontent.com/iptv-org/iptv/gh-pages/countries/cn.m3u
+
 
