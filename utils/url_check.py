@@ -14,7 +14,7 @@ from typing import List, Dict, Any, Optional, Callable
 import logging
 
 from .config import config
-from .types import CheckResult, SpeedResult
+from .iptv_types import CheckResult, SpeedResult
 from .tools import format_speed, is_valid_url
 
 logger = logging.getLogger(__name__)

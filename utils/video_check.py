@@ -16,7 +16,7 @@ from typing import List, Dict, Any, Optional, Callable
 import logging
 
 from utils.config import config
-from utils.types import VideoResult
+from utils.iptv_types import VideoResult
 from utils.tools import is_valid_url
 
 logger = logging.getLogger(__name__)
