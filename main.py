@@ -155,7 +155,7 @@ from utils.tools import (
     get_pbar_remaining,
     format_interval
 )
-from utils.types import ChannelData, CategoryChannelData, ChannelItem
+from utils.iptv_types import ChannelData, CategoryChannelData, ChannelItem
 
 
 class IPTVChecker:

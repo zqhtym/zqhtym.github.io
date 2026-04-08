@@ -207,24 +207,49 @@ def check_video_changes(url):
         # Detect audio before detecting screen changes
         has_audio_detected = False
         try:
-            # First try modern FFmpeg command (6.1.1+)
-            cmd_audio_modern = [
-                'ffmpeg', '-i', url,
-                '-hide_banner', '-nostats', '-v', 'error',
-                '-select_streams', 'a:0', '-show_entries', 'stream=codec_type', '-of', 'default=noprint_wrappers=1:nokey=1'
-            ]
-            result_audio = subprocess.run(
-                cmd_audio_modern,
-                capture_output=True,
-                text=True,
-                timeout=15  # 15-second timeout
-            )
+            # First, detect FFmpeg version
+            version_cmd = ['ffmpeg', '-version']
+            version_result = subprocess.run(version_cmd, capture_output=True, text=True, timeout=5)
+            ffmpeg_version = version_result.stdout if version_result.returncode == 0 else ""
             
-            if result_audio.returncode == 0 and result_audio.stdout.strip():
-                has_audio_detected = True
-                print(f"[Debug] Audio detection successful (modern) | URL: {url}")
+            # Check if FFmpeg supports -select_streams (version 4.4+)
+            supports_select_streams = 'ffmpeg version 6.' in ffmpeg_version or 'ffmpeg version 5.' in ffmpeg_version or 'ffmpeg version 4.4' in ffmpeg_version
+            
+            if supports_select_streams:
+                # Use modern FFmpeg command (6.1.1+)
+                cmd_audio_modern = [
+                    'ffmpeg', '-i', url,
+                    '-hide_banner', '-nostats', '-v', 'error',
+                    '-select_streams', 'a:0', '-show_entries', 'stream=codec_type', '-of', 'default=noprint_wrappers=1:nokey=1'
+                ]
+                result_audio = subprocess.run(
+                    cmd_audio_modern,
+                    capture_output=True,
+                    text=True,
+                    timeout=15  # 15-second timeout
+                )
+                
+                if result_audio.returncode == 0 and result_audio.stdout.strip():
+                    has_audio_detected = True
+                    print(f"[Debug] Audio detection successful (modern) | URL: {url}")
+                else:
+                    # Modern command failed, fallback to legacy parsing
+                    cmd_audio_fallback = [
+                        'ffmpeg', '-i', url,
+                        '-hide_banner'
+                    ]
+                    result_audio = subprocess.run(
+                        cmd_audio_fallback,
+                        capture_output=True,
+                        text=True,
+                        timeout=15  # 15-second timeout
+                    )
+                    output_audio = result_audio.stderr.strip()  # FFmpeg outputs stream info to stderr
+                    if 'Audio:' in output_audio:
+                        has_audio_detected = True
+                        print(f"[Debug] Audio detection successful (fallback) | URL: {url}")
             else:
-                # Fallback to legacy FFmpeg command (4.3.1 compatible)
+                # Use legacy FFmpeg command (4.3.1 compatible)
                 cmd_audio_legacy = [
                     'ffmpeg', '-i', url,
                     '-hide_banner'
