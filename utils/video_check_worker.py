@@ -207,21 +207,39 @@ def check_video_changes(url):
         # Detect audio before detecting screen changes
         has_audio_detected = False
         try:
-            # Use FFmpeg to detect audio tracks (compatible with version 4.3.1)
-            cmd_audio = [
+            # First try modern FFmpeg command (6.1.1+)
+            cmd_audio_modern = [
                 'ffmpeg', '-i', url,
-                '-hide_banner'
+                '-hide_banner', '-nostats', '-v', 'error',
+                '-select_streams', 'a:0', '-show_entries', 'stream=codec_type', '-of', 'default=noprint_wrappers=1:nokey=1'
             ]
             result_audio = subprocess.run(
-                cmd_audio,
+                cmd_audio_modern,
                 capture_output=True,
                 text=True,
                 timeout=15  # 15-second timeout
             )
-            output_audio = result_audio.stderr.strip()  # FFmpeg outputs stream info to stderr
-            if 'Audio:' in output_audio:
+            
+            if result_audio.returncode == 0 and result_audio.stdout.strip():
                 has_audio_detected = True
-                print(f"[Debug] Audio detection successful | URL: {url}")
+                print(f"[Debug] Audio detection successful (modern) | URL: {url}")
+            else:
+                # Fallback to legacy FFmpeg command (4.3.1 compatible)
+                cmd_audio_legacy = [
+                    'ffmpeg', '-i', url,
+                    '-hide_banner'
+                ]
+                result_audio = subprocess.run(
+                    cmd_audio_legacy,
+                    capture_output=True,
+                    text=True,
+                    timeout=15  # 15-second timeout
+                )
+                output_audio = result_audio.stderr.strip()  # FFmpeg outputs stream info to stderr
+                if 'Audio:' in output_audio:
+                    has_audio_detected = True
+                    print(f"[Debug] Audio detection successful (legacy) | URL: {url}")
+                    
         except subprocess.TimeoutExpired:
             print(f"[Debug] Audio detection timeout | URL: {url}")
         except Exception as e:
