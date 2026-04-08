@@ -20,6 +20,108 @@ class ThirdChecker(IPTVChecker):
     def __init__(self):
         super().__init__()
     
+    async def _run_conversion_tools(self):
+        """运行转换工具 - 第三步专用，将exe复制到output目录"""
+        import subprocess
+        import shutil
+        from pathlib import Path
+        
+        # 获取最新的文件
+        output_dir = Path("output")
+        utils_dir = Path("utils")
+        
+        # 复制txt_to_m3u8b.exe到output目录
+        exe_source = utils_dir / "txt_to_m3u8b.exe"
+        exe_target = output_dir / "txt_to_m3u8b.exe"
+        
+        if exe_source.exists():
+            try:
+                shutil.copy2(exe_source, exe_target)
+                print(f"✅ 复制转换工具: {exe_target}")
+            except Exception as e:
+                print(f"❌ 复制exe失败: {e}")
+                return
+        
+        # 只处理LE.txt和LU.txt文件
+        le_file = output_dir / "LE.txt"
+        lu_file = output_dir / "LU.txt"
+        
+        if le_file.exists():
+            print(f"🔄 转换 LE.txt -> LE.m3u")
+            try:
+                # 使用output目录中的exe文件
+                exe_path = exe_target
+                bat_path = output_dir / "txt_to_m3u8b.bat"
+                py_path = output_dir / "txt_to_m3u8b.py"
+                
+                # 首先尝试exe文件
+                if exe_path.exists():
+                    try:
+                        result = subprocess.run([str(exe_path), "LE.txt", "LE.m3u"], 
+                                             cwd=output_dir, check=True, capture_output=True, text=True)
+                        print(f"✅ 转换完成: LE.m3u (Exe文件)")
+                    except (subprocess.CalledProcessError, PermissionError, FileNotFoundError) as e:
+                        print(f"⚠️ exe转换失败: {str(e)}，尝试Python脚本")
+                        # exe失败，尝试Python脚本
+                        if py_path.exists():
+                            try:
+                                subprocess.run(["python", str(py_path), "LE.txt", "LE.m3u"], 
+                                             cwd=output_dir, check=True, capture_output=True, text=True)
+                                print(f"✅ 转换完成: LE.m3u (Python脚本)")
+                            except (subprocess.CalledProcessError, FileNotFoundError):
+                                # Python脚本失败，尝试bat脚本
+                                if bat_path.exists():
+                                    subprocess.run([str(bat_path), "LE.txt", "LE.m3u"], 
+                                                 cwd=output_dir, check=True)
+                                    print(f"✅ 转换完成: LE.m3u (Bat脚本)")
+                                else:
+                                    print(f"❌ 所有转换工具都失败")
+                        else:
+                            print(f"❌ 找不到Python转换脚本")
+                else:
+                    print(f"❌ 找不到exe文件: txt_to_m3u8b.exe")
+                    
+            except Exception as e:
+                print(f"❌ 转换异常: {e}")
+        
+        if lu_file.exists():
+            print(f"🔄 转换 LU.txt -> LU.m3u")
+            try:
+                # 使用output目录中的exe文件
+                exe_path = exe_target
+                bat_path = output_dir / "txt_to_m3u8b.bat"
+                py_path = output_dir / "txt_to_m3u8b.py"
+                
+                # 首先尝试exe文件
+                if exe_path.exists():
+                    try:
+                        result = subprocess.run([str(exe_path), "LU.txt", "LU.m3u"], 
+                                             cwd=output_dir, check=True, capture_output=True, text=True)
+                        print(f"✅ 转换完成: LU.m3u (Exe文件)")
+                    except (subprocess.CalledProcessError, PermissionError, FileNotFoundError) as e:
+                        print(f"⚠️ exe转换失败: {str(e)}，尝试Python脚本")
+                        # exe失败，尝试Python脚本
+                        if py_path.exists():
+                            try:
+                                subprocess.run(["python", str(py_path), "LU.txt", "LU.m3u"], 
+                                             cwd=output_dir, check=True, capture_output=True, text=True)
+                                print(f"✅ 转换完成: LU.m3u (Python脚本)")
+                            except (subprocess.CalledProcessError, FileNotFoundError):
+                                # Python脚本失败，尝试bat脚本
+                                if bat_path.exists():
+                                    subprocess.run([str(bat_path), "LU.txt", "LU.m3u"], 
+                                                 cwd=output_dir, check=True)
+                                    print(f"✅ 转换完成: LU.m3u (Bat脚本)")
+                                else:
+                                    print(f"❌ 所有转换工具都失败")
+                        else:
+                            print(f"❌ 找不到Python转换脚本")
+                else:
+                    print(f"❌ 找不到exe文件: txt_to_m3u8b.exe")
+                    
+            except Exception as e:
+                print(f"❌ 转换异常: {e}")
+    
     async def run_from_step7(self):
         """从Step7开始运行"""
         try:
