@@ -156,97 +156,7 @@ from utils.tools import (
     format_interval
 )
 from utils.iptv_types import ChannelData, CategoryChannelData, ChannelItem
-
-
-class IPTVChecker:
-    """IPTV直播流检测器 - 基于IPTV API框架"""
-
-    def __init__(self):
-        self.update_progress = None
-        self.run_ui = False
-        self.tasks = []
-        self.channel_items: CategoryChannelData = {}
-        self.url_checker = URLChecker()
-        self.video_checker = VideoChecker()
-        self.pbar = None
-        self.total = 0
-        self.start_time = None
-        
-        # 设置环境变量
-        os.environ['PYTHONIOENCODING'] = 'utf-8'
-        os.environ['LANG'] = 'C.UTF-8'
-        os.environ['LC_ALL'] = 'C.UTF-8'
-        
-        # 配置stdout编码
-        if hasattr(sys.stdout, 'reconfigure'):
-            sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-
-    def pbar_update(self, name: str = ""):
-        """更新进度条"""
-        if self.pbar and self.pbar.n < self.total:
-            self.pbar.update()
-            remaining = get_pbar_remaining(n=self.pbar.n, total=self.total, start_time=self.start_time)
-            self.update_progress(
-                f"正在进行{name}, 剩余{self.total - self.pbar.n}个接口, 预计剩余时间: {remaining}",
-                int((self.pbar.n / self.total) * 100),
-            )
-
-    def get_urls_len(self, is_filter: bool = False) -> int:
-        """获取URL数量"""
-        data = copy.deepcopy(self.channel_items)
-        processed_urls = set(
-            url_info["url"]
-            for channel_obj in data.values()
-            for url_info_list in channel_obj.values()
-            for url_info in url_info_list
-        )
-        return len(processed_urls)
-
-    def _format_duration(self, seconds: float) -> str:
-        """格式化时间间隔"""
-        hours = int(seconds // 3600)
-        minutes = int((seconds % 3600) // 60)
-        seconds = int(seconds % 60)
-        
-        if hours > 0:
-            return f"{hours}分{minutes}秒"
-        elif minutes > 0:
-            return f"{minutes}分{seconds}秒"
-        else:
-            return f"{seconds}秒"
-
-    def _merge_channels(self, target: CategoryChannelData, source: CategoryChannelData):
-        """合并频道数据"""
-        for category, channels in source.items():
-            if category not in target:
-                target[category] = {}
-            
-            for channel_name, urls in channels.items():
-                if channel_name not in target[category]:
-                    target[category][channel_name] = []
-                
-                # 合并URL，避免重复
-                existing_urls = {url_info.get('url') if isinstance(url_info, dict) else str(url_info) 
-                               for url_info in target[category][channel_name]}
-                
-                for url_info in urls:
-                    url = url_info.get('url') if isinstance(url_info, dict) else str(url_info)
-                    if url and url not in existing_urls:
-                        target[category][channel_name].append(url_info)
-
-    async def main(self):
-        """主处理函数 - 完成Step1~Step5的工作"""
-        try:
-            main_start_time = time_module.time()
-            
-            print("=" * 80)
-            print(f"🔍 开始执行IPTV直播流检测... [版本: 2026-04-07 v2]")
-            print(f"基于IPTV API框架的稳定检测系统")
-            print("=" * 80)
-            
-            # Step1: 读取所有资源
-            print("\n📊 Step1: 读取所有资源（网上+本地）")
-            print("-" * 50)
+from iptv_checker import IPTVChecker
             
             # 初始化资源列表
             all_resources = []
@@ -1702,10 +1612,12 @@ class IPTVChecker:
                         except UnicodeDecodeError:
                             stderr = result.stderr.decode('latin1', errors='ignore')
                     
+                    # 处理空的stderr
+                    stderr_msg = stderr.strip() if stderr else '未知错误'
                     return {
                         'has_video': False,
                         'has_audio': False,
-                        'reason': f'脚本执行失败: {stderr}',
+                        'reason': f'脚本执行失败: {stderr_msg}',
                         'success': False
                     }
                     
@@ -1983,46 +1895,78 @@ class IPTVChecker:
         if le_file.exists():
             print(f"🔄 转换 LE.txt -> LE.m3u")
             try:
+                # 优先使用exe文件
                 exe_path = utils_dir / "txt_to_m3u8b.exe"
+                bat_path = utils_dir / "txt_to_m3u8b.bat"
+                py_path = utils_dir / "txt_to_m3u8b.py"
+                
+                # 首先尝试exe文件
                 if exe_path.exists():
-                    result = subprocess.run([str(exe_path), "LE.txt", "LE.m3u"], 
-                                       cwd=output_dir, check=True, capture_output=True, text=True)
-                    if result.returncode != 0:
-                        print(f"⚠️ exe转换失败，使用Python脚本")
-                        # 直接使用Python脚本
-                        subprocess.run([str(utils_dir / "txt_to_m3u8b.bat"), "LE.txt", "LE.m3u"], 
-                                   cwd=output_dir, check=True)
-                    else:
-                        print(f"✅ 转换完成: LE.m3u")
+                    try:
+                        result = subprocess.run([str(exe_path), "LE.txt", "LE.m3u"], 
+                                             cwd=output_dir, check=True, capture_output=True, text=True)
+                        print(f"✅ 转换完成: LE.m3u (Exe文件)")
+                    except (subprocess.CalledProcessError, PermissionError, FileNotFoundError) as e:
+                        print(f"⚠️ exe转换失败: {str(e)}，尝试Python脚本")
+                        # exe失败，尝试Python脚本
+                        if py_path.exists():
+                            try:
+                                subprocess.run(["python", str(py_path), "LE.txt", "LE.m3u"], 
+                                             cwd=output_dir, check=True, capture_output=True, text=True)
+                                print(f"✅ 转换完成: LE.m3u (Python脚本)")
+                            except (subprocess.CalledProcessError, FileNotFoundError):
+                                # Python脚本失败，尝试bat脚本
+                                if bat_path.exists():
+                                    subprocess.run([str(bat_path), "LE.txt", "LE.m3u"], 
+                                                 cwd=output_dir, check=True)
+                                    print(f"✅ 转换完成: LE.m3u (Bat脚本)")
+                                else:
+                                    print(f"❌ 所有转换工具都失败")
+                        else:
+                            print(f"❌ 找不到Python转换脚本")
                 else:
-                    # 使用Python脚本
-                    subprocess.run([str(utils_dir / "txt_to_m3u8b.bat"), "LE.txt", "LE.m3u"], 
-                               cwd=output_dir, check=True)
-                    print(f"✅ 转换完成: LE.m3u")
-            except subprocess.CalledProcessError as e:
-                print(f"❌ 转换失败: {e}")
+                    print(f"❌ 找不到exe文件: txt_to_m3u8b.exe")
+                    
+            except Exception as e:
+                print(f"❌ 转换异常: {e}")
         
         if lu_file.exists():
             print(f"🔄 转换 LU.txt -> LU.m3u")
             try:
+                # 优先使用exe文件
                 exe_path = utils_dir / "txt_to_m3u8b.exe"
+                bat_path = utils_dir / "txt_to_m3u8b.bat"
+                py_path = utils_dir / "txt_to_m3u8b.py"
+                
+                # 首先尝试exe文件
                 if exe_path.exists():
-                    result = subprocess.run([str(exe_path), "LU.txt", "LU.m3u"], 
-                                       cwd=output_dir, check=True, capture_output=True, text=True)
-                    if result.returncode != 0:
-                        print(f"⚠️ exe转换失败，使用Python脚本")
-                        # 直接使用Python脚本
-                        subprocess.run([str(utils_dir / "txt_to_m3u8b.bat"), "LU.txt", "LU.m3u"], 
-                                   cwd=output_dir, check=True)
-                    else:
-                        print(f"✅ 转换完成: LU.m3u")
+                    try:
+                        result = subprocess.run([str(exe_path), "LU.txt", "LU.m3u"], 
+                                             cwd=output_dir, check=True, capture_output=True, text=True)
+                        print(f"✅ 转换完成: LU.m3u (Exe文件)")
+                    except (subprocess.CalledProcessError, PermissionError, FileNotFoundError) as e:
+                        print(f"⚠️ exe转换失败: {str(e)}，尝试Python脚本")
+                        # exe失败，尝试Python脚本
+                        if py_path.exists():
+                            try:
+                                subprocess.run(["python", str(py_path), "LU.txt", "LU.m3u"], 
+                                             cwd=output_dir, check=True, capture_output=True, text=True)
+                                print(f"✅ 转换完成: LU.m3u (Python脚本)")
+                            except (subprocess.CalledProcessError, FileNotFoundError):
+                                # Python脚本失败，尝试bat脚本
+                                if bat_path.exists():
+                                    subprocess.run([str(bat_path), "LU.txt", "LU.m3u"], 
+                                                 cwd=output_dir, check=True)
+                                    print(f"✅ 转换完成: LU.m3u (Bat脚本)")
+                                else:
+                                    print(f"❌ 所有转换工具都失败")
+                        else:
+                            print(f"❌ 找不到Python转换脚本")
                 else:
-                    # 使用Python脚本
-                    subprocess.run([str(utils_dir / "txt_to_m3u8b.bat"), "LU.txt", "LU.m3u"], 
-                               cwd=output_dir, check=True)
-                    print(f"✅ 转换完成: LU.m3u")
-            except subprocess.CalledProcessError as e:
-                print(f"❌ 转换失败: {e}")
+                    print(f"❌ 找不到exe文件: txt_to_m3u8b.exe")
+                    
+            except Exception as e:
+                print(f"❌ 转换异常: {e}")
 
 
 async def main():

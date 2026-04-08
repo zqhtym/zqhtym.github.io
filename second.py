@@ -23,8 +23,8 @@ import multiprocessing
 
 from tqdm import tqdm
 
-# 导入主模块的相关功能
-from main import IPTVChecker
+# 导入独立模块
+from iptv_checker import IPTVChecker
 
 class SecondChecker(IPTVChecker):
     """Step6及以后的步骤检查器"""
@@ -43,7 +43,7 @@ class SecondChecker(IPTVChecker):
             print("=" * 80)
             
             # 读取Step5结果文件
-            step5_csv_path = "output1/step5_speed_resources.csv"
+            step5_csv_path = "output/step5_speed_resources.csv"
             if not os.path.exists(step5_csv_path):
                 print(f"❌ Step5结果文件不存在：{step5_csv_path}")
                 print(f"请先运行main.py完成Step1~Step5的工作")

@@ -6,11 +6,13 @@ on:
     branches: [ main, master ]
     paths:
       - 'third.py'
+      - 'iptv_checker.py'
       - 'requirements.txt'
   pull_request:
     branches: [ main, master ]
     paths:
       - 'third.py'
+      - 'iptv_checker.py'
       - 'requirements.txt'
   schedule:
     - cron: '0 4 * * *'  # 每天04:00 UTC
@@ -53,7 +55,7 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: second-results
-        path: output1/
+        path: output/
       continue-on-error: true
         
     - name: Run third.py (Step7-Step8)
@@ -79,25 +81,25 @@ jobs:
       with:
         name: third-results
         path: |
-          output1/
+          output/
         retention-days: 7
       if: always()
         
     - name: Commit final CSV files to repository
       if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
       run: |
-        echo "🔍 检查output1目录内容"
-        ls -la output1/ || echo "output1目录不存在"
+        echo "🔍 检查output目录内容"
+        ls -la output/ || echo "output目录不存在"
         
         echo "🔍 检查最终CSV文件"
-        find output1/ -name "*.csv" -type f || echo "未找到最终CSV文件"
+        find output/ -name "*.csv" -type f || echo "未找到最终CSV文件"
         
         echo "🔧 配置Git"
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         
         echo "📦 添加最终CSV文件到Git"
-        git add output1/*.csv || echo "添加最终CSV文件失败"
+        git add output/*.csv || echo "添加最终CSV文件失败"
         
         echo "🔍 检查Git状态"
         git status

@@ -113,33 +113,78 @@ def check_video_changes(url):
             result['reason'] = reason
             return result
 
-        # Try to read video stream
+        # Try to read video stream with retry mechanism
         # Do not use ffmpeg:// prefix in GitHub Actions, use URL directly
-        cap = cv2.VideoCapture(url)
+        max_retries = 3
+        cap = None
         
-        # Set environment variables in GitHub Actions to avoid GUI-related errors
-        if IS_GITHUB_ACTIONS:
-            os.environ['OPENCV_LOG_LEVEL'] = 'ERROR'
-        
-        # Set timeout and buffer parameters
-        cap.set(cv2.CAP_PROP_OPEN_TIMEOUT_MSEC, 5000)  # 5-second open timeout
-        cap.set(cv2.CAP_PROP_READ_TIMEOUT_MSEC, 5000)   # 5-second read timeout
+        for retry in range(max_retries):
+            try:
+                cap = cv2.VideoCapture(url)
+                
+                # Set environment variables in GitHub Actions to avoid GUI-related errors
+                if IS_GITHUB_ACTIONS:
+                    os.environ['OPENCV_LOG_LEVEL'] = 'ERROR'
+                
+                # Set timeout and buffer parameters
+                cap.set(cv2.CAP_PROP_OPEN_TIMEOUT_MSEC, 3000)  # 3-second open timeout (reduced)
+                cap.set(cv2.CAP_PROP_READ_TIMEOUT_MSEC, 3000)   # 3-second read timeout (reduced)
+                cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  # Minimize buffer size
 
-        if not cap.isOpened():
-            # Second attempt: read directly with OpenCV (compatible with no FFmpeg scenario)
-            cap = cv2.VideoCapture(url)
-            if not cap.isOpened():
-                reason = f"URL: {url} | Error: Unable to open video stream (format not supported/link invalid)"
-                print(f"[Debug] Screen change detection failed | {reason}")
-                result['reason'] = reason
-                cap.release()
-                return result
+                if not cap.isOpened():
+                    if retry < max_retries - 1:
+                        print(f"[Debug] Retry {retry + 1}/{max_retries} - Unable to open video stream | URL: {url}")
+                        time.sleep(1)  # Wait before retry
+                        continue
+                    else:
+                        reason = f"URL: {url} | Error: Unable to open video stream after {max_retries} attempts (format not supported/link invalid)"
+                        print(f"[Debug] Screen change detection failed | {reason}")
+                        result['reason'] = reason
+                        if cap:
+                            cap.release()
+                        return result
+                
+                # Test if we can actually read a frame
+                test_ret, test_frame = cap.read()
+                if not test_ret:
+                    if retry < max_retries - 1:
+                        print(f"[Debug] Retry {retry + 1}/{max_retries} - Cannot read frame, stream may be ending | URL: {url}")
+                        cap.release()
+                        time.sleep(2)  # Wait longer before retry
+                        continue
+                    else:
+                        reason = f"URL: {url} | Error: Cannot read video frames (stream ended prematurely or format not supported)"
+                        print(f"[Debug] Screen change detection failed | {reason}")
+                        result['reason'] = reason
+                        cap.release()
+                        return result
+                
+                # If we can read a frame, break the retry loop
+                print(f"[Debug] Successfully opened video stream on attempt {retry + 1} | URL: {url}")
+                break
+                
+            except Exception as e:
+                if retry < max_retries - 1:
+                    print(f"[Debug] Retry {retry + 1}/{max_retries} - Exception during open: {str(e)} | URL: {url}")
+                    if cap:
+                        cap.release()
+                    time.sleep(1)
+                    continue
+                else:
+                    reason = f"URL: {url} | Error: Exception during video stream opening: {str(e)}"
+                    print(f"[Debug] Screen change detection failed | {reason}")
+                    result['reason'] = reason
+                    if cap:
+                        cap.release()
+                    return result
 
         # 3. Read frames and detect changes (with timeout check)
         frames = []
         start_time = time.time()
         last_frame_time = start_time
         frame_read_count = 0  # Count successfully read frames
+        consecutive_failures = 0  # Track consecutive read failures
+        max_consecutive_failures = 5  # Max allowed consecutive failures
 
         while time.time() - start_time < Config.TIMEOUT['video_check']:
             # Check if timeout (3 minutes)
@@ -152,18 +197,31 @@ def check_video_changes(url):
 
             ret, frame = cap.read()
             if not ret:
-                break  # No more frames or read failed
+                consecutive_failures += 1
+                if consecutive_failures >= max_consecutive_failures:
+                    print(f"[Debug] Stream ended after {frame_read_count} frames (consecutive failures: {consecutive_failures}) | URL: {url}")
+                    break  # Stream ended or having persistent issues
+                else:
+                    # Try to continue reading, might be temporary issue
+                    time.sleep(0.1)  # Small delay before retry
+                    continue
+            else:
+                consecutive_failures = 0  # Reset failure counter on successful read
 
             frame_read_count += 1
             current_time = time.time()
             
             # Take one frame at specified intervals (reduce computation)
             if current_time - last_frame_time >= Config.VIDEO_CHECK['frame_interval']:
-                # Convert to grayscale and shrink
-                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                gray = cv2.resize(gray, (320, 240))
-                frames.append(gray)
-                last_frame_time = current_time
+                try:
+                    # Convert to grayscale and shrink
+                    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                    gray = cv2.resize(gray, (320, 240))
+                    frames.append(gray)
+                    last_frame_time = current_time
+                except Exception as e:
+                    print(f"[Debug] Frame processing error: {str(e)} | URL: {url}")
+                    continue  # Skip this frame but continue with others
 
             # Take at most 5 frames (enough to determine changes, avoid long time)
             if len(frames) >= 5:

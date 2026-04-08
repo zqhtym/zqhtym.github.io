@@ -6,12 +6,14 @@ on:
     branches: [ main, master ]
     paths:
       - 'second.py'
+      - 'iptv_checker.py'
       - 'utils/video_check_worker.py'
       - 'requirements.txt'
   pull_request:
     branches: [ main, master ]
     paths:
       - 'second.py'
+      - 'iptv_checker.py'
       - 'utils/video_check_worker.py'
       - 'requirements.txt'
   schedule:
@@ -57,20 +59,20 @@ jobs:
         echo "📁 当前目录内容:"
         ls -la
         
-        echo "📁 output1目录内容:"
-        ls -la output1/ || echo "output1目录不存在"
+        echo "📁 output目录内容:"
+        ls -la output/ || echo "output目录不存在"
         
-        if [ -f "output1/step5_speed_resources.csv" ]; then
+        if [ -f "output/step5_speed_resources.csv" ]; then
           echo "✅ 找到 step5_speed_resources.csv"
           echo "📊 文件信息:"
-          ls -la output1/step5_speed_resources.csv
+          ls -la output/step5_speed_resources.csv
           echo "📝 文件前几行:"
-          head -10 output1/step5_speed_resources.csv
+          head -10 output/step5_speed_resources.csv
         else
           echo "❌ 未找到 step5_speed_resources.csv"
           echo "🔍 尝试查找所有CSV文件:"
           find . -name "*.csv" -type f || echo "未找到任何CSV文件"
-          echo "请先运行 main-only.yml 或确保文件已提交到仓库"
+          echo "请先运行 first-only.yml 或确保文件已提交到仓库"
           exit 1
         fi
         
@@ -78,7 +80,7 @@ jobs:
       run: |
         echo "📦 跳过工件下载 - 文件已在仓库中"
         echo "🔍 确认必要文件存在:"
-        ls -la output1/step5_speed_resources.csv && echo "✅ step5_speed_resources.csv 存在" || echo "❌ 文件不存在"
+        ls -la output/step5_speed_resources.csv && echo "✅ step5_speed_resources.csv 存在" || echo "❌ 文件不存在"
         
     - name: Run second.py (Step6)
       run: |
@@ -116,25 +118,25 @@ jobs:
       with:
         name: second-results
         path: |
-          output1/step6_video_resources.csv
+          output/step6_video_resources.csv
         retention-days: 7
       if: always()
         
     - name: Commit Step6 CSV files to repository
       if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
       run: |
-        echo "🔍 检查output1目录内容"
-        ls -la output1/ || echo "output1目录不存在"
+        echo "🔍 检查output目录内容"
+        ls -la output/ || echo "output目录不存在"
         
         echo "🔍 检查Step6 CSV文件"
-        find output1/ -name "step6_video_resources.csv" -type f || echo "未找到step6 CSV文件"
+        find output/ -name "step6_video_resources.csv" -type f || echo "未找到step6 CSV文件"
         
         echo "🔧 配置Git"
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         
         echo "📦 添加Step6 CSV文件到Git"
-        git add output1/step6_video_resources.csv || echo "添加Step6 CSV文件失败"
+        git add output/step6_video_resources.csv || echo "添加Step6 CSV文件失败"
         
         echo "🔍 检查Git状态"
         git status
