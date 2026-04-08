@@ -385,13 +385,13 @@ class IPTVChecker:
                     speed_kb = speed_mb * 1024  # 转换为KB/s
                     delay = resource.get('delay', 'N/A')
                     
-                    print(f"{name:<30} {speed_mb:<15.3f} {speed_kb:<15.1f} {delay:<10}")
+                    print(f"{name:<30} {speed_mb:<15.3f} {speed_kb:<15.1f} {delay:<10}", flush=True)
                 
                 if len(sorted_speed_resources) > 20:
-                    print(f"... 还有 {len(sorted_speed_resources) - 20} 个资源")
+                    print(f"... 还有 {len(sorted_speed_resources) - 20} 个资源", flush=True)
                 
                 print("-" * 80)
-                print(f"速度范围: {sorted_speed_resources[-1].get('speed', 0):.3f} - {sorted_speed_resources[0].get('speed', 0):.3f} MB/s")
+                print(f"速度范围: {sorted_speed_resources[-1].get('speed', 0):.3f} - {sorted_speed_resources[0].get('speed', 0):.3f} MB/s", flush=True)
             else:
                 print(f"   输入资源: 0")
                 print(f"   输出资源: 0")
@@ -1761,7 +1761,7 @@ class IPTVChecker:
                 end_idx = min(start_idx + batch_size, len(resources))
                 batch_resources = resources[start_idx:end_idx]
                 
-                print(f"🔄 处理第{batch_idx + 1}/{total_batches}批 (资源: {len(batch_resources)}个)")
+                print(f"🔄 处理第{batch_idx + 1}/{total_batches}批 (资源: {len(batch_resources)}个)", flush=True)
                 
                 # 使用线程池处理当前批次
                 with ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -1785,40 +1785,42 @@ class IPTVChecker:
                             video_changing = video_result.get('video_changing', False)
                             
                             if success and (has_video or has_audio):
+                                # 合并视频检测结果和原始信息
                                 merged_resource = resource.copy()
                                 merged_resource.update(video_result)
                                 valid_video_resources.append(merged_resource)
                                 batch_valid_count += 1
                                 
-                                if len(valid_video_resources) <= 10:
-                                    frame_info = video_result.get('frame_info', {})
-                                    print(f"✅ 画面检测成功 | URL: {resource.get('url', '')[:50]}... | 画面变化: {has_video} | 有声音: {has_audio}")
+                                # 实时显示成功资源
+                                name = resource.get('name', '未知频道')[:30]
+                                print(f"✅ [{processed_count}/{len(resources)}] {name}", flush=True)
                             else:
-                                reason = video_result.get('reason', '未知原因')
-                                if processed_count <= 10:
-                                    url_short = resource.get('url', '')[:50]
-                                    print(f"❌ 画面检测失败 | URL: {url_short}... | 原因: {reason}")
-                                    
-                                    if os.environ.get('GITHUB_ACTIONS'):
-                                        if '404' in reason:
-                                            print(f"🔍 GitHub Actions诊断: URL失效 (404错误)")
-                                        elif 'timeout' in reason.lower():
-                                            print(f"🔍 GitHub Actions诊断: 网络超时 (可能被限制)")
-                                        elif 'connection' in reason.lower():
-                                            print(f"🔍 GitHub Actions诊断: 连接失败 (网络限制)")
-                                        elif '无法打开视频流' in reason:
-                                            print(f"🔍 GitHub Actions诊断: 流媒体访问被阻 (可能IP被限制)")
-                                        else:
-                                            print(f"🔍 GitHub Actions诊断: 其他错误 - {reason}")
+                                # 记录失败原因
+                                reason = video_result.get('reason', '') or video_result.get('error', '')
+                                name = resource.get('name', '未知频道')[:30]
+                                print(f"❌ [{processed_count}/{len(resources)}] {name} - {reason[:40]}", flush=True)
+                                
+                                # GitHub Actions环境下的网络问题诊断
+                                if os.environ.get('GITHUB_ACTIONS'):
+                                    if '404' in reason:
+                                        print(f"🔍 GitHub Actions诊断: URL失效 (404错误)")
+                                    elif 'timeout' in reason.lower():
+                                        print(f"🔍 GitHub Actions诊断: 网络超时 (可能被限制)")
+                                    elif 'connection' in reason.lower():
+                                        print(f"🔍 GitHub Actions诊断: 连接失败 (网络限制)")
+                                    elif '无法打开视频流' in reason:
+                                        print(f"🔍 GitHub Actions诊断: 流媒体访问被阻 (可能IP被限制)")
+                                    else:
+                                        print(f"🔍 GitHub Actions诊断: 其他错误 - {reason}")
                         except Exception as e:
                             print(f"❌ 处理检测结果异常: {e}")
                             continue
                 
-                print(f"✅ 第{batch_idx + 1}批完成，有效资源: {batch_valid_count}个")
+                print(f"✅ 第{batch_idx + 1}批完成，有效资源: {batch_valid_count}个", flush=True)
                 
                 # 批次间暂停，避免网络限制
                 if batch_idx < total_batches - 1:
-                    print(f"⏱️ 批次间暂停2秒，避免网络限制...")
+                    print(f"⏱️ 批次间暂停2秒，避免网络限制...", flush=True)
                     import time
                     time.sleep(2)
         else:
