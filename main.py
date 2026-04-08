@@ -1669,19 +1669,20 @@ class IPTVChecker:
                             output = result.stdout.decode('gbk')
                         except UnicodeDecodeError:
                             output = result.stdout.decode('latin1', errors='ignore')
-                    
-                    # 查找JSON部分（从第一个{开始到最后一个}结束）
+
+                    # 找到JSON部分（从第一个{到最后一个}）
                     start_idx = output.find('{')
                     end_idx = output.rfind('}')
-                    
+
                     if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
                         json_str = output[start_idx:end_idx + 1]
                         video_result = json.loads(json_str)
                         return {
-                            'has_video': video_result.get('success', False) and video_result.get('changing', False),
-                            'has_audio': video_result.get('success', False),  # 如果检测成功认为有音频
+                            'has_video': video_result.get('has_video', False),
+                            'has_audio': video_result.get('has_audio', False),
+                            'video_changing': video_result.get('video_changing', False) or video_result.get('changing', False),
                             'frame_info': video_result.get('frame_info', {}),
-                            'reason': video_result.get('reason', ''),
+                            'reason': video_result.get('reason', '') or video_result.get('error', ''),
                             'success': video_result.get('success', False)
                         }
                     else:
@@ -1774,7 +1775,10 @@ class IPTVChecker:
                     has_video = video_result.get('has_video', False)
                     has_audio = video_result.get('has_audio', False)
                     success = video_result.get('success', False)
+                    video_changing = video_result.get('video_changing', False)
                     
+                    # Strict detection criteria: require successful video detection
+                    # Only accept resources with actual video content or audio
                     if success and (has_video or has_audio):
                         # 合并视频检测结果和原始信息
                         merged_resource = resource.copy()
