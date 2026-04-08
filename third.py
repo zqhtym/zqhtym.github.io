@@ -7,9 +7,10 @@ IPTV检测工具 - Step7及以后步骤
 
 import asyncio
 import os
-import sys
 import time
+import os
 from datetime import datetime
+from typing import List
 
 # 导入独立模块
 from iptv_checker import IPTVChecker
@@ -122,6 +123,102 @@ class ThirdChecker(IPTVChecker):
             except Exception as e:
                 print(f"❌ 转换异常: {e}")
     
+    async def _generate_results(self, video_resources: List[dict]):
+        """生成最终结果文件 - third.py专用，只输出LE.txt和LU.txt"""
+        from pathlib import Path
+        from datetime import datetime
+        
+        # 创建输出目录
+        output_dir = Path("output")
+        output_dir.mkdir(exist_ok=True)
+        
+        # 按速度分类
+        excellent_resources = []  # >= 2MB/s
+        wonderful_resources = []  # >= 1MB/s  
+        good_resources = []      # >= 0.7MB/s
+        useful_resources = []     # >= 0.5MB/s
+        
+        for resource in video_resources:
+            speed = resource.get('speed', 0)
+            if speed >= 2.0:
+                excellent_resources.append(resource)
+            elif speed >= 1.0:
+                wonderful_resources.append(resource)
+            elif speed >= 0.7:
+                good_resources.append(resource)
+            elif speed >= 0.5:
+                useful_resources.append(resource)
+        
+        # 生成 LE.txt 和 LU.txt (兼容原有格式)
+        le_file = output_dir / "LE.txt"
+        lu_file = output_dir / "LU.txt"
+        
+        # LE.txt: 包含所有级别的资源
+        all_resources = useful_resources + good_resources + wonderful_resources + excellent_resources
+        with open(le_file, 'w', encoding='utf-8') as f:
+            for resource in all_resources:
+                f.write(f"{resource['name']},{resource['url']}\n")
+        
+        # LU.txt: 只包含 good 及以上级别的资源
+        lu_resources = good_resources + wonderful_resources + excellent_resources
+        with open(lu_file, 'w', encoding='utf-8') as f:
+            for resource in lu_resources:
+                f.write(f"{resource['name']},{resource['url']}\n")
+        
+        # 统计信息
+        total_channels = len(set(r['name'] for r in video_resources))
+        good_channels = len(set(r['name'] for r in lu_resources))
+        
+        print(f"✅ 生成 LE.txt: {len(all_resources)} 个资源")
+        print(f"✅ 生成 LU.txt: {len(lu_resources)} 个资源")
+        print(f"   good: 总频道={total_channels}, 符合条件={good_channels}")
+        print(f"📊 文件生成完成: LE.txt + LU.txt (third.py专用模式)")
+    
+    async def _cleanup_output_directory(self):
+        """清理output目录，删除不需要的文件，保留CSV中间文件和最终文件"""
+        import glob
+        from pathlib import Path
+        
+        output_dir = Path("output")
+        
+        # 需要保留的文件模式
+        keep_patterns = [
+            "step*.csv",           # 中间CSV文件
+            "LE.txt", "LU.txt",    # 最终txt文件
+            "LE.m3u", "LU.m3u",    # 最终m3u文件
+            "txt_to_m3u8b.exe",     # 转换工具（保留）
+            "ffmpeg.exe"             # FFmpeg工具（保留）
+        ]
+        
+        # 需要删除的文件模式
+        delete_patterns = [
+            "live+*.txt",           # 分级txt文件（删除）
+            "*.txt.bak", "*.csv.bak" # 备份文件（删除）
+        ]
+        
+        # 注意：不删除live+*.csv，因为包含分级结果
+        # 注意：不删除step*.csv，因为包含中间结果
+        
+        # 特别保护：确保txt_to_m3u8b.exe不被删除
+        exe_file = output_dir / "txt_to_m3u8b.exe"
+        if exe_file.exists():
+            print(f"🛡️ 保护文件: txt_to_m3u8b.exe")
+        
+        print("🔍 检查需要清理的文件...")
+        
+        deleted_count = 0
+        for pattern in delete_patterns:
+            files = glob.glob(str(output_dir / pattern))
+            for file in files:
+                try:
+                    os.remove(file)
+                    print(f"🗑️ 删除: {Path(file).name}")
+                    deleted_count += 1
+                except Exception as e:
+                    print(f"⚠️ 删除失败 {Path(file).name}: {e}")
+        
+        print(f"✅ 清理完成，删除了 {deleted_count} 个文件")
+    
     async def run_from_step7(self):
         """从Step7开始运行"""
         try:
@@ -149,6 +246,11 @@ class ThirdChecker(IPTVChecker):
                 return
             
             print(f"✅ 成功读取 {len(video_resources)} 个Step6资源")
+            
+            # 清理output目录，只保留CSV中间文件
+            print(f"\n🧹 清理output目录")
+            print("-" * 50)
+            await self._cleanup_output_directory()
             
             # Step7: 结果整理输出
             print(f"\n📊 Step7: 结果整理输出")
