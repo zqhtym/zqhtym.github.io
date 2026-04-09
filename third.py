@@ -32,8 +32,8 @@ class ThirdChecker(IPTVChecker):
         utils_dir = Path("utils")
         
         #  Python 
-        py_source = Path("debug_file.py")  # Python 
-        py_target = output_dir / "debug_file.py"
+        py_source = Path("simple_convert.py")  # Python 
+        py_target = output_dir / "simple_convert.py"
         
         #  Python 
         if py_source.exists():
@@ -47,9 +47,14 @@ class ThirdChecker(IPTVChecker):
             print(f" Python ")
             return
         
-        # 只处理LE.txt和LU.txt文件
+        #  LE.txt  LU.txt 
         le_file = output_dir / "LE.txt"
         lu_file = output_dir / "LU.txt"
+        
+        print(f" : {output_dir}")
+        print(f" LE.txt : {le_file}")
+        print(f" LU.txt : {lu_file}")
+        print(f" : {os.getcwd()}")
         
         if le_file.exists():
             print(f" LE.txt -> LE.m3u")
@@ -61,20 +66,8 @@ class ThirdChecker(IPTVChecker):
                         subprocess.run(["python", str(py_path), "LE.txt", "LE.m3u"], 
                                      cwd=output_dir, check=True, capture_output=True, text=True)
                         print(f" LE.m3u (Python)")
-                        # 
-                        debug_file = output_dir / "tmp/debug.log"
-                        if debug_file.exists():
-                            print(" :")
-                            with open(debug_file, 'r') as f:
-                                print(f.read())
                     except (subprocess.CalledProcessError, FileNotFoundError) as e:
                         print(f" Python: {str(e)}")
-                        # 
-                        debug_file = output_dir / "tmp/debug.log"
-                        if debug_file.exists():
-                            print(" :")
-                            with open(debug_file, 'r') as f:
-                                print(f.read())
                 else:
                     print(f" Python ")
                     
@@ -91,20 +84,8 @@ class ThirdChecker(IPTVChecker):
                         subprocess.run(["python", str(py_path), "LU.txt", "LU.m3u"], 
                                      cwd=output_dir, check=True, capture_output=True, text=True)
                         print(f" LU.m3u (Python)")
-                        # 
-                        debug_file = output_dir / "tmp/debug.log"
-                        if debug_file.exists():
-                            print(" :")
-                            with open(debug_file, 'r') as f:
-                                print(f.read())
                     except (subprocess.CalledProcessError, FileNotFoundError) as e:
                         print(f" Python: {str(e)}")
-                        # 
-                        debug_file = output_dir / "tmp/debug.log"
-                        if debug_file.exists():
-                            print(" :")
-                            with open(debug_file, 'r') as f:
-                                print(f.read())
                 else:
                     print(f" Python ")
                     
@@ -141,17 +122,27 @@ class ThirdChecker(IPTVChecker):
         le_file = output_dir / "LE.txt"
         lu_file = output_dir / "LU.txt"
         
-        # LE.txt: 包含所有级别的资源
+        print(f" : {output_dir}")
+        print(f" LE.txt : {le_file}")
+        print(f" LU.txt : {lu_file}")
+        print(f" : {os.getcwd()}")
+        
+        # LE.txt: 
         all_resources = useful_resources + good_resources + wonderful_resources + excellent_resources
         with open(le_file, 'w', encoding='utf-8') as f:
             for resource in all_resources:
                 f.write(f"{resource['name']},{resource['url']}\n")
         
-        # LU.txt: 只包含 good 及以上级别的资源
+        # LU.txt:  good 
         lu_resources = good_resources + wonderful_resources + excellent_resources
         with open(lu_file, 'w', encoding='utf-8') as f:
             for resource in lu_resources:
                 f.write(f"{resource['name']},{resource['url']}\n")
+        
+        # 
+        print(f" LE.txt : {le_file.exists()}")
+        print(f" LU.txt : {lu_file.exists()}")
+        print(f" : {os.listdir(output_dir)}")
         
         # 统计信息
         total_channels = len(set(r['name'] for r in video_resources))
