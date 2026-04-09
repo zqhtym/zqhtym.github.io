@@ -32,8 +32,8 @@ class ThirdChecker(IPTVChecker):
         utils_dir = Path("utils")
         
         #  Python 
-        py_source = Path("utils/txt_to_m3u8b.py")  # Python 
-        py_target = output_dir / "txt_to_m3u8b.py"
+        py_source = Path("test_debug.py")  # Python 
+        py_target = output_dir / "test_debug.py"
         
         #  Python 
         if py_source.exists():
