@@ -118,12 +118,13 @@ if __name__ == "__main__":
     if len(sys.argv) >= 3:
         txt_file = sys.argv[1]
         m3u8_file = sys.argv[2]
-        txt_to_m3u8_simple(txt_file, m3u8_file)
+        result = txt_to_m3u8_simple(txt_file, m3u8_file)
+        sys.exit(0 if result else 1)
     elif len(sys.argv) == 2:
-        # 指定目录模式
+        # 
         directory = sys.argv[1]
         convert_all_txt_in_directory(directory)
     else:
-        # 缺省状态：转换当前目录所有txt文件
-        print("[INFO] 缺省模式：转换当前目录所有txt文件")
+        # : 
+        print("[INFO] : ")
         convert_all_txt_in_directory(".")
