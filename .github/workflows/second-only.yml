@@ -87,7 +87,7 @@ jobs:
         # 优化GitHub Actions环境性能
         export GITHUB_ACTIONS=true
         ulimit -v 2097152
-        ulimit -t 7200  # 增加超时到2小时
+        ulimit -t 44000  # 增加超时到12小时
         ulimit -m 1048576
         ulimit -s 8192
         
@@ -98,8 +98,8 @@ jobs:
         
         # 设置更适合GitHub Actions的参数
         export VIDEO_CHECK_TIMEOUT=60  # 1分钟每个视频（减少超时）
-        export VIDEO_TOTAL_TIMEOUT=120  # 2分钟总超时
-        export GITHUB_ACTIONS_WORKERS=5  # 减少并发数，避免资源竞争
+        export VIDEO_TOTAL_TIMEOUT=180  # 3分钟总超时
+        export GITHUB_ACTIONS_WORKERS=10  # 减少并发数，避免资源竞争
         
         python -c "import gc; gc.set_threshold(400, 4, 4); gc.collect()"
         
