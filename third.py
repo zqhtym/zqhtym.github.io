@@ -32,44 +32,28 @@ class ThirdChecker(IPTVChecker):
         utils_dir = Path("utils")
         
         #  Python 
-        py_source = Path("simple_convert.py")  # Python 
-        py_target = output_dir / "simple_convert.py"
+        py_source = Path("utils/txt_to_m3u8b.py")  # Python 
         
         #  Python 
-        if py_source.exists():
-            try:
-                shutil.copy2(py_source, py_target)
-                print(f" Python : {py_target}")
-            except Exception as e:
-                print(f" Python : {e}")
-                return
-        else:
-            print(f" Python ")
+        if not py_source.exists():
+            print(f" Python : {py_source}")
             return
         
         #  LE.txt  LU.txt 
         le_file = output_dir / "LE.txt"
         lu_file = output_dir / "LU.txt"
         
-        print(f" : {output_dir}")
-        print(f" LE.txt : {le_file}")
-        print(f" LU.txt : {lu_file}")
-        print(f" : {os.getcwd()}")
-        
+                
         if le_file.exists():
             print(f" LE.txt -> LE.m3u")
             try:
                 #  Python 
-                py_path = py_target
-                if py_path.exists():
-                    try:
-                        subprocess.run(["python", str(py_path), "LE.txt", "LE.m3u"], 
-                                     cwd=output_dir, check=True, capture_output=True, text=True)
-                        print(f" LE.m3u (Python)")
-                    except (subprocess.CalledProcessError, FileNotFoundError) as e:
-                        print(f" Python: {str(e)}")
-                else:
-                    print(f" Python ")
+                try:
+                    subprocess.run(["python", str(py_source), "LE.txt", "LE.m3u"], 
+                                 cwd=output_dir, check=True, capture_output=True, text=True)
+                    print(f" LE.m3u (Python)")
+                except (subprocess.CalledProcessError, FileNotFoundError) as e:
+                    print(f" Python: {str(e)}")
                     
             except Exception as e:
                 print(f" : {e}")
@@ -78,16 +62,12 @@ class ThirdChecker(IPTVChecker):
             print(f" LU.txt -> LU.m3u")
             try:
                 #  Python 
-                py_path = py_target
-                if py_path.exists():
-                    try:
-                        subprocess.run(["python", str(py_path), "LU.txt", "LU.m3u"], 
-                                     cwd=output_dir, check=True, capture_output=True, text=True)
-                        print(f" LU.m3u (Python)")
-                    except (subprocess.CalledProcessError, FileNotFoundError) as e:
-                        print(f" Python: {str(e)}")
-                else:
-                    print(f" Python ")
+                try:
+                    subprocess.run(["python", str(py_source), "LU.txt", "LU.m3u"], 
+                                 cwd=output_dir, check=True, capture_output=True, text=True)
+                    print(f" LU.m3u (Python)")
+                except (subprocess.CalledProcessError, FileNotFoundError) as e:
+                    print(f" Python: {str(e)}")
                     
             except Exception as e:
                 print(f" : {e}")
@@ -101,6 +81,7 @@ class ThirdChecker(IPTVChecker):
         output_dir = Path("output")
         output_dir.mkdir(exist_ok=True)
         
+                
         # 按速度分类
         excellent_resources = []  # >= 2MB/s
         wonderful_resources = []  # >= 1MB/s  
@@ -122,11 +103,7 @@ class ThirdChecker(IPTVChecker):
         le_file = output_dir / "LE.txt"
         lu_file = output_dir / "LU.txt"
         
-        print(f" : {output_dir}")
-        print(f" LE.txt : {le_file}")
-        print(f" LU.txt : {lu_file}")
-        print(f" : {os.getcwd()}")
-        
+                
         # LE.txt: 
         all_resources = useful_resources + good_resources + wonderful_resources + excellent_resources
         with open(le_file, 'w', encoding='utf-8') as f:
@@ -139,11 +116,7 @@ class ThirdChecker(IPTVChecker):
             for resource in lu_resources:
                 f.write(f"{resource['name']},{resource['url']}\n")
         
-        # 
-        print(f" LE.txt : {le_file.exists()}")
-        print(f" LU.txt : {lu_file.exists()}")
-        print(f" : {os.listdir(output_dir)}")
-        
+                
         # 统计信息
         total_channels = len(set(r['name'] for r in video_resources))
         good_channels = len(set(r['name'] for r in lu_resources))
