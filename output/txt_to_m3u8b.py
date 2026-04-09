@@ -115,29 +115,15 @@ def convert_all_txt_in_directory(directory_path="."):
         print(f"[ERROR] 批量转换失败: {str(e)}")
 
 if __name__ == "__main__":
-    print(f"[DEBUG] Python version: {sys.version}")
-    print(f"[DEBUG] Current directory: {os.getcwd()}")
-    print(f"[DEBUG] Arguments: {sys.argv}")
-    
     if len(sys.argv) >= 3:
         txt_file = sys.argv[1]
         m3u8_file = sys.argv[2]
-        print(f"[DEBUG] Input file: {txt_file}")
-        print(f"[DEBUG] Output file: {m3u8_file}")
-        print(f"[DEBUG] Input file exists: {os.path.exists(txt_file)}")
-        
-        if not os.path.exists(txt_file):
-            print(f"[ERROR] Input file not found: {txt_file}")
-            sys.exit(2)
-            
-        result = txt_to_m3u8_simple(txt_file, m3u8_file)
-        print(f"[DEBUG] Conversion result: {result}")
-        sys.exit(0 if result else 2)
+        txt_to_m3u8_simple(txt_file, m3u8_file)
     elif len(sys.argv) == 2:
-        # 
+        # 指定目录模式
         directory = sys.argv[1]
         convert_all_txt_in_directory(directory)
     else:
-        # : 
-        print("[INFO] : ")
+        # 缺省状态：转换当前目录所有txt文件
+        print("[INFO] 缺省模式：转换当前目录所有txt文件")
         convert_all_txt_in_directory(".")
