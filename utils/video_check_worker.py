@@ -113,28 +113,34 @@ def check_video_changes(url):
             result['reason'] = reason
             return result
 
-        # Try to read video stream with retry mechanism
-        # Do not use ffmpeg:// prefix in GitHub Actions, use URL directly
-        max_retries = 3
+        # Try to read video stream with improved retry mechanism and error handling
+        max_retries = 2  # Reduce retries to speed up processing
         cap = None
         
         for retry in range(max_retries):
             try:
+                # Set OpenCV log level to reduce noise (if available)
+                try:
+                    cv2.setLogLevel(3)  # ERROR level only
+                except AttributeError:
+                    # Older OpenCV versions don't have setLogLevel
+                    pass
+                
                 cap = cv2.VideoCapture(url)
                 
                 # Set environment variables in GitHub Actions to avoid GUI-related errors
                 if IS_GITHUB_ACTIONS:
                     os.environ['OPENCV_LOG_LEVEL'] = 'ERROR'
                 
-                # Set timeout and buffer parameters
-                cap.set(cv2.CAP_PROP_OPEN_TIMEOUT_MSEC, 3000)  # 3-second open timeout (reduced)
-                cap.set(cv2.CAP_PROP_READ_TIMEOUT_MSEC, 3000)   # 3-second read timeout (reduced)
+                # Set timeout and buffer parameters for better reliability
+                cap.set(cv2.CAP_PROP_OPEN_TIMEOUT_MSEC, 5000)  # 5-second open timeout
+                cap.set(cv2.CAP_PROP_READ_TIMEOUT_MSEC, 5000)   # 5-second read timeout
                 cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  # Minimize buffer size
 
                 if not cap.isOpened():
                     if retry < max_retries - 1:
                         print(f"[Debug] Retry {retry + 1}/{max_retries} - Unable to open video stream | URL: {url}")
-                        time.sleep(1)  # Wait before retry
+                        time.sleep(2)  # Wait longer before retry
                         continue
                     else:
                         reason = f"URL: {url} | Error: Unable to open video stream after {max_retries} attempts (format not supported/link invalid)"
@@ -144,13 +150,21 @@ def check_video_changes(url):
                             cap.release()
                         return result
                 
-                # Test if we can actually read a frame
-                test_ret, test_frame = cap.read()
-                if not test_ret:
+                # Test if we can actually read frames (try multiple times)
+                test_success = False
+                for test_attempt in range(3):
+                    test_ret, test_frame = cap.read()
+                    if test_ret and test_frame is not None:
+                        test_success = True
+                        break
+                    elif not test_ret:
+                        time.sleep(0.5)  # Brief wait between attempts
+                
+                if not test_success:
                     if retry < max_retries - 1:
                         print(f"[Debug] Retry {retry + 1}/{max_retries} - Cannot read frame, stream may be ending | URL: {url}")
                         cap.release()
-                        time.sleep(2)  # Wait longer before retry
+                        time.sleep(3)  # Wait longer before retry
                         continue
                     else:
                         reason = f"URL: {url} | Error: Cannot read video frames (stream ended prematurely or format not supported)"
@@ -168,7 +182,7 @@ def check_video_changes(url):
                     print(f"[Debug] Retry {retry + 1}/{max_retries} - Exception during open: {str(e)} | URL: {url}")
                     if cap:
                         cap.release()
-                    time.sleep(1)
+                    time.sleep(2)
                     continue
                 else:
                     reason = f"URL: {url} | Error: Exception during video stream opening: {str(e)}"
@@ -178,13 +192,14 @@ def check_video_changes(url):
                         cap.release()
                     return result
 
-        # 3. Read frames and detect changes (with timeout check)
+        # 3. Read frames and detect changes (with improved error handling)
         frames = []
         start_time = time.time()
         last_frame_time = start_time
         frame_read_count = 0  # Count successfully read frames
         consecutive_failures = 0  # Track consecutive read failures
-        max_consecutive_failures = 5  # Max allowed consecutive failures
+        max_consecutive_failures = 3  # Reduce to speed up failure detection
+        stream_ended = False
 
         while time.time() - start_time < Config.TIMEOUT['video_check']:
             # Check if timeout (3 minutes)
@@ -195,37 +210,53 @@ def check_video_changes(url):
                 cap.release()
                 return result
 
-            ret, frame = cap.read()
-            if not ret:
+            try:
+                ret, frame = cap.read()
+                
+                if not ret or frame is None:
+                    consecutive_failures += 1
+                    if consecutive_failures >= max_consecutive_failures:
+                        print(f"[Debug] Stream ended after {frame_read_count} frames (consecutive failures: {consecutive_failures}) | URL: {url}")
+                        stream_ended = True
+                        break  # Stream ended or having persistent issues
+                    else:
+                        # Try to continue reading, might be temporary issue
+                        time.sleep(0.2)  # Slightly longer delay before retry
+                        continue
+                else:
+                    consecutive_failures = 0  # Reset failure counter on successful read
+
+                frame_read_count += 1
+                current_time = time.time()
+                
+                # Take one frame at specified intervals (reduce computation)
+                if current_time - last_frame_time >= Config.VIDEO_CHECK['frame_interval']:
+                    try:
+                        # Convert to grayscale and shrink with error checking
+                        if len(frame.shape) >= 2 and frame.size > 0:
+                            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                            gray = cv2.resize(gray, (320, 240))
+                            frames.append(gray)
+                            last_frame_time = current_time
+                        else:
+                            print(f"[Debug] Invalid frame shape, skipping | URL: {url}")
+                            continue
+                    except Exception as e:
+                        print(f"[Debug] Frame processing error: {str(e)} | URL: {url}")
+                        continue  # Skip this frame but continue with others
+
+                # Take at most 5 frames (enough to determine changes, avoid long time)
+                if len(frames) >= 5:
+                    break
+                    
+            except Exception as e:
                 consecutive_failures += 1
                 if consecutive_failures >= max_consecutive_failures:
-                    print(f"[Debug] Stream ended after {frame_read_count} frames (consecutive failures: {consecutive_failures}) | URL: {url}")
-                    break  # Stream ended or having persistent issues
-                else:
-                    # Try to continue reading, might be temporary issue
-                    time.sleep(0.1)  # Small delay before retry
-                    continue
-            else:
-                consecutive_failures = 0  # Reset failure counter on successful read
-
-            frame_read_count += 1
-            current_time = time.time()
-            
-            # Take one frame at specified intervals (reduce computation)
-            if current_time - last_frame_time >= Config.VIDEO_CHECK['frame_interval']:
-                try:
-                    # Convert to grayscale and shrink
-                    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                    gray = cv2.resize(gray, (320, 240))
-                    frames.append(gray)
-                    last_frame_time = current_time
-                except Exception as e:
-                    print(f"[Debug] Frame processing error: {str(e)} | URL: {url}")
-                    continue  # Skip this frame but continue with others
-
-            # Take at most 5 frames (enough to determine changes, avoid long time)
-            if len(frames) >= 5:
-                break
+                    print(f"[Debug] Frame reading exception after {frame_read_count} frames: {str(e)} | URL: {url}")
+                    stream_ended = True
+                    break
+                time.sleep(0.2)
+                continue
 
         cap.release()
 
@@ -265,66 +296,37 @@ def check_video_changes(url):
         # Detect audio before detecting screen changes
         has_audio_detected = False
         try:
-            # First, detect FFmpeg version
-            version_cmd = ['ffmpeg', '-version']
-            version_result = subprocess.run(version_cmd, capture_output=True, text=True, timeout=5)
-            ffmpeg_version = version_result.stdout if version_result.returncode == 0 else ""
+            # Use local ffmpeg.exe and add better error handling for 4.3.1
+            ffmpeg_path = 'ffmpeg.exe' if os.path.exists('ffmpeg.exe') else 'ffmpeg'
             
-            # Check if FFmpeg supports -select_streams (version 4.4+)
-            supports_select_streams = 'ffmpeg version 6.' in ffmpeg_version or 'ffmpeg version 5.' in ffmpeg_version or 'ffmpeg version 4.4' in ffmpeg_version
+            # Use legacy FFmpeg command (4.3.1 compatible) with additional error suppression
+            cmd_audio_legacy = [
+                ffmpeg_path, '-i', url,
+                '-hide_banner', '-v', 'error', '-nostats'
+            ]
+            result_audio = subprocess.run(
+                cmd_audio_legacy,
+                stderr=subprocess.PIPE,  # Capture stderr separately
+                stdout=subprocess.PIPE,
+                text=True,
+                timeout=10  # Reduce timeout to avoid hanging
+            )
             
-            if supports_select_streams:
-                # Use modern FFmpeg command (6.1.1+)
-                cmd_audio_modern = [
-                    'ffmpeg', '-i', url,
-                    '-hide_banner', '-nostats', '-v', 'error',
-                    '-select_streams', 'a:0', '-show_entries', 'stream=codec_type', '-of', 'default=noprint_wrappers=1:nokey=1'
-                ]
-                result_audio = subprocess.run(
-                    cmd_audio_modern,
-                    capture_output=True,
-                    text=True,
-                    timeout=15  # 15-second timeout
-                )
-                
-                if result_audio.returncode == 0 and result_audio.stdout.strip():
-                    has_audio_detected = True
-                    print(f"[Debug] Audio detection successful (modern) | URL: {url}")
-                else:
-                    # Modern command failed, fallback to legacy parsing
-                    cmd_audio_fallback = [
-                        'ffmpeg', '-i', url,
-                        '-hide_banner'
-                    ]
-                    result_audio = subprocess.run(
-                        cmd_audio_fallback,
-                        capture_output=True,
-                        text=True,
-                        timeout=15  # 15-second timeout
-                    )
-                    output_audio = result_audio.stderr.strip()  # FFmpeg outputs stream info to stderr
-                    if 'Audio:' in output_audio:
-                        has_audio_detected = True
-                        print(f"[Debug] Audio detection successful (fallback) | URL: {url}")
+            # Check both stderr and stdout for audio information
+            output_audio = result_audio.stderr.strip() + ' ' + result_audio.stdout.strip()
+            
+            # Look for various audio indicators in FFmpeg output
+            audio_indicators = ['Audio:', 'Stream #0:1: Audio', 'Stream #0:0: Audio', 'aac', 'mp3', 'opus']
+            if any(indicator in output_audio for indicator in audio_indicators):
+                has_audio_detected = True
+                print(f"[Debug] Audio detection successful (legacy) | URL: {url}")
             else:
-                # Use legacy FFmpeg command (4.3.1 compatible)
-                cmd_audio_legacy = [
-                    'ffmpeg', '-i', url,
-                    '-hide_banner'
-                ]
-                result_audio = subprocess.run(
-                    cmd_audio_legacy,
-                    capture_output=True,
-                    text=True,
-                    timeout=15  # 15-second timeout
-                )
-                output_audio = result_audio.stderr.strip()  # FFmpeg outputs stream info to stderr
-                if 'Audio:' in output_audio:
-                    has_audio_detected = True
-                    print(f"[Debug] Audio detection successful (legacy) | URL: {url}")
+                print(f"[Debug] No audio detected | URL: {url}")
                     
         except subprocess.TimeoutExpired:
             print(f"[Debug] Audio detection timeout | URL: {url}")
+        except FileNotFoundError:
+            print(f"[Debug] FFmpeg not found, skipping audio detection | URL: {url}")
         except Exception as e:
             print(f"[Debug] Audio detection exception | URL: {url} | Error: {e}")
 
