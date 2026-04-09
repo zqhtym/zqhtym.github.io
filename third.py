@@ -62,7 +62,7 @@ class ThirdChecker(IPTVChecker):
                                      cwd=output_dir, check=True, capture_output=True, text=True)
                         print(f" LE.m3u (Python)")
                         # 
-                        debug_file = output_dir / "../tmp/debug.log"
+                        debug_file = output_dir / "tmp/debug.log"
                         if debug_file.exists():
                             print(" :")
                             with open(debug_file, 'r') as f:
@@ -70,7 +70,7 @@ class ThirdChecker(IPTVChecker):
                     except (subprocess.CalledProcessError, FileNotFoundError) as e:
                         print(f" Python: {str(e)}")
                         # 
-                        debug_file = output_dir / "../tmp/debug.log"
+                        debug_file = output_dir / "tmp/debug.log"
                         if debug_file.exists():
                             print(" :")
                             with open(debug_file, 'r') as f:
@@ -92,7 +92,7 @@ class ThirdChecker(IPTVChecker):
                                      cwd=output_dir, check=True, capture_output=True, text=True)
                         print(f" LU.m3u (Python)")
                         # 
-                        debug_file = output_dir / "../tmp/debug.log"
+                        debug_file = output_dir / "tmp/debug.log"
                         if debug_file.exists():
                             print(" :")
                             with open(debug_file, 'r') as f:
@@ -100,7 +100,7 @@ class ThirdChecker(IPTVChecker):
                     except (subprocess.CalledProcessError, FileNotFoundError) as e:
                         print(f" Python: {str(e)}")
                         # 
-                        debug_file = output_dir / "../tmp/debug.log"
+                        debug_file = output_dir / "tmp/debug.log"
                         if debug_file.exists():
                             print(" :")
                             with open(debug_file, 'r') as f:

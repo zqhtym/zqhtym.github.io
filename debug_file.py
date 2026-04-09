@@ -8,8 +8,9 @@ import os
 import sys
 
 def main():
-    # Write debug info to file
-    with open('/tmp/debug.log', 'w') as f:
+    # Create debug directory and write debug info to file
+    os.makedirs('tmp', exist_ok=True)
+    with open('tmp/debug.log', 'w') as f:
         f.write(f"Python version: {sys.version}\n")
         f.write(f"Current directory: {os.getcwd()}\n")
         f.write(f"Arguments: {sys.argv}\n")
@@ -17,6 +18,8 @@ def main():
         f.write(f"Input file exists: {os.path.exists(sys.argv[1]) if len(sys.argv) > 1 else 'N/A'}\n")
         f.write(f"Input file: {sys.argv[1] if len(sys.argv) > 1 else 'N/A'}\n")
         f.write(f"Output file: {sys.argv[2] if len(sys.argv) > 2 else 'N/A'}\n")
+        f.write(f"Files in current directory: {os.listdir('.')}\n")
+        f.write(f"Files in parent directory: {os.listdir('..')}\n")
     
     if len(sys.argv) >= 3:
         txt_file = sys.argv[1]
