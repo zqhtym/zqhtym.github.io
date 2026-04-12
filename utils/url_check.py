@@ -40,45 +40,60 @@ class URLChecker:
         self.error_count = 0
     
     async def check_urls_batch(self, urls: List[str], progress_callback: Callable[[int, int, int], None] = None) -> List[str]:
-        """批量检查URL有效性"""
+        """批量检查URL有效性 - 优化版本"""
         logger.info(f"开始批量URL检测: {len(urls)}个")
         
-        # IPTV API风格：深拷贝避免内存污染
-        urls_copy = copy.deepcopy(urls)
+        # 优化：增加并发数和批次大小
+        original_max_concurrent = self.max_concurrent
+        original_batch_size = self.batch_size
+        
+        # 临时提高并发性能
+        self.max_concurrent = min(self.max_concurrent * 3, 50)  # 最多50个并发
+        self.batch_size = min(self.batch_size * 2, 200)  # 最多200个批次
+        
+        # 更新信号量
+        self.semaphore = asyncio.Semaphore(self.max_concurrent)
+        
+        logger.info(f"优化参数: 并发数 {original_max_concurrent}->{self.max_concurrent}, "
+                   f"批次大小 {original_batch_size}->{self.batch_size}")
         
         try:
             # 分批处理
             results = []
             processed_count = 0
             
-            for i in range(0, len(urls_copy), self.batch_size):
-                batch = urls_copy[i:i + self.batch_size]
+            for i in range(0, len(urls), self.batch_size):
+                batch = urls[i:i + self.batch_size]
                 batch_results = await self._check_url_batch(batch)
                 results.extend(batch_results)
                 
                 # 更新进度
                 processed_count += len(batch)
                 if progress_callback:
-                    progress_callback(processed_count, len(urls_copy), len(batch_results))
+                    progress_callback(processed_count, len(urls), len(batch_results))
                 
-                # IPTV API风格：批次间内存检查（每5批次检查一次）
-                if i % 5 == 0:
+                # 减少内存检查频率以提高性能
+                if i % 10 == 0:  # 每10批次检查一次
                     await self._check_memory()
                 
                 # 清理批次数据
                 del batch
-                gc.collect()
             
             # 过滤有效URL
             valid_urls = [result['url'] for result in results if result['is_valid']]
             
-            logger.info(f"URL检测完成: 有效{len(valid_urls)}/{len(urls_copy)}个, "
+            logger.info(f"URL检测完成: 有效{len(valid_urls)}/{len(urls)}个, "
                        f"缓存命中{self.cache_hits}次")
             return valid_urls
             
         except Exception as e:
             logger.error(f"批量URL检测失败: {e}")
             return []
+        finally:
+            # 恢复原始设置
+            self.max_concurrent = original_max_concurrent
+            self.batch_size = original_batch_size
+            self.semaphore = asyncio.Semaphore(self.max_concurrent)
     
     async def _check_url_batch(self, urls: List[str]) -> List[CheckResult]:
         """检查单个批次的URL"""
@@ -119,16 +134,18 @@ class URLChecker:
             }
             
             try:
-                # 使用异步HTTP检测
+                # 使用异步HTTP检测 - 优化版本
                 import aiohttp
                 
-                timeout = aiohttp.ClientTimeout(total=self.timeout)
+                # 减少超时时间以提高速度
+                timeout = aiohttp.ClientTimeout(total=min(self.timeout, 3))  # 最多3秒
                 connector = aiohttp.TCPConnector(
-                    limit=self.max_concurrent,
-                    limit_per_host=5,
+                    limit=self.max_concurrent * 2,  # 增加连接池大小
+                    limit_per_host=10,  # 增加每个主机的连接数
                     ttl_dns_cache=300,
                     use_dns_cache=True,
-                    ssl=False
+                    ssl=False,
+                    enable_cleanup_closed=True
                 )
                 
                 async with aiohttp.ClientSession(
@@ -138,16 +155,29 @@ class URLChecker:
                 ) as session:
                     
                     start_time = time.time()
-                    async with session.head(url) as response:
-                        result['response_time'] = (time.time() - start_time) * 1000
-                        
-                        # 检查状态码
-                        if response.status == 200:
-                            result['is_valid'] = True
-                        elif response.status == 404:
-                            result['error'] = f"HTTP 404 Not Found"
-                        else:
-                            result['is_valid'] = True  # 非404都认为有效
+                    # 优先使用HEAD请求，失败时降级到GET
+                    try:
+                        async with session.head(url, allow_redirects=True) as response:
+                            result['response_time'] = (time.time() - start_time) * 1000
+                            
+                            # 检查状态码
+                            if response.status == 200:
+                                result['is_valid'] = True
+                            elif response.status == 404:
+                                result['error'] = f"HTTP 404 Not Found"
+                            else:
+                                result['is_valid'] = True  # 非404都认为有效
+                    except Exception:
+                        # HEAD失败时尝试GET
+                        async with session.get(url, allow_redirects=True) as response:
+                            result['response_time'] = (time.time() - start_time) * 1000
+                            
+                            if response.status == 200:
+                                result['is_valid'] = True
+                            elif response.status == 404:
+                                result['error'] = f"HTTP 404 Not Found"
+                            else:
+                                result['is_valid'] = True
                 
             except asyncio.TimeoutError:
                 result['error'] = "Timeout"

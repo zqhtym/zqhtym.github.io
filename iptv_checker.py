@@ -119,27 +119,27 @@ class IPTVChecker:
         output_dir = Path("output")
         output_dir.mkdir(exist_ok=True)
         
-        # 按速度分类
-        excellent_resources = []  # >= 2MB/s
-        wonderful_resources = []  # >= 1MB/s  
-        good_resources = []      # >= 0.7MB/s
-        useful_resources = []     # >= 0.5MB/s
+        # 按速度分类 - 使用固定的速度标准
+        excellent_resources = []  # >= 1MB/s (1024*1024)
+        wonderful_resources = []  # >= 700KB/s (1024*700)  
+        good_resources = []      # >= 500KB/s (1024*500)
+        useful_resources = []     # >= 200KB/s (1024*200)
         
         for resource in video_resources:
-            speed = resource.get('speed', 0)
-            if speed >= 2.0:
+            speed = resource.get('speed', 0)  # speed 单位是 MB/s
+            if speed >= 1.0:  # >= 1MB/s
                 excellent_resources.append(resource)
-            elif speed >= 1.0:
+            elif speed >= 0.7:  # >= 700KB/s
                 wonderful_resources.append(resource)
-            elif speed >= 0.7:
+            elif speed >= 0.5:  # >= 500KB/s
                 good_resources.append(resource)
-            elif speed >= 0.5:
+            elif speed >= 0.2:  # >= 200KB/s
                 useful_resources.append(resource)
         
         # 生成不同级别的文件
         current_time = datetime.now().strftime('%Y%m%d%H%M')
         
-        # 生成 useful 级别文件 (>= 0.5MB/s)
+        # 生成 useful 级别文件 (>= 200KB/s)
         if useful_resources:
             useful_file = output_dir / f"live+useful+{current_time}.txt"
             useful_csv = output_dir / f"live+useful+{current_time}.csv"
@@ -153,10 +153,10 @@ class IPTVChecker:
                 for resource in useful_resources:
                     f.write(f"{resource['name']},{resource['url']},{resource.get('speed', 0):.3f},{resource.get('category', '')}\n")
             
-            print(f"📄 生成文件: {useful_file} (速度 >= 500KB/s, 非白名单内容)")
+            print(f"📄 生成文件: {useful_file} (速度 >= 200KB/s, 非白名单内容)")
             print(f"📄 生成文件: {useful_csv} (CSV格式数据)")
         
-        # 生成 good 级别文件 (>= 0.7MB/s)
+        # 生成 good 级别文件 (>= 500KB/s)
         if good_resources:
             good_file = output_dir / f"live+good+{current_time}.txt"
             good_csv = output_dir / f"live+good+{current_time}.csv"
@@ -170,10 +170,10 @@ class IPTVChecker:
                 for resource in good_resources:
                     f.write(f"{resource['name']},{resource['url']},{resource.get('speed', 0):.3f},{resource.get('category', '')}\n")
             
-            print(f"📄 生成文件: {good_file} (速度 >= 700KB/s, 非白名单内容)")
+            print(f"📄 生成文件: {good_file} (速度 >= 500KB/s, 非白名单内容)")
             print(f"📄 生成文件: {good_csv} (CSV格式数据)")
         
-        # 生成 wonderful 级别文件 (>= 1MB/s)
+        # 生成 wonderful 级别文件 (>= 700KB/s)
         if wonderful_resources:
             wonderful_file = output_dir / f"live+wonderful+{current_time}.txt"
             wonderful_csv = output_dir / f"live+wonderful+{current_time}.csv"
@@ -187,10 +187,10 @@ class IPTVChecker:
                 for resource in wonderful_resources:
                     f.write(f"{resource['name']},{resource['url']},{resource.get('speed', 0):.3f},{resource.get('category', '')}\n")
             
-            print(f"📄 生成文件: {wonderful_file} (速度 >= 500KB/s, 非白名单内容)")
+            print(f"📄 生成文件: {wonderful_file} (速度 >= 700KB/s, 非白名单内容)")
             print(f"📄 生成文件: {wonderful_csv} (CSV格式数据)")
         
-        # 生成 excellent 级别文件 (>= 2MB/s)
+        # 生成 excellent 级别文件 (>= 1MB/s)
         if excellent_resources:
             excellent_file = output_dir / f"live+excellent+{current_time}.txt"
             excellent_csv = output_dir / f"live+excellent+{current_time}.csv"
@@ -204,7 +204,7 @@ class IPTVChecker:
                 for resource in excellent_resources:
                     f.write(f"{resource['name']},{resource['url']},{resource.get('speed', 0):.3f},{resource.get('category', '')}\n")
             
-            print(f"📄 生成文件: {excellent_file} (速度 >= 2MB/s, 非白名单内容)")
+            print(f"📄 生成文件: {excellent_file} (速度 >= 1MB/s, 非白名单内容)")
             print(f"📄 生成文件: {excellent_csv} (CSV格式数据)")
         
         # 生成 LE.txt 和 LU.txt (兼容原有格式)

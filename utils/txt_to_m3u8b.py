@@ -56,12 +56,12 @@ def txt_to_m3u8_simple(txt_file_path, m3u8_file_path):
                 else:
                     # 处理TXT格式
                     # 处理分组行
-                    if line.endswith(",#group#"):
-                        current_group = line.replace(",#group#", "")
+                    if line.endswith(",#genre#"):
+                        current_group = line.replace(",#genre#", "")
                         continue
                     
                     # 跳过纯分组行
-                    if line == "#group#" or line == ",#group#":
+                    if line == "#genre#" or line == ",#genre#":
                         continue
                     
                     # 处理频道行

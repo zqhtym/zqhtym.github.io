@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 IPTV检测工具 - Step6及以后步骤
-从step5_speed_resources.csv开始运行Step6、Step7、Step8
+从step5_speed_resources.csv开始运行Step6
 Author: chaichunyang@outlook.com
 """
 
