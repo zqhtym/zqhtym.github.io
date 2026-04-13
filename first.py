@@ -839,14 +839,14 @@ class IPTVResourceProcessor:
                 except UnicodeEncodeError:
                     print(f"  {i}. [Chinese channel] ({len(resources[channel])} URLs)")
     
-    async def run_step3_deduplicate(self):
-        """Step3: URL去重处理"""
+    async def run_step2_deblack_deannotation(self):
+        """Step2: 过滤black.txt网址特征和按IPTV规则去掉URL注释部分"""
         try:
             print("=" * 80)
-            print(f" IPTV Resource Processing - Step3: URL Deduplication")
+            print(f" IPTV Resource Processing - Step2: De-black & De-annotation")
             print("=" * 80)
             
-            print("\n[Step3] Loading Step1 output and performing URL deduplication...")
+            print("\n[Step2] Loading Step1 output and performing de-black & de-annotation...")
             
             # 读取Step1的输出文件
             step1_file = self.output_dir / "step1_all_resources.csv"
@@ -855,13 +855,160 @@ class IPTVResourceProcessor:
                 print("  Please run Step1 first using: python first.py --step1")
                 return
             
+            # 加载black.txt文件
+            black_patterns = []
+            black_file = Path("black.txt")
+            if black_file.exists():
+                print(f"  Loading black list: {black_file}")
+                with open(black_file, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        line = line.strip()
+                        if line and not line.startswith('#'):
+                            black_patterns.append(line.lower())
+                print(f"  Loaded {len(black_patterns)} black patterns")
+            else:
+                print(f"  Warning: black.txt not found, skipping black filtering")
+            
+            # 加载所有资源
+            all_resources = []
+            total_urls_before = 0
+            black_filtered = 0
+            annotation_removed = 0
+            
+            print(f"  Loading Step1 output: {step1_file}")
+            with open(step1_file, 'r', encoding='utf-8') as f:
+                reader = csv.reader(f)
+                next(reader)  # Skip header
+                
+                for row in reader:
+                    if len(row) >= 2:
+                        name = row[0]
+                        url = row[1]
+                        total_urls_before += 1
+                        
+                        # 1. 过滤black.txt网址特征
+                        is_blacklisted = False
+                        if black_patterns:
+                            url_lower = url.lower()
+                            for pattern in black_patterns:
+                                if pattern in url_lower:
+                                    is_blacklisted = True
+                                    break
+                        
+                        if is_blacklisted:
+                            black_filtered += 1
+                            continue
+                        
+                        # 2. 按IPTV规则去掉URL注释部分（$及以后内容）
+                        original_url = url
+                        if '$' in url:
+                            url = url.split('$')[0]
+                            annotation_removed += 1
+                        
+                        # 添加到结果列表
+                        all_resources.append({
+                            'name': name,
+                            'url': url,
+                            'original_url': original_url
+                        })
+            
+            print(f"  Loaded {len(all_resources)} channels")
+            print(f"  Total URLs before filtering: {total_urls_before}")
+            print(f"  Black-list filtered: {black_filtered}")
+            print(f"  Annotations removed: {annotation_removed}")
+            
+            # 保存Step2结果
+            step2_file = self.output_dir / "step2_deblack_deAnnotation.csv"
+            self._save_step2_output(all_resources, step2_file)
+            
+            # 打印摘要
+            self._print_step2_summary(all_resources, total_urls_before, black_filtered, annotation_removed)
+            
+        except Exception as e:
+            print(f"  Error in Step2: {e}")
+            import traceback
+            traceback.print_exc()
+    
+    def _save_step2_output(self, resources, filepath):
+        """保存Step2去黑名单和去注释后的输出文件"""
+        try:
+            with open(filepath, 'w', encoding='utf-8', newline='') as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow(['resource_name', 'url'])
+                
+                for resource in resources:
+                    writer.writerow([resource['name'], resource['url']])
+            
+            print(f"  Saved file: {filepath}")
+            
+            # Count valid URLs
+            total_urls = len(resources)
+            print(f"  Valid URLs: {total_urls}")
+            
+        except Exception as e:
+            print(f"  Error saving Step2 CSV: {e}")
+    
+    def _print_step2_summary(self, resources, urls_before, black_filtered, annotation_removed):
+        """打印Step2完成摘要"""
+        print("\n" + "="*60)
+        print("Step2 De-black & De-annotation - Completion Summary")
+        print("="*60)
+        
+        total_channels = len(resources)
+        total_urls_after = len(resources)
+        
+        print(f"Total Channels: {total_channels}")
+        print(f"URLs Before Filtering: {urls_before}")
+        print(f"URLs After Filtering: {total_urls_after}")
+        print(f"Black-list Filtered: {black_filtered}")
+        print(f"Annotations Removed: {annotation_removed}")
+        
+        if urls_before > 0:
+            black_rate = (black_filtered / urls_before * 100)
+            annotation_rate = (annotation_removed / urls_before * 100)
+            total_removed = black_filtered + annotation_removed
+            total_rate = (total_removed / urls_before * 100)
+            
+            print(f"Black-filter Rate: {black_rate:.2f}%")
+            print(f"Annotation Rate: {annotation_rate:.2f}%")
+            print(f"Total Filter Rate: {total_rate:.2f}%")
+        
+        # Show sample channels
+        if resources:
+            print("\nSample channels:")
+            sample_channels = resources[:5]
+            for i, channel in enumerate(sample_channels, 1):
+                try:
+                    name = channel['name']
+                    url = channel['url']
+                    print(f"  {i}. {name}")
+                    print(f"     URL: {url[:80]}{'...' if len(url) > 80 else ''}")
+                except UnicodeEncodeError:
+                    print(f"  {i}. [Chinese channel]")
+    
+    async def run_step3_deduplicate(self):
+        """Step3: URL去重处理"""
+        try:
+            print("=" * 80)
+            print(f" IPTV Resource Processing - Step3: URL Deduplication")
+            print("=" * 80)
+            
+            print("\n[Step3] Loading Step2 output and performing URL deduplication...")
+            
+            # 读取Step2的输出文件
+            step2_file = self.output_dir / "step2_deblack_deAnnotation.csv"
+            if not step2_file.exists():
+                print(f"  Error: Step2 output file not found: {step2_file}")
+                print("  Please run Step2 first using: python first.py --step2")
+                return
+            
             # 加载所有资源
             all_resources = {}
             total_urls_before = 0
             duplicate_urls = 0
             
-            print(f"  Loading Step1 output: {step1_file}")
-            with open(step1_file, 'r', encoding='utf-8') as f:
+            print(f"  Loading Step2 output: {step2_file}")
+            with open(step2_file, 'r', encoding='utf-8') as f:
                 reader = csv.reader(f)
                 next(reader)  # Skip header
                 
@@ -1660,7 +1807,7 @@ class IPTVResourceProcessor:
             return f"{secs}s"
 
     async def run_complete_pipeline(self):
-        """执行完整的IPTV资源处理流程：Step1 → Step3 → Step4 → Step5"""
+        """执行完整的IPTV资源处理流程：Step1 → Step2 → Step3 → Step4 → Step5"""
         try:
             main_start_time = time.time()
             
@@ -1673,6 +1820,12 @@ class IPTVResourceProcessor:
             print("STEP 1: Resource Loading (No Deduplication)")
             print("="*60)
             await self.run_step1_only()
+            
+            # Step2: 去黑名单和去注释
+            print("\n" + "="*60)
+            print("STEP 2: De-black & De-annotation")
+            print("="*60)
+            await self.run_step2_deblack_deannotation()
             
             # Step3: URL去重
             print("\n" + "="*60)
@@ -1716,6 +1869,8 @@ async def main():
     if len(sys.argv) > 1:
         if sys.argv[1] == "--step1":
             await processor.run_step1_only()
+        elif sys.argv[1] == "--step2":
+            await processor.run_step2_deblack_deannotation()
         elif sys.argv[1] == "--step3":
             await processor.run_step3_deduplicate()
         elif sys.argv[1] == "--step4":
@@ -1727,19 +1882,21 @@ async def main():
         else:
             print("Usage:")
             print("  python first.py --step1    # Run Step1: Resource loading (no deduplication)")
+            print("  python first.py --step2    # Run Step2: De-black & De-annotation")
             print("  python first.py --step3    # Run Step3: URL deduplication")
             print("  python first.py --step4    # Run Step4: 404 detection")
             print("  python first.py --step5    # Run Step5: Speed testing")
-            print("  python first.py --all      # Run complete pipeline: Step1 → Step3 → Step4 → Step5")
-            print("\nNote: Steps must be run in order: Step1 -> Step3 -> Step4 -> Step5")
+            print("  python first.py --all      # Run complete pipeline: Step1 → Step2 → Step3 → Step4 → Step5")
+            print("\nNote: Steps must be run in order: Step1 -> Step2 -> Step3 -> Step4 -> Step5")
     else:
         print("Usage:")
         print("  python first.py --step1    # Run Step1: Resource loading (no deduplication)")
+        print("  python first.py --step2    # Run Step2: De-black & De-annotation")
         print("  python first.py --step3    # Run Step3: URL deduplication")
         print("  python first.py --step4    # Run Step4: 404 detection")
         print("  python first.py --step5    # Run Step5: Speed testing")
-        print("  python first.py --all      # Run complete pipeline: Step1 → Step3 → Step4 → Step5")
-        print("\nNote: Steps must be run in order: Step1 -> Step3 -> Step4 -> Step5")
+        print("  python first.py --all      # Run complete pipeline: Step1 → Step2 → Step3 → Step4 → Step5")
+        print("\nNote: Steps must be run in order: Step1 -> Step2 -> Step3 -> Step4 -> Step5")
         print("Running complete pipeline by default...")
         await processor.run_complete_pipeline()
 

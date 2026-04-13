@@ -420,8 +420,8 @@ class ThirdChecker(IPTVChecker):
                 try:
                     le_txt_path = output_dir / "LE.txt"
                     le_m3u_path = output_dir / "LE.m3u"
-                    subprocess.run(["python", str(py_source), str(le_txt_path), str(le_m3u_path)], 
-                                 check=True, capture_output=True, text=True)
+                    result = subprocess.run(["python", str(py_source), str(le_txt_path), str(le_m3u_path)], 
+                                         check=True, capture_output=True, text=True, encoding='utf-8', errors='ignore')
                     print(f" LE.m3u (Python)")
                 except (subprocess.CalledProcessError, FileNotFoundError) as e:
                     print(f" Python: {str(e)}")
@@ -436,8 +436,8 @@ class ThirdChecker(IPTVChecker):
                 try:
                     lu_txt_path = output_dir / "LU.txt"
                     lu_m3u_path = output_dir / "LU.m3u"
-                    subprocess.run(["python", str(py_source), str(lu_txt_path), str(lu_m3u_path)], 
-                                 check=True, capture_output=True, text=True)
+                    result = subprocess.run(["python", str(py_source), str(lu_txt_path), str(lu_m3u_path)], 
+                                         check=True, capture_output=True, text=True, encoding='utf-8', errors='ignore')
                     print(f" LU.m3u (Python)")
                 except (subprocess.CalledProcessError, FileNotFoundError) as e:
                     print(f" Python: {str(e)}")
@@ -590,41 +590,71 @@ class ThirdChecker(IPTVChecker):
         return classified_resources
     
     def _sort_resources(self, resources):
-        """排序资源 - 实现所有排序规则"""
+        """ sorting resources - implement user's specific sorting requirements"""
         if not resources:
             return []
         
-        # 1. CCTV/CCTV-按数字升序排列
+        # function to extract CCTV number for sorting
         def extract_cctv_number(name):
-            match = re.search(r'CCTV-?(\d+)', name, re.IGNORECASE)
-            return int(match.group(1)) if match else 999999
+            # handle CCTV-数字 format (e.g., CCTV-1, CCTV-2)
+            match = re.search(r'CCTV-(\d+)', name, re.IGNORECASE)
+            if match:
+                return int(match.group(1))
+            
+            # handle CCTV数字 format (e.g., CCTV1, CCTV2)
+            match = re.search(r'CCTV(\d+)', name, re.IGNORECASE)
+            if match:
+                return int(match.group(1))
+            
+            return 999999  # for non-CCTV channels
         
-        # 2. 同类分组内的质量分类
-        def get_quality_priority(name):
+        # function to identify 4k content
+        def is_4k_content(name):
             name_lower = name.lower()
-            if '4d' in name_lower or '超高清' in name_lower or '4k' in name_lower or 'cctv4k' in name_lower:
-                return 0
-            elif '高清' in name_lower or 'hd' in name_lower:
-                return 1
-            elif 'sd' in name_lower:
-                return 2
+            return '4k' in name_lower or 'cctv4k' in name_lower
+        
+        # first, group resources by name (case-sensitive)
+        name_groups = {}
+        for resource in resources:
+            name = resource['name']
+            if name not in name_groups:
+                name_groups[name] = []
+            name_groups[name].append(resource)
+        
+        # sort each name group: whitelist first, then by speed descending
+        for name, group in name_groups.items():
+            group.sort(key=lambda r: (
+                0 if r.get('is_whitelist', False) else 1,  # whitelist priority
+                -r.get('speed', 0)  # speed descending
+            ))
+        
+        # sort names with special logic for CCTV channels
+        def sort_key(name):
+            # check if it's a 4k content
+            if is_4k_content(name):
+                cctv_num = extract_cctv_number(name)
+                if cctv_num != 999999:
+                    # CCTV4k gets special treatment: put 4k content at the end of CCTV channels
+                    return (0, cctv_num, 999999)  # (is_cctv, cctv_number, 4k_priority)
+                else:
+                    # non-CCTV 4k content
+                    return (1, name, 0)  # (is_cctv, name, 4k_priority)
             else:
-                return 3
+                cctv_num = extract_cctv_number(name)
+                if cctv_num != 999999:
+                    # regular CCTV channels
+                    return (0, cctv_num, 0)  # (is_cctv, cctv_number, 4k_priority)
+                else:
+                    # non-CCTV channels, sort lexicographically
+                    return (1, name, 0)  # (is_cctv, name, 4k_priority)
         
-        # 3. 资源名首字排序
-        def get_first_char(name):
-            return name[0] if name else ''
+        sorted_names = sorted(name_groups.keys(), key=sort_key)
         
-        # 复合排序
-        sorted_resources = sorted(resources, key=lambda r: (
-            0 if r.get('is_whitelist', False) else 1,  # 白名单优先
-            extract_cctv_number(r['name']),  # CCTV数字
-            get_first_char(r['name']),     # 首字
-            -r.get('speed', 0),            # 速度降序
-            get_quality_priority(r['name']) # 质量优先级
-        ))
+        # flatten the sorted groups
+        sorted_resources = []
+        for name in sorted_names:
+            sorted_resources.extend(name_groups[name])
         
-        # 4. 同名资源按速度排序（已经在复合排序中处理）
         return sorted_resources
     
     def _load_whitelist_resources(self):
