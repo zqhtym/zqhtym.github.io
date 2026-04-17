@@ -101,15 +101,16 @@ jobs:
         echo "🔍 检查output目录内容"
         ls -la output/ || echo "output目录不存在"
         
-        echo "🔍 检查最终CSV文件"
+        echo "🔍 检查最终文件"
         find output/ -name "*.csv" -type f || echo "未找到最终CSV文件"
+        find output/ -name "LE.txt" -o -name "LU.txt" -o -name "LE.m3u" -o -name "LU.m3u" || echo "未找到最终结果文件"
         
         echo "🔧 配置Git"
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         
-        echo "📦 添加最终CSV文件到Git"
-        git add output/*.csv || echo "添加最终CSV文件失败"
+        echo "📦 添加最终文件到Git"
+        git add output/*.csv output/LE.txt output/LU.txt output/LE.m3u output/LU.m3u || echo "添加最终文件失败"
         
         echo "🔍 检查Git状态"
         git status
