@@ -755,10 +755,16 @@ class ThirdChecker(IPTVChecker):
             if not os.path.exists(step6_csv_path):
                 print(f"❌ Step6结果文件不存在：{step6_csv_path}")
                 print(f"请先运行second.py完成Step6的工作")
+                print(f"💡 注意：GitHub Actions中不需要下载artifact，直接使用Git中的step6_video_resources.csv文件")
                 return
             
             print(f"\n📊 从Step7开始：读取Step6结果文件")
             print("-" * 50)
+            
+            # 验证Step6文件
+            if not self._validate_step6_file(step6_csv_path):
+                print("❌ Step6文件验证失败")
+                return
             
             video_resources = self._read_step6_csv_resources(step6_csv_path)
             
@@ -789,6 +795,9 @@ class ThirdChecker(IPTVChecker):
             main_end_time = time.time()
             print(f"\n🎉 检测完成！总耗时: {self._format_duration(main_end_time - main_start_time)}")
             print(f"📊 从Step7开始统计: Step6={len(video_resources)}")
+            
+            # 验证生成的文件
+            await self._verify_generated_files()
             
         except Exception as e:
             print(f"❌ Step7及以后步骤失败: {e}")
@@ -885,6 +894,83 @@ class ThirdChecker(IPTVChecker):
                     pass
         
         return resources
+    
+    def _validate_step6_file(self, file_path: str) -> bool:
+        """验证Step6文件的完整性和有效性"""
+        try:
+            # 检查文件大小
+            file_size = os.path.getsize(file_path)
+            if file_size == 0:
+                print(f"❌ Step6文件为空: {file_path}")
+                return False
+            
+            print(f"📋 Step6文件大小: {file_size} bytes")
+            
+            # 检查文件修改时间
+            import datetime
+            mod_time = datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
+            print(f"📅 Step6文件修改时间: {mod_time.strftime('%Y-%m-%d %H:%M:%S')}")
+            
+            # 尝试读取文件头部验证格式
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    first_line = f.readline().strip()
+                    if not first_line:
+                        print(f"❌ Step6文件格式错误: 文件为空")
+                        return False
+                    
+                    # 检查是否包含预期的头部信息
+                    if 'Step6' in first_line or '资源' in first_line or '#' in first_line:
+                        print(f"✅ Step6文件格式验证通过")
+                        return True
+                    else:
+                        print(f"⚠️ Step6文件头部格式异常，但继续处理")
+                        return True
+                        
+            except UnicodeDecodeError:
+                print(f"❌ Step6文件编码错误，无法读取")
+                return False
+                
+        except Exception as e:
+            print(f"❌ 验证Step6文件时出错: {e}")
+            return False
+    
+    async def _verify_generated_files(self):
+        """验证生成的文件是否正确更新"""
+        import datetime
+        
+        output_dir = Path("output")
+        files_to_check = ["LE.txt", "LU.txt", "LE.m3u", "LU.m3u"]
+        
+        print(f"\n🔍 验证生成的文件")
+        print("-" * 50)
+        
+        for filename in files_to_check:
+            file_path = output_dir / filename
+            if file_path.exists():
+                # 获取文件信息
+                file_size = file_path.stat().st_size
+                mod_time = datetime.datetime.fromtimestamp(file_path.stat().st_mtime)
+                
+                print(f"✅ {filename}: {file_size} bytes, 修改时间: {mod_time.strftime('%Y-%m-%d %H:%M:%S')}")
+                
+                # 检查文件内容是否为空
+                if file_size == 0:
+                    print(f"⚠️ 警告: {filename} 文件为空")
+                else:
+                    # 读取前几行验证内容
+                    try:
+                        with open(file_path, 'r', encoding='utf-8') as f:
+                            first_line = f.readline().strip()
+                            if first_line:
+                                print(f"   📝 内容预览: {first_line[:50]}...")
+                    except Exception as e:
+                        print(f"   ❌ 读取文件内容失败: {e}")
+            else:
+                print(f"❌ {filename}: 文件不存在")
+        
+        print(f"\n💡 提示: 如果这些文件的时间戳是最新的，说明third.py正确生成了新文件")
+        print(f"💡 如果时间戳较旧，可能GitHub Actions使用了缓存文件")
 
 async def main():
     """ """

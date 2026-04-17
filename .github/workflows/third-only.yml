@@ -51,12 +51,22 @@ jobs:
         which ffmpeg || echo "ffmpeg不在PATH中"
         ffmpeg -version || echo "ffmpeg版本检查失败"
         
-    - name: Download second.py results
-      uses: actions/download-artifact@v4
-      with:
-        name: second-results
-        path: output/
-      continue-on-error: true
+    - name: Ensure output directory exists
+      run: |
+        echo "📁 创建output目录"
+        mkdir -p output/
+        
+    - name: Verify step6_video_resources.csv exists
+      run: |
+        echo "🔍 检查step6_video_resources.csv文件"
+        if [ -f "output/step6_video_resources.csv" ]; then
+          echo "✅ step6_video_resources.csv存在"
+          ls -la output/step6_video_resources.csv
+        else
+          echo "❌ step6_video_resources.csv不存在，从Git中检出"
+          # 确保文件存在，如果不在output目录，可能需要从Git中获取
+          find . -name "step6_video_resources.csv" -type f 2>/dev/null || echo "在仓库中未找到step6_video_resources.csv"
+        fi
         
     - name: Run third.py (Step7-Step8)
       run: |
