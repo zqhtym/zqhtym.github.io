@@ -620,7 +620,7 @@ class ThirdChecker1:
         return classified_resources
     
     def _sort_resources_by_keyword_order(self, resources, keywords):
-        """Sort resources by keyword order in template, then by name"""
+        """Sort resources by keyword order in template, then by custom rules"""
         if not resources:
             return []
         
@@ -637,23 +637,80 @@ class ThirdChecker1:
                     return keyword_order[keyword.lower()]
             return float('inf')  # If no keyword match, put at end
         
-        return sorted(resources, key=lambda x: (get_keyword_order(x), x['name']))
+        def extract_cctv_number(name):
+            """Extract CCTV number for sorting"""
+            import re
+            match = re.search(r'^(CCTV[-\s]*)(\d+)', name, re.IGNORECASE)
+            if match:
+                return int(match.group(2))
+            return float('inf')  # Non-CCTV channels
+        
+        def extract_speed_from_url(url):
+            """Extract speed value from URL"""
+            import re
+            # Look for .speed=number pattern in URL
+            match = re.search(r'\.speed=(\d+(?:\.\d+)?)', url)
+            if match:
+                return float(match.group(1))
+            return 0  # Default speed if not found
+        
+        def sort_key(resource):
+            """Custom sort key function"""
+            name = resource['name']
+            url = resource['url']
+            
+            # Primary sort: keyword order
+            keyword_order_val = get_keyword_order(resource)
+            
+            # Secondary sort: CCTV number (ascending for CCTV channels)
+            cctv_number = extract_cctv_number(name)
+            
+            # Tertiary sort: speed value (descending for same names)
+            speed_val = extract_speed_from_url(url)
+            
+            # For same names, we want higher speed first (negative for descending)
+            # For different names, speed doesn't matter as much
+            return (keyword_order_val, cctv_number, -speed_val, name)
+        
+        return sorted(resources, key=sort_key)
     
     def _sort_resources(self, resources):
         """ sorting resources - implement user's specific sorting requirements"""
         if not resources:
             return []
         
-        # function to extract CCTV number for sorting
         def extract_cctv_number(name):
+            """Extract CCTV number for sorting (ascending)"""
             import re
-            match = re.search(r'CCTV[-\s]*(\d+)', name, re.IGNORECASE)
+            match = re.search(r'^(CCTV[-\s]*)(\d+)', name, re.IGNORECASE)
             if match:
-                return int(match.group(1))
+                return int(match.group(2))
             return float('inf')  # Non-CCTV channels go to the end
         
-        # Sort by CCTV number first, then by name
-        return sorted(resources, key=lambda x: (extract_cctv_number(x['name']), x['name']))
+        def extract_speed_from_url(url):
+            """Extract speed value from URL"""
+            import re
+            # Look for .speed=number pattern in URL
+            match = re.search(r'\.speed=(\d+(?:\.\d+)?)', url)
+            if match:
+                return float(match.group(1))
+            return 0  # Default speed if not found
+        
+        def sort_key(resource):
+            """Custom sort key function"""
+            name = resource['name']
+            url = resource['url']
+            
+            # Primary sort: CCTV number (ascending for CCTV channels)
+            cctv_number = extract_cctv_number(name)
+            
+            # Secondary sort: speed value (descending for same names)
+            speed_val = extract_speed_from_url(url)
+            
+            # Tertiary sort: name (for final tie-breaker)
+            return (cctv_number, -speed_val, name)
+        
+        return sorted(resources, key=sort_key)
     
     def _run_conversion_tools(self):
         """  -  exe output"""
