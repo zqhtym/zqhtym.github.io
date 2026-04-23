@@ -1,5 +1,10 @@
 🔄4K视频[刷新就是新内容],http://xjj1.716888.xyz/fenlei/4k/4k.php
-
+ABC Australia,https://abc-news-dmd-streams-1.akamaized.net/out/v1/701126012d044971b3fa89406a440133/index.m3u8
+ABC WWAY 3,https://townnews.g-mana.live/media/027a05c7-43b6-49eb-ad10-a0c0f10a0754/main.m3u8
+[HD]bbc,https://t.freetv.fun/live/bbc-2.m3u8
+BBC America,https://bcovlive-a.akamaihd.net/7f5ec16d102f4b5d92e8e27bc95ff424/us-east-1/6240731308001/playlist.m3u8
+Bloomberg Quicktake (720p),https://aegis-cloudfront-1.tubi.video/c597e8ac-bfb2-4a1c-865c-cad55566f953/playlist.m3u8
+Bloomberg TV (720p),https://aegis-cloudfront-1.tubi.video/de29234d-1a53-4cf9-b6ba-9cf412b66d76/playlist.m3u8
 Camp Spoopy (576p),https://stream.ads.ottera.tv/playlist.m3u8?network_id=269
 CBS News 24/7 (720p),https://cbsn-us.cbsnstream.cbsnews.com/out/v1/55a8648e8f134e82a470f83d562deeca/master.m3u8
 CBS News Baltimore (720p),https://lineup.cbsivideo.com/playout/8877a7d5-b094-4ac8-bc72-75a5fed68e5b/index.m3u8
@@ -43,6 +48,7 @@ Newsmax 2 (720p),https://nmxdistro.akamaized.net/hls/live/529965/Live_1/index.m3
 Newsmax 2 (720p),https://nmxlive.akamaized.net/hls/live/529965/Live_1/index.m3u8
 Newsmax TV (720p),https://nmx1ota.akamaized.net/hls/live/2107010/Live_1/index.m3u8
 NewsWorld,https://amg01076-lightning-amg01076c5-rakuten-us-1788.playouts.now.amagi.tv/playlist/amg01076-lightning-newsworld-rakutenus/playlist.m3u8
+Newsy (1080p),https://547f72e6652371c3.mediapackage.us-east-1.amazonaws.com/out/v1/e3e6e29095844c4ba7d887f01e44a5ef/index.m3u8
 NTD TV (1080p),https://amg17596-ntdtv-amg17596c1-rakuten-gb-6741.playouts.now.amagi.tv/playlist/amg17596-newtangdynastytelevision-ntdtv-rakutengb/playlist.m3u8
 NTD TV (1080p),https://amg17596-ntdtv-amg17596c1-stirr-us-4738.playouts.now.amagi.tv/ntd.m3u8
 NTD TV East (New Tang Dynasty Television),https://ntd02.akamaized.net/NTDA/index.m3u8
@@ -51,6 +57,7 @@ NTD TV UK (New Tang Dynasty Television),https://ntd02.akamaized.net/NTD-UK/index
 Real Disaster Channel [Geo-blocked],https://linear-475.frequency.stream/dist/xumo/475/hls/master/playlist.m3u8
 Real Housewives Vault,https://xumo-xumoent-vc-123-8gq0q.fast.nbcuni.com/live/master.m3u8
 Real Wild (1080p),https://lds-realwild-rakuten.amagi.tv/playlist.m3u8
+[BD]trt world,https://t.freetv.fun/live/trt-world-1.m3u8
 UN Web TV (540p),https://cdnapi.kaltura.com/p/2503451/sp/250345100/playManifest/entryId/1_gb6tjmle/protocol/https/format/applehttp/a.m3u8
 Yahoo! Finance (1080p),https://d1ewctnvcwvvvu.cloudfront.net/playlist.m3u8
 Yahoo! Finance (1080p),https://yahoo-plex.amagi.tv/playlist.m3u8
