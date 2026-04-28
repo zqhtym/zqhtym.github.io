@@ -928,6 +928,7 @@ tvbs新闻FYtv,http://iptv.4666888.xyz/iptv2A.php?id=43
 壹电视电影,http://8.218.84.3:8885/live/LxWcScuQ6WphaELY4DhkKm8SIv7_ZgNIJtNvFurqphvyqxUIU84OjKVCwFxMq9iUmgrc6Cj9bnaXGBfHBsZOYFd42nGow7m-55c68wtLQCShEW-FSptVBq-QsJdmB4fjbbnEtUCos8q_E8WqrTv5D_vJw_DCNdSh3FuhnkbgUCnvGUKr8QxB9jxwiR2Pc7UPgoiqhAb3MYJqNOMpGLZtKMVb4ASXAXJ66D3cRidnzIpxlfhBUeXzNPFHE_LEk3HvZ7XOTcJqdjBlYScGTMKCwA.m3u8?u=1756878715
 影迷数位电影台,http://8.218.84.3:8885/live/LxWcScuQ6WphaELY4DhkKm8SIv7_ZgNIJtNvFurqphvyqxUIU84OjKVCwFxMq9iUdt63uRz89giBm7SDjL0rv_KIdlQpdfaweHkEsMjRcTyWTkmAIamofG98HLLqS4XBWxsniylZYS7fe6pFNArqo0f0J-Kj1AlMRca1-YhPCzr681fFSeWw3K7yUsq83pV0eQ8BGMO5u504Gx0F3i0idCNTAEgDMieA4qfFwX_KNxMlhj8nMzbVmMu_7fV8ErhRdhVn3_mV68JYghmp1pXq_oUrHHWxJP6NqDWale926w8.m3u8?u=1756878715
 東森电影,http://iptv.4666888.xyz/iptv2A.php?id=48
+电影_斯坦森,http://cfss.cc/cdn/huya/21059588.flv
 纬来电影FYtv,http://iptv.4666888.xyz/iptv2A.php?id=40
 美亚电影,http://iptv.4666888.xyz/iptv2A.php?id=30
 美亚电影FYtv,http://iptv.4666888.xyz/iptv2A.php?id=30

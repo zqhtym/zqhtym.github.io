@@ -308,6 +308,7 @@ TVB娱乐新闻,http://8.218.84.3:8885/live/LxWcScuQ6WphaELY4DhkKm8SIv7_ZgNIJtNv
 诸暨新闻,http://l.cztvcloud.com/channels/lantian/SXzhuji3/720p.m3u8
 诸暨新闻综合,http://l.cztvcloud.com/channels/lantian/SXzhuji3/720p.m3u8?zzhed
 郫都新闻综合,http://115.29.208.41:34567/sccd.php?id=pd&kl=www.9kds.com
+电影_斯坦森,http://cfss.cc/cdn/huya/21059588.flv
 纬来电影FYtv,http://iptv.4666888.xyz/iptv2A.php?id=40
 风云恐怖电影,http://iptv.4666888.xyz/iptv2A.php?id=59
 TVB娱乐,http://iptv.4666888.xyz/iptv2A.php?id=36
