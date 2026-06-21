@@ -115,26 +115,24 @@ https://turkmedya-live.ercdn.net/tv360/tv360.m3u8
 http://115.29.208.41:34567/gd.php?id=1197
 #EXTINF:-1 tvg-name="大湾区卫视（海外版）" group-title="🌊港·澳·台",大湾区卫视（海外版）
 http://115.29.208.41:34567/gd.php?id=1191
-#EXTINF:-1 tvg-name="CCTV-1" group-title="📺央视",CCTV-1
-http://129.211.14.102:25000/cctv1.m3u8
-#EXTINF:-1 tvg-name="CCTV1" group-title="📺央视",CCTV1
-http://129.211.14.102:24445/cctv1.m3u8
 #EXTINF:-1 tvg-name="CCTV1" group-title="📺央视",CCTV1
 http://129.211.14.102:22225/cctv1.m3u8
 #EXTINF:-1 tvg-name="CCTV1" group-title="📺央视",CCTV1
+http://129.211.14.102:24445/cctv1.m3u8
+#EXTINF:-1 tvg-name="CCTV1" group-title="📺央视",CCTV1
 http://129.211.14.102:25000/cctv1.m3u8
-#EXTINF:-1 tvg-name="CCTV-2" group-title="📺央视",CCTV-2
-http://129.211.14.102:25000/cctv2.m3u8
 #EXTINF:-1 tvg-name="CCTV2" group-title="📺央视",CCTV2
-http://129.211.14.102:25000/cctv2.m3u8
+http://129.211.14.102:24445/cctv2.m3u8
 #EXTINF:-1 tvg-name="CCTV2" group-title="📺央视",CCTV2
 http://129.211.14.102:22225/cctv2.m3u8
 #EXTINF:-1 tvg-name="CCTV2" group-title="📺央视",CCTV2
-http://129.211.14.102:24445/cctv2.m3u8
+http://129.211.14.102:25000/cctv2.m3u8
 #EXTINF:-1 tvg-name="CCTV-3" group-title="📺央视",CCTV-3
 http://129.211.14.102:25000/cctv3.m3u8
 #EXTINF:-1 tvg-name="CCTV3" group-title="📺央视",CCTV3
 http://129.211.14.102:25000/cctv3.m3u8
+#EXTINF:-1 tvg-name="CCTV-4" group-title="📺央视",CCTV-4
+http://129.211.14.102:25000/cctv4.m3u8
 #EXTINF:-1 tvg-name="CCTV4" group-title="📺央视",CCTV4
 http://129.211.14.102:24445/cctv4.m3u8
 #EXTINF:-1 tvg-name="CCTV4" group-title="📺央视",CCTV4
@@ -144,17 +142,11 @@ http://129.211.14.102:22225/cctv4.m3u8
 #EXTINF:-1 tvg-name="CCTV4K" group-title="📺央视",CCTV4K
 http://198.204.240.250:82/live/cctv4k.m3u8?jsbt=1760148172&jsbk=8ce47519e62b009dfa80f8fbfb2dd932
 #EXTINF:-1 tvg-name="CCTV4美洲咪咕" group-title="📺央视",CCTV4美洲咪咕
-http://185.80.197.39:80/play/live.php?extension=ts&mac=00:1A:79:00:3D:60&stream=156404
-#EXTINF:-1 tvg-name="CCTV4美洲咪咕" group-title="📺央视",CCTV4美洲咪咕
 http://129.211.14.102:22225/cctvmz.m3u8
 #EXTINF:-1 tvg-name="CCTV4美洲咪咕" group-title="📺央视",CCTV4美洲咪咕
 http://129.211.14.102:24445/cctvmz.m3u8
 #EXTINF:-1 tvg-name="CCTV4美洲咪咕" group-title="📺央视",CCTV4美洲咪咕
 http://129.211.14.102:25000/cctvmz.m3u8
-#EXTINF:-1 tvg-name="CCTV4美洲咪咕" group-title="📺央视",CCTV4美洲咪咕
-http://185.80.197.39:80/play/live.php?extension=ts&mac=00:1A:79:00:3D:60&stream=90226
-#EXTINF:-1 tvg-name="CCTV4美洲咪咕" group-title="📺央视",CCTV4美洲咪咕
-http://185.80.197.39:80/play/live.php?extension=ts&mac=00:1A:79:00:3D:60&stream=1423389
 #EXTINF:-1 tvg-name="CCTV-5" group-title="📺央视",CCTV-5
 http://129.211.14.102:25000/cctv5.m3u8
 #EXTINF:-1 tvg-name="CCTV-5+" group-title="📺央视",CCTV-5+
@@ -166,13 +158,11 @@ http://129.211.14.102:25000/cctv5.m3u8
 #EXTINF:-1 tvg-name="CCTV5" group-title="📺央视",CCTV5
 http://129.211.14.102:24445/cctv5.m3u8
 #EXTINF:-1 tvg-name="CCTV5+" group-title="📺央视",CCTV5+
-http://129.211.14.102:24445/cctv5plus.m3u8
-#EXTINF:-1 tvg-name="CCTV5+" group-title="📺央视",CCTV5+
 http://129.211.14.102:25000/cctv5plus.m3u8
 #EXTINF:-1 tvg-name="cctv5" group-title="📺央视",cctv5
-http://82.156.243.185:36888/av3a/cctv5.m3u8
-#EXTINF:-1 tvg-name="cctv5" group-title="📺央视",cctv5
 http://82.156.243.185:36888/av3a/cctv5n.m3u8
+#EXTINF:-1 tvg-name="cctv5" group-title="📺央视",cctv5
+http://82.156.243.185:36888/av3a/cctv5.m3u8
 #EXTINF:-1 tvg-name="cctv5p" group-title="📺央视",cctv5p
 http://82.156.243.185:36888/av3a/cctv5pn.m3u8
 #EXTINF:-1 tvg-name="CCTV6" group-title="📺央视",CCTV6
@@ -180,7 +170,9 @@ http://129.211.14.102:24445/cctv6.m3u8
 #EXTINF:-1 tvg-name="CCTV-7" group-title="📺央视",CCTV-7
 http://129.211.14.102:25000/cctv7.m3u8
 #EXTINF:-1 tvg-name="CCTV7" group-title="📺央视",CCTV7
-http://129.211.14.102:22225/cctv7.m3u8
+http://129.211.14.102:24445/cctv7.m3u8
+#EXTINF:-1 tvg-name="CCTV7" group-title="📺央视",CCTV7
+http://129.211.14.102:25000/cctv7.m3u8
 #EXTINF:-1 tvg-name="CCTV-8" group-title="📺央视",CCTV-8
 http://129.211.14.102:25000/cctv8.m3u8
 #EXTINF:-1 tvg-name="CCTV8" group-title="📺央视",CCTV8
@@ -192,17 +184,23 @@ http://129.211.14.102:24445/cctv8.m3u8
 #EXTINF:-1 tvg-name="CCTV-9" group-title="📺央视",CCTV-9
 http://129.211.14.102:25000/cctv9.m3u8
 #EXTINF:-1 tvg-name="CCTV9" group-title="📺央视",CCTV9
-http://129.211.14.102:24445/cctv9.m3u8
+http://129.211.14.102:25000/cctv9.m3u8
 #EXTINF:-1 tvg-name="CCTV9" group-title="📺央视",CCTV9
 http://129.211.14.102:22225/cctv9.m3u8
-#EXTINF:-1 tvg-name="CCTV-10" group-title="📺央视",CCTV-10
-http://129.211.14.102:25000/cctv10.m3u8
+#EXTINF:-1 tvg-name="CCTV9" group-title="📺央视",CCTV9
+http://129.211.14.102:24445/cctv9.m3u8
 #EXTINF:-1 tvg-name="CCTV10" group-title="📺央视",CCTV10
 http://129.211.14.102:24445/cctv10.m3u8
-#EXTINF:-1 tvg-name="CCTV-11" group-title="📺央视",CCTV-11
-http://129.211.14.102:25000/cctv11.m3u8
+#EXTINF:-1 tvg-name="CCTV10" group-title="📺央视",CCTV10
+http://129.211.14.102:25000/cctv10.m3u8
+#EXTINF:-1 tvg-name="CCTV11" group-title="📺央视",CCTV11
+http://129.211.14.102:22225/cctv11.m3u8
+#EXTINF:-1 tvg-name="CCTV11" group-title="📺央视",CCTV11
+http://129.211.14.102:24445/cctv11.m3u8
 #EXTINF:-1 tvg-name="CCTV-12" group-title="📺央视",CCTV-12
 http://129.211.14.102:25000/cctv12.m3u8
+#EXTINF:-1 tvg-name="CCTV12" group-title="📺央视",CCTV12
+http://129.211.14.102:24445/cctv12.m3u8
 #EXTINF:-1 tvg-name="CCTV12" group-title="📺央视",CCTV12
 http://129.211.14.102:25000/cctv12.m3u8
 #EXTINF:-1 tvg-name="CCTV12" group-title="📺央视",CCTV12
@@ -213,16 +211,12 @@ http://129.211.14.102:25000/cctv13.m3u8
 http://129.211.14.102:24445/cctv13.m3u8
 #EXTINF:-1 tvg-name="CCTV13" group-title="📺央视",CCTV13
 http://129.211.14.102:25000/cctv13.m3u8
-#EXTINF:-1 tvg-name="CCTV13" group-title="📺央视",CCTV13
-http://129.211.14.102:22225/cctv13.m3u8
 #EXTINF:-1 tvg-name="CCTV-14" group-title="📺央视",CCTV-14
 http://129.211.14.102:25000/cctv14.m3u8
 #EXTINF:-1 tvg-name="CCTV14" group-title="📺央视",CCTV14
 http://129.211.14.102:25000/cctv14.m3u8
 #EXTINF:-1 tvg-name="CCTV14" group-title="📺央视",CCTV14
 http://129.211.14.102:24445/cctv14.m3u8
-#EXTINF:-1 tvg-name="CCTV14" group-title="📺央视",CCTV14
-http://129.211.14.102:22225/cctv14.m3u8
 #EXTINF:-1 tvg-name="CCTV-15" group-title="📺央视",CCTV-15
 http://129.211.14.102:25000/cctv15.m3u8
 #EXTINF:-1 tvg-name="CCTV15" group-title="📺央视",CCTV15
@@ -256,9 +250,9 @@ http://173.208.187.18:82/live/fyzq.m3u8?jsbt=1760355398&jsbk=d838949ce8ba43fabfa
 #EXTINF:-1 tvg-name="三沙卫视" group-title="📡卫视",三沙卫视
 http://129.211.14.102:25000/ssws.m3u8
 #EXTINF:-1 tvg-name="三沙卫视" group-title="📡卫视",三沙卫视
-http://129.211.14.102:24445/ssws.m3u8
-#EXTINF:-1 tvg-name="三沙卫视" group-title="📡卫视",三沙卫视
 http://129.211.14.102:22225/ssws.m3u8
+#EXTINF:-1 tvg-name="三沙卫视" group-title="📡卫视",三沙卫视
+http://129.211.14.102:24445/ssws.m3u8
 #EXTINF:-1 tvg-name="东南卫视" group-title="📡卫视",东南卫视
 http://129.211.14.102:25000/dnws.m3u8
 #EXTINF:-1 tvg-name="东南卫视" group-title="📡卫视",东南卫视
@@ -288,17 +282,17 @@ http://129.211.14.102:25000/nmgws.m3u8
 #EXTINF:-1 tvg-name="北京卫视" group-title="📡卫视",北京卫视
 http://129.211.14.102:25000/bjws.m3u8
 #EXTINF:-1 tvg-name="北京卫视" group-title="📡卫视",北京卫视
-http://129.211.14.102:22225/bjws.m3u8
-#EXTINF:-1 tvg-name="北京卫视" group-title="📡卫视",北京卫视
 http://129.211.14.102:24445/bjws.m3u8
+#EXTINF:-1 tvg-name="北京卫视" group-title="📡卫视",北京卫视
+http://129.211.14.102:22225/bjws.m3u8
 #EXTINF:-1 tvg-name="厦门卫视" group-title="📡卫视",厦门卫视
 http://129.211.14.102:24445/xmws.m3u8
 #EXTINF:-1 tvg-name="厦门卫视" group-title="📡卫视",厦门卫视
 http://129.211.14.102:22225/xmws.m3u8
 #EXTINF:-1 tvg-name="吉林卫视" group-title="📡卫视",吉林卫视
-http://129.211.14.102:25000/jlws.m3u8
-#EXTINF:-1 tvg-name="吉林卫视" group-title="📡卫视",吉林卫视
 http://129.211.14.102:24445/jlws.m3u8
+#EXTINF:-1 tvg-name="吉林卫视" group-title="📡卫视",吉林卫视
+http://129.211.14.102:25000/jlws.m3u8
 #EXTINF:-1 tvg-name="吉林卫视" group-title="📡卫视",吉林卫视
 http://129.211.14.102:22225/jlws.m3u8
 #EXTINF:-1 tvg-name="四川卫视" group-title="📡卫视",四川卫视
@@ -334,15 +328,15 @@ http://129.211.14.102:22225/ahws.m3u8
 #EXTINF:-1 tvg-name="山东卫视" group-title="📡卫视",山东卫视
 http://115.29.208.41:34567/sd.php?id=sdws
 #EXTINF:-1 tvg-name="山东卫视" group-title="📡卫视",山东卫视
-http://129.211.14.102:22225/sdws.m3u8
-#EXTINF:-1 tvg-name="山东卫视" group-title="📡卫视",山东卫视
 http://129.211.14.102:25000/sdws.m3u8
+#EXTINF:-1 tvg-name="山东卫视" group-title="📡卫视",山东卫视
+http://129.211.14.102:22225/sdws.m3u8
 #EXTINF:-1 tvg-name="山东卫视" group-title="📡卫视",山东卫视
 http://129.211.14.102:24445/sdws.m3u8
 #EXTINF:-1 tvg-name="山东教育卫视" group-title="📡卫视",山东教育卫视
-https://live.264788.xyz/channel/shandongjiaoyuweishi?streamid=16a8df8a9d3abf67efc9f918e135c41d&livekey=01WgOR41rriMmMkzNsd0UoaxJRwetZdxIvtVk
-#EXTINF:-1 tvg-name="山东教育卫视" group-title="📡卫视",山东教育卫视
 https://live.264788.xyz/channel/shandongjiaoyuweishi?streamid=f43e528c02ddd9062ade5f0c8619acaa&livekey=01WgOR41rriMmMkzNsd0UoaxJRwetZdxIvtVk
+#EXTINF:-1 tvg-name="山东教育卫视" group-title="📡卫视",山东教育卫视
+https://live.264788.xyz/channel/shandongjiaoyuweishi?streamid=16a8df8a9d3abf67efc9f918e135c41d&livekey=01WgOR41rriMmMkzNsd0UoaxJRwetZdxIvtVk
 #EXTINF:-1 tvg-name="山东齐鲁卫视" group-title="📡卫视",山东齐鲁卫视
 http://115.29.208.41:34567/sd.php?id=qlpd
 #EXTINF:-1 tvg-name="山西卫视" group-title="📡卫视",山西卫视
@@ -356,39 +350,27 @@ http://129.211.14.102:24445/gxws.m3u8
 #EXTINF:-1 tvg-name="广西卫视" group-title="📡卫视",广西卫视
 http://129.211.14.102:22225/gxws.m3u8
 #EXTINF:-1 tvg-name="广西卫视" group-title="📡卫视",广西卫视
-http://129.211.14.102:25000/gxws.m3u8
-#EXTINF:-1 tvg-name="广西卫视" group-title="📡卫视",广西卫视
 http://115.29.208.41:34567/gd.php?id=gxws&kl=www.9kds.com
+#EXTINF:-1 tvg-name="广西卫视" group-title="📡卫视",广西卫视
+http://129.211.14.102:25000/gxws.m3u8
 #EXTINF:-1 tvg-name="康巴卫视" group-title="📡卫视",康巴卫视
 https://live.264788.xyz/channel/kangbaweishi?streamid=2e281c42f6125b5ffeacab24e4dd551d&livekey=01WgOR41rriMmMkzNsd0UoaxJRwetZdxIvtVk
-#EXTINF:-1 tvg-name="康巴卫视" group-title="📡卫视",康巴卫视
-https://live.264788.xyz/channel/kangbaweishi?streamid=a027d1f4a2a0dda912f250b1fcb80223&livekey=01WgOR41rriMmMkzNsd0UoaxJRwetZdxIvtVk
 #EXTINF:-1 tvg-name="新疆卫视" group-title="📡卫视",新疆卫视
 http://129.211.14.102:25000/xjws.m3u8
-#EXTINF:-1 tvg-name="新疆卫视" group-title="📡卫视",新疆卫视
-http://129.211.14.102:24445/xjws.m3u8
-#EXTINF:-1 tvg-name="新疆卫视" group-title="📡卫视",新疆卫视
-http://129.211.14.102:22225/xjws.m3u8
 #EXTINF:-1 tvg-name="江苏卫视" group-title="📡卫视",江苏卫视
 http://129.211.14.102:22225/jsws.m3u8
 #EXTINF:-1 tvg-name="江苏卫视" group-title="📡卫视",江苏卫视
-http://129.211.14.102:25000/jsws.m3u8
-#EXTINF:-1 tvg-name="江苏卫视" group-title="📡卫视",江苏卫视
 http://129.211.14.102:24445/jsws.m3u8
-#EXTINF:-1 tvg-name="江西卫视" group-title="📡卫视",江西卫视
-http://129.211.14.102:25000/jxws.m3u8
-#EXTINF:-1 tvg-name="江西卫视" group-title="📡卫视",江西卫视
-http://129.211.14.102:22225/jxws.m3u8
-#EXTINF:-1 tvg-name="江西卫视" group-title="📡卫视",江西卫视
-http://115.29.208.41:34567/gd.php?id=jxws&kl=www.9kds.com
+#EXTINF:-1 tvg-name="江苏卫视" group-title="📡卫视",江苏卫视
+http://129.211.14.102:25000/jsws.m3u8
 #EXTINF:-1 tvg-name="河北卫视" group-title="📡卫视",河北卫视
 http://115.29.208.41:34567/gd.php?id=hebws&kl=www.9kds.com
 #EXTINF:-1 tvg-name="河北卫视" group-title="📡卫视",河北卫视
 http://129.211.14.102:22225/hbws.m3u8
 #EXTINF:-1 tvg-name="河北卫视" group-title="📡卫视",河北卫视
-http://129.211.14.102:24445/hbws.m3u8
-#EXTINF:-1 tvg-name="河北卫视" group-title="📡卫视",河北卫视
 http://129.211.14.102:25000/hbws.m3u8
+#EXTINF:-1 tvg-name="河北卫视" group-title="📡卫视",河北卫视
+http://129.211.14.102:24445/hbws.m3u8
 #EXTINF:-1 tvg-name="河南卫视" group-title="📡卫视",河南卫视
 http://115.29.208.41:34567/gd.php?id=henws&kl=www.9kds.com
 #EXTINF:-1 tvg-name="河南卫视" group-title="📡卫视",河南卫视
@@ -407,12 +389,10 @@ http://129.211.14.102:25000/hnws2.m3u8
 http://115.29.208.41:34567/gd.php?id=hanws&kl=www.9kds.com
 #EXTINF:-1 tvg-name="海南卫视" group-title="📡卫视",海南卫视
 http://129.211.14.102:22225/hnws2.m3u8
-#EXTINF:-1 tvg-name="海峡卫视" group-title="📡卫视",海峡卫视
-http://185.80.197.39:80/play/live.php?extension=ts&mac=00:1A:79:00:3D:60&stream=156424
-#EXTINF:-1 tvg-name="深圳卫视" group-title="📡卫视",深圳卫视
-http://115.29.208.41:34567/gd.php?id=1206
 #EXTINF:-1 tvg-name="深圳卫视" group-title="📡卫视",深圳卫视
 http://129.211.14.102:25000/szws.m3u8
+#EXTINF:-1 tvg-name="深圳卫视" group-title="📡卫视",深圳卫视
+http://115.29.208.41:34567/gd.php?id=1206
 #EXTINF:-1 tvg-name="深圳卫视" group-title="📡卫视",深圳卫视
 http://129.211.14.102:24445/szws.m3u8
 #EXTINF:-1 tvg-name="深圳卫视" group-title="📡卫视",深圳卫视
@@ -422,9 +402,9 @@ http://129.211.14.102:22225/hbws2.m3u8
 #EXTINF:-1 tvg-name="湖北卫视" group-title="📡卫视",湖北卫视
 http://115.29.208.41:34567/gd.php?id=hbws&kl=www.9kds.com
 #EXTINF:-1 tvg-name="湖北卫视" group-title="📡卫视",湖北卫视
-http://129.211.14.102:25000/hbws2.m3u8
-#EXTINF:-1 tvg-name="湖北卫视" group-title="📡卫视",湖北卫视
 http://129.211.14.102:24445/hbws2.m3u8
+#EXTINF:-1 tvg-name="湖北卫视" group-title="📡卫视",湖北卫视
+http://129.211.14.102:25000/hbws2.m3u8
 #EXTINF:-1 tvg-name="湖南卫视" group-title="📡卫视",湖南卫视
 http://129.211.14.102:24445/hnws3.m3u8
 #EXTINF:-1 tvg-name="湖南卫视" group-title="📡卫视",湖南卫视
@@ -432,13 +412,11 @@ http://129.211.14.102:25000/hnws3.m3u8
 #EXTINF:-1 tvg-name="湖南卫视" group-title="📡卫视",湖南卫视
 http://129.211.14.102:22225/hnws3.m3u8
 #EXTINF:-1 tvg-name="甘肃卫视" group-title="📡卫视",甘肃卫视
-http://129.211.14.102:25000/gsws.m3u8
-#EXTINF:-1 tvg-name="甘肃卫视" group-title="📡卫视",甘肃卫视
 http://129.211.14.102:22225/gsws.m3u8
 #EXTINF:-1 tvg-name="甘肃卫视" group-title="📡卫视",甘肃卫视
+http://129.211.14.102:25000/gsws.m3u8
+#EXTINF:-1 tvg-name="甘肃卫视" group-title="📡卫视",甘肃卫视
 http://129.211.14.102:24445/gsws.m3u8
-#EXTINF:-1 tvg-name="西藏卫视" group-title="📡卫视",西藏卫视
-http://129.211.14.102:22225/xzws.m3u8
 #EXTINF:-1 tvg-name="西藏卫视" group-title="📡卫视",西藏卫视
 http://129.211.14.102:25000/xzws.m3u8
 #EXTINF:-1 tvg-name="贵州卫视" group-title="📡卫视",贵州卫视
@@ -447,24 +425,18 @@ http://129.211.14.102:25000/gzws.m3u8
 http://129.211.14.102:22225/gzws.m3u8
 #EXTINF:-1 tvg-name="贵州卫视" group-title="📡卫视",贵州卫视
 http://129.211.14.102:24445/gzws.m3u8
-#EXTINF:-1 tvg-name="贵州卫视" group-title="📡卫视",贵州卫视
-http://115.29.208.41:34567/gd.php?id=gzws&kl=www.9kds.com
-#EXTINF:-1 tvg-name="辽宁卫视" group-title="📡卫视",辽宁卫视
-http://115.29.208.41:34567/gd.php?id=lnws&kl=www.9kds.com
-#EXTINF:-1 tvg-name="辽宁卫视" group-title="📡卫视",辽宁卫视
-http://129.211.14.102:25000/lnws.m3u8
 #EXTINF:-1 tvg-name="辽宁卫视" group-title="📡卫视",辽宁卫视
 http://129.211.14.102:24445/lnws.m3u8
+#EXTINF:-1 tvg-name="辽宁卫视" group-title="📡卫视",辽宁卫视
+http://129.211.14.102:25000/lnws.m3u8
 #EXTINF:-1 tvg-name="辽宁卫视" group-title="📡卫视",辽宁卫视
 http://129.211.14.102:22225/lnws.m3u8
 #EXTINF:-1 tvg-name="重庆卫视" group-title="📡卫视",重庆卫视
 http://129.211.14.102:24445/cqws.m3u8
 #EXTINF:-1 tvg-name="重庆卫视" group-title="📡卫视",重庆卫视
-http://129.211.14.102:22225/cqws.m3u8
-#EXTINF:-1 tvg-name="重庆卫视" group-title="📡卫视",重庆卫视
 http://129.211.14.102:25000/cqws.m3u8
-#EXTINF:-1 tvg-name="陕西卫视" group-title="📡卫视",陕西卫视
-http://129.211.14.102:25000/sxws2.m3u8
+#EXTINF:-1 tvg-name="重庆卫视" group-title="📡卫视",重庆卫视
+http://129.211.14.102:22225/cqws.m3u8
 #EXTINF:-1 tvg-name="青海卫视" group-title="📡卫视",青海卫视
 http://129.211.14.102:22225/qhws.m3u8
 #EXTINF:-1 tvg-name="青海卫视" group-title="📡卫视",青海卫视
@@ -543,6 +515,8 @@ https://demiroren.daioncdn.net/kanald/kanald.m3u8?app=kanald_web&ce=3
 https://copacotf.desdeparaguay.net/latele/latele_py_alta/playlist.m3u8?admin=tvaccion
 #EXTINF:-1 tvg-name="Latina Clasicos (1080p)" group-title="🎬其它",Latina Clasicos (1080p)
 https://redirector.rudo.video/hls-video/plus226/latina2/latina2.smil/playlist.m3u8
+#EXTINF:-1 tvg-name="Makan 33 (1080p)" group-title="🎬其它",Makan 33 (1080p)
+https://kancdn.medonecdn.net/livehls/oil/kancdn-live/live/makan/live.livx/playlist.m3u8
 #EXTINF:-1 tvg-name="NPY (1080p)" group-title="🎬其它",NPY (1080p)
 https://copacogen.desdeparaguay.net/npy/npy_py_alta/playlist.m3u8?admin=tvaccion
 #EXTINF:-1 tvg-name="PravdaTUT Lviv (1080p)" group-title="🎬其它",PravdaTUT Lviv (1080p)
@@ -586,9 +560,9 @@ http://l.cztvcloud.com/channels/lantian/SXshangyu1/720p.m3u8?zzhed
 #EXTINF:-1 tvg-name="半岛新闻" group-title="🎬其它",半岛新闻
 http://live-hls-web-aja.getaj.net/AJA/02.m3u8?zshijd
 #EXTINF:-1 tvg-name="太谷新闻综合" group-title="🎬其它",太谷新闻综合
-https://p2.vzan.com/slowlive/596867413819827251/live.m3u8?zbid=1725814272&tpid=1516989100&type=0
-#EXTINF:-1 tvg-name="太谷新闻综合" group-title="🎬其它",太谷新闻综合
 https://p2.vzan.com/slowlive/596867413819827251/live.m3u8?zbid=1725814272&amp;tpid=1516989100&amp;type=0
+#EXTINF:-1 tvg-name="太谷新闻综合" group-title="🎬其它",太谷新闻综合
+https://p2.vzan.com/slowlive/596867413819827251/live.m3u8?zbid=1725814272&tpid=1516989100&type=0
 #EXTINF:-1 tvg-name="太谷新闻综合" group-title="🎬其它",太谷新闻综合
 https://p2.vzan.com/slowlive/596867413819827251/live.m3u8?zbid=1725814272&amp;amp;tpid=1516989100&amp;amp;type=0
 #EXTINF:-1 tvg-name="广东新闻" group-title="🎬其它",广东新闻
@@ -602,9 +576,9 @@ http://ali-m-l.cztv.com/channels/lantian/channel07/1080p.m3u8
 #EXTINF:-1 tvg-name="苍南新闻综合频道" group-title="🎬其它",苍南新闻综合频道
 http://l.cztvcloud.com/channels/lantian/SXcangnan1/720p.m3u8
 #EXTINF:-1 tvg-name="萧山新闻综合" group-title="🎬其它",萧山新闻综合
-http://l.cztvcloud.com/channels/lantian/SXxiaoshan1/720p.m3u8?zzhed
-#EXTINF:-1 tvg-name="萧山新闻综合" group-title="🎬其它",萧山新闻综合
 http://l.cztvcloud.com/channels/lantian/SXxiaoshan1/720p.m3u8?cWlkPSZzPTg3OWMwYmMyZDMzYTFhZGY3NDQxMjgyYTg1MmUzNTY0JmVzPTE3MDY2Nzc4NzMmdXVpZD0yMjdiY2MzNGNiNGY0MThlYjRiY2IxYzcwNmZjODNkMS02NzQ3NDY2NyZ2PTImYXM9MCZjZG5leF9pZD10eF9waG9uZV9saXZl
+#EXTINF:-1 tvg-name="萧山新闻综合" group-title="🎬其它",萧山新闻综合
+http://l.cztvcloud.com/channels/lantian/SXxiaoshan1/720p.m3u8?zzhed
 #EXTINF:-1 tvg-name="萧山新闻综合 (720p) [Not 24/7]" group-title="🎬其它",萧山新闻综合 (720p) [Not 24/7]
 https://l.cztvcloud.com/channels/lantian/SXxiaoshan1/720p.m3u8
 #EXTINF:-1 tvg-name="衢江新闻综合" group-title="🎬其它",衢江新闻综合
@@ -614,9 +588,9 @@ http://129.211.14.102:25000/1905.php?t=1&id=LIVEOYY31H24H48NE&token=www.9kds.com
 #EXTINF:-1 tvg-name="1905电影网环球经典" group-title="🎬其它",1905电影网环球经典
 http://129.211.14.102:25000/1905.php?t=1&id=LIVE8J4LTCXPI7QJ5_261&token=www.9kds.com
 #EXTINF:-1 tvg-name="动作电影" group-title="🎬其它",动作电影
-https://live.264788.xyz/channel/newtvdongzuodianying?streamid=05ad887268adec6763cb8eafd1c0b6ec&livekey=01WgOR41rriMmMkzNsd0UoaxJRwetZdxIvtVk
-#EXTINF:-1 tvg-name="动作电影" group-title="🎬其它",动作电影
 https://live.264788.xyz/channel/newtvdongzuodianying?streamid=dc4df8b22f3ce9e79832bdd91cd7ea76&livekey=01WgOR41rriMmMkzNsd0UoaxJRwetZdxIvtVk
+#EXTINF:-1 tvg-name="动作电影" group-title="🎬其它",动作电影
+https://live.264788.xyz/channel/newtvdongzuodianying?streamid=05ad887268adec6763cb8eafd1c0b6ec&livekey=01WgOR41rriMmMkzNsd0UoaxJRwetZdxIvtVk
 #EXTINF:-1 tvg-name="动作电影咪咕" group-title="🎬其它",动作电影咪咕
 https://live.264788.xyz/channel/newtvdongzuodianying?streamid=dc4df8b22f3ce9e79832bdd91cd7ea76&livekey=01WgOR41rriMmMkzNsd0UoaxJRwetZdxIvtVk
 #EXTINF:-1 tvg-name="动作电影咪咕" group-title="🎬其它",动作电影咪咕
@@ -626,7 +600,7 @@ http://cfss.cc/cdn/huya/21059588.flv
 #EXTINF:-1 tvg-name="广东体育" group-title="🎬其它",广东体育
 http://115.29.208.41:34567/gd.php?id=1184
 #EXTINF:-1 tvg-name="精品体育" group-title="🎬其它",精品体育
-https://live.264788.xyz/channel/newtvjingpintiyu?streamid=c6d38d114b6ac7088f9600529f26f47a&livekey=01WgOR41rriMmMkzNsd0UoaxJRwetZdxIvtVk
+https://live.264788.xyz/channel/newtvjingpintiyu?streamid=53f79016c385f5c91cedaba25c3b0559&livekey=01WgOR41rriMmMkzNsd0UoaxJRwetZdxIvtVk
 #EXTINF:-1 tvg-name="天下足球" group-title="🎬其它",天下足球
 https://live.264788.xyz/channel/tianxiazuqiu?streamid=17d33b43b067622afac79b2f4f9ecd29&livekey=01WgOR41rriMmMkzNsd0UoaxJRwetZdxIvtVk
 #EXTINF:-1 tvg-name="天下足球" group-title="🎬其它",天下足球
@@ -640,8 +614,8 @@ https://live.264788.xyz/channel/jingcailanqiu?streamid=38ee65d3b9fee2eb971b05b0a
 #EXTINF:-1 tvg-name="睛彩篮球" group-title="🎬其它",睛彩篮球
 https://live.264788.xyz/channel/jingcailanqiu?streamid=40e579f6c4fc2784fadd3338b2de8b93&livekey=01WgOR41rriMmMkzNsd0UoaxJRwetZdxIvtVk
 #EXTINF:-1 tvg-name="炫舞未来" group-title="🎬其它",炫舞未来
-https://live.264788.xyz/channel/newtvxuanwuweilai?streamid=eb8ff971ab3cb4fd6b4352548dd05b44&livekey=01WgOR41rriMmMkzNsd0UoaxJRwetZdxIvtVk
-#EXTINF:-1 tvg-name="炫舞未来" group-title="🎬其它",炫舞未来
 https://live.264788.xyz/channel/newtvxuanwuweilai?streamid=5a841c808d813604ff9195cad9e21670&livekey=01WgOR41rriMmMkzNsd0UoaxJRwetZdxIvtVk
+#EXTINF:-1 tvg-name="炫舞未来" group-title="🎬其它",炫舞未来
+https://live.264788.xyz/channel/newtvxuanwuweilai?streamid=eb8ff971ab3cb4fd6b4352548dd05b44&livekey=01WgOR41rriMmMkzNsd0UoaxJRwetZdxIvtVk
 #EXTINF:-1 tvg-name="高清舞曲" group-title="🎬其它",高清舞曲
 https://txmov2.a.kwimgs.com/upic/2022/03/25/20/BMjAyMjAzMjUyMDUyNTZfMjM0NDc1MTE5N183MDQ0NzkzMTQxOV8wXzM=_b_B383b34c7a7c97f97b5350f622d8da0a6.mp4?tag=1-1648554367-std-1-puqq96jiry-1167f7fd60758f88&clientCacheKey=3x3qtumzyu5rh6w_b.mp4&tt=b&di=79c43beb&bp=12681
