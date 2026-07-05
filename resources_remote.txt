@@ -33,6 +33,7 @@ https://raw.githubusercontent.com/YanG-1989/m3u/main/Gather.m3u
 https://raw.githubusercontent.com/yuanzl77/IPTV/master/live.txt
 https://raw.githubusercontent.com/zxmlxw520/5566/refs/heads/main/cjdszb.txt
 https://raw.githubusercontent.com/zxmlxw520/5566/refs/heads/main/gqds+.txt
+https://raw.githubusercontent.com/iptv-org/iptv/refs/heads/master/streams/us.m3u
 https://www.iyouhun.com/tv/myIPTV/ipv4.m3u
 https://www.iyouhun.com/tv/myIPTV/ipv6.m3u
 https://jihulab.com/owen2000wy/owentv/-/raw/main/HP20230319.txt
