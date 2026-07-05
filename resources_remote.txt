@@ -23,6 +23,11 @@ https://raw.githubusercontent.com/HerbertHe/iptv-sources/refs/heads/gh-pages/all
 https://raw.githubusercontent.com/iptv-org/iptv/gh-pages/countries/cn.m3u
 https://raw.githubusercontent.com/iptv-org/iptv/master/streams/cn.m3u
 https://raw.githubusercontent.com/Jsnzkpg/Jsnzkpg/Jsnzkpg/Jsnzkpg1
+https://raw.githubusercontent.com/judy-gotv/iptv/refs/heads/main/Roku-All.m3u
+https://raw.githubusercontent.com/judy-gotv/iptv/refs/heads/main/SOFAST.m3u
+https://raw.githubusercontent.com/judy-gotv/iptv/refs/heads/main/SamsungTVPlus-All.m3u
+https://raw.githubusercontent.com/judy-gotv/iptv/refs/heads/main/main/klowdtv.m3u
+https://raw.githubusercontent.com/judy-gotv/iptv/refs/heads/main/distrotv.m3u
 https://raw.githubusercontent.com/kimwang1978/collect-tv-txt/main/merged_output.txt
 https://raw.githubusercontent.com/mymsnn/DailyIPTV/main/outputs/full_validated.m3u
 https://raw.githubusercontent.com/suxuang/myIPTV/main/ipv4.m3u
