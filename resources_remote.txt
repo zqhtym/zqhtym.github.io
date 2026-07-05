@@ -15,6 +15,7 @@ https://live.zbds.top/tv/iptv4.txt
 https://raw.githubusercontent.com/zqhtym/iptv-api/refs/heads/master/output/xp_result.txt
 https://raw.githubusercontent.com/alantang1977/iptv_api/refs/heads/main/output/live_ipv4.txt
 https://raw.githubusercontent.com/alantang1977/iptv-auto/refs/heads/main/my.txt
+https://raw.githubusercontent.com/CCSH/IPTV/refs/heads/main/live.m3u
 https://raw.githubusercontent.com/develop202/migu_video/main/interface.txt
 https://raw.githubusercontent.com/Guovin/iptv-api/refs/heads/gd/output/result.m3u
 https://raw.githubusercontent.com/fafa002/yf2025/refs/heads/main/yiyifafa.txt
