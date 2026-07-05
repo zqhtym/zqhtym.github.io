@@ -17,7 +17,8 @@ https://raw.githubusercontent.com/alantang1977/iptv_api/refs/heads/main/output/l
 https://raw.githubusercontent.com/alantang1977/iptv-auto/refs/heads/main/my.txt
 https://raw.githubusercontent.com/develop202/migu_video/main/interface.txt
 https://raw.githubusercontent.com/fafa002/yf2025/refs/heads/main/yiyifafa.txt
-https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u       
+https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u  
+https://raw.githubusercontent.com/HerbertHe/iptv-sources/refs/heads/gh-pages/all.m3u
 https://raw.githubusercontent.com/iptv-org/iptv/gh-pages/countries/cn.m3u
 https://raw.githubusercontent.com/iptv-org/iptv/master/streams/cn.m3u
 https://raw.githubusercontent.com/Jsnzkpg/Jsnzkpg/Jsnzkpg/Jsnzkpg1
