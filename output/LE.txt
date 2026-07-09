@@ -61,8 +61,8 @@ Yahoo! Finance (1080p),https://yahoo-plex.amagi.tv/playlist.m3u8
 
 翡翠台,http://183.62.8.58:50085/tsfile/live/0017_1.m3u8?key=txiptv&playlive=1&authid=0
 明珠台,http://183.62.8.58:50085/tsfile/live/0018_1.m3u8?key=txiptv&playlive=1&authid=0
-TVBS亚洲,http://38.64.72.148/hls/modn/list/4005/chunklist1.m3u8?
 TVBS亚洲,http://d2e1asnsl7br7b.cloudfront.net/7782e205e72f43aeb4a48ec97f66ebbe/index_5.m3u8?zshijd
+TVBS亚洲,http://38.64.72.148/hls/modn/list/4005/chunklist1.m3u8?
 Viutv,https://turkmedya-live.ercdn.net/tv360/tv360.m3u8
 📺央视,#genre#
 
@@ -81,7 +81,6 @@ CCTV14,http://119.62.24.75:50085/tsfile/live/0015_1.m3u8?key=txiptv&playlive=0&a
 
 
 🔄4K视频[刷新就是新内容],http://xjj1.716888.xyz/fenlei/4k/4k.php
-A Spor (1080p),https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8
 A2TV (1080p),https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/a2tv/a2tv.m3u8
 Altaghier TV (1080p),https://jmc-live.ercdn.net/altaghier/altaghier.m3u8
 BUTV10 (Boston University) (1080p) [Not 24/7],https://cdnapisec.kaltura.com/p/2184561/sp/218456100/playManifest/entryId/1_68qxw4eu/format/applehttp/a.m3u8
@@ -98,7 +97,6 @@ DraftKings Network (1080p),https://na.linear.zype.com/e0bd0e23-a958-4e43-8164-4f
 FashionTV Secrets (1080p),https://ssai.aniview.com/api/v1/hls/stream.m3u8?AVS_SSAIID=67c0c39764ad6f7dab07aa0b&AV_APPNAME=[ADS.APP_NAME]&AV_APPPKGNAME=[ADS.APP_BUNDLE]&AV_APPSTOREURL=[ADS.APP_STORE_URL]&AV_CCPA=[ADS.US_PRIVACY]&AV_CLIENT_SECTION=ftv_secrets&AV_CONSENT=[ADS.GDPR_CONSENT]&AV_CONTENT_CAT=IAB7&AV_CONTENT_CHANNEL=&AV_CONTENT_CONTEXT=&AV_CONTENT_EPISODE=&AV_CONTENT_GENRE=fashion+and+lifestyle&AV_CONTENT_ID=[ADS.VIDAA_ADS_CONTENTID]&AV_CONTENT_KEYWORDS=&AV_CONTENT_LANGUAGE=en&AV_CONTENT_LENGTH=&AV_CONTENT_NETWORK=&AV_CONTENT_PROVIDER=FTV&AV_CONTENT_RATING=R&AV_CONTENT_SEASON=&AV_CONTENT_SERIES=&AV_CONTENT_TITLE=&AV_CONTENT_URL=&AV_DNT=[ADS.DNT]&AV_GDPR=[ADS.GDPR]&AV_HEIGHT=[ADS.H]&AV_IDFA=[ADS.IFA]&AV_IFA_TYPE=[ADS.IFA_TYPE]&AV_LANGUAGE=[ADS.DEVICE_LANGUAGE]&AV_OSVERS=[ADS.DEVICE_OSV]&AV_RTB_DEVICE_TYPE=[ADS.DEVICE_TYPE]&AV_VAUTH=[ADS.VAUTH]&AV_WIDTH=[ADS.W]&Content_Id=[ADS.ADS_CONTENTID]&ads.vidaa_ads_param=1191723366&cb=[CACHEBUSTER]&content_channel_name=ftv+-fashiontv+Secrets&content_livestream=1
 Folketinget (1080p) [Not 24/7],https://cdnapi.kaltura.com/p/2158211/sp/327418300/playManifest/entryId/1_24gfa7qq/protocol/https/format/applehttp/a.m3u8
 GNN TV (1080p),https://na.linear.zype.com/bf94f9f4-383c-40e0-9d49-279a4f33ab8d/f29b8836-d990-4c8d-b421-192a8f43edc4-zype/live.m3u8
-Gospel Truth TV (1080p),https://na.linear.zype.com/bf94f9f4-383c-40e0-9d49-279a4f33ab8d/f29b8836-d990-4c8d-b421-192a8f43edc4-zype/manifest.m3u8
 HEi Now (1080p),https://copacogen.desdeparaguay.net/heitv/heitv_py_alta/playlist.m3u8?admin=nacion
 Hala London (1080p),https://halalondon-live.ercdn.net/halalondon/halalondon.m3u8
 Jordan Satellite Channel (1080p),https://jrtv-live.ercdn.net/jordanhd/jordanhd.m3u8
@@ -107,11 +105,9 @@ Kanal D (1080p),https://demiroren.daioncdn.net/kanald/kanald.m3u8?app=kanald_web
 Latele (1080p),https://copacotf.desdeparaguay.net/latele/latele_py_alta/playlist.m3u8?admin=tvaccion
 Latina Clasicos (1080p),https://redirector.rudo.video/hls-video/plus226/latina2/latina2.smil/playlist.m3u8
 NPY (1080p),https://copacogen.desdeparaguay.net/npy/npy_py_alta/playlist.m3u8?admin=tvaccion
-Pauta (1080p),https://redirector.rudo.video/hls-video/ey6283je82983je9823je8jowowiekldk9838274/pautatv/pautatv.smil/playlist.m3u8
 RT India (1080p),https://rt-india.rttv.com/dvr/rtindia/playlist.m3u8
 Real Wild (1080p),https://lds-realwild-rakuten.amagi.tv/playlist.m3u8
 SQCS Canal 4 (1080p),https://video0.rogohosting.com:19360/4982/4982.m3u8
-TV 100 (1080p),https://tv100-live.daioncdn.net/tv100/tv100.m3u8
 TV Latina (1080p),https://castv10.plugstreaming.com:19360/redtv/redtv.m3u8
 TVMarineret (1080p),http://sdream.info:8080/hls/livestream/index.m3u8
 Tele 1 (1080p),https://tele1-live.ercdn.net/tele1/tele1.m3u8
@@ -126,13 +122,10 @@ CNA新闻,http://d2e1asnsl7br7b.cloudfront.net/7782e205e72f43aeb4a48ec97f66ebbe/
 亳州新闻,http://zbbf2.ahbztv.com/live/416.m3u8?zanhd
 半岛新闻,http://live-hls-web-aja.getaj.net/AJA/02.m3u8?zshijd
 广东新闻,http://183.62.8.58:50085/tsfile/live/1001_1.m3u8?key=txiptv&playlive=1&authid=0
-永嘉新闻综合,http://l.cztvcloud.com/channels/lantian/SXyongjia1/720p.m3u8
 永嘉新闻综合,http://l.cztvcloud.com/channels/lantian/SXyongjia1/720p.m3u8?zzhed&quot;
 永嘉新闻综合,http://l.cztvcloud.com/channels/lantian/SXyongjia1/720p.m3u8?zzhed
-浙江|诸暨新闻综合,http://l.cztvcloud.com/channels/lantian/SXzhuji3/720p.m3u8
 浙江公共新闻,http://ali-m-l.cztv.com/channels/lantian/channel07/1080p.m3u8
 浙江公共新闻 # Tier:A Score:10,http://ali-m-l.cztv.com/channels/lantian/channel07/1080p.m3u8
 浙江新闻,https://ali-m-l.cztv.com/channels/lantian/channel07/1080p.m3u8
 萧山新闻综合,http://l.cztvcloud.com/channels/lantian/SXxiaoshan1/720p.m3u8?cWlkPSZzPTg3OWMwYmMyZDMzYTFhZGY3NDQxMjgyYTg1MmUzNTY0JmVzPTE3MDY2Nzc4NzMmdXVpZD0yMjdiY2MzNGNiNGY0MThlYjRiY2IxYzcwNmZjODNkMS02NzQ3NDY2NyZ2PTImYXM9MCZjZG5leF9pZD10eF9waG9uZV9saXZl
 衢江新闻综合,http://l.cztvcloud.com/channels/lantian/SXqujiang1/720p.m3u8?zzhed
-诸暨新闻综合 # Tier:A Score:10,https://l.cztvcloud.com/channels/lantian/SXzhuji3/720p.m3u8

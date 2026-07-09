@@ -112,9 +112,9 @@ http://183.62.8.58:50085/tsfile/live/0017_1.m3u8?key=txiptv&playlive=1&authid=0
 #EXTINF:-1 tvg-name="明珠台" group-title="🌊港·澳·台",明珠台
 http://183.62.8.58:50085/tsfile/live/0018_1.m3u8?key=txiptv&playlive=1&authid=0
 #EXTINF:-1 tvg-name="TVBS亚洲" group-title="🌊港·澳·台",TVBS亚洲
-http://38.64.72.148/hls/modn/list/4005/chunklist1.m3u8?
-#EXTINF:-1 tvg-name="TVBS亚洲" group-title="🌊港·澳·台",TVBS亚洲
 http://d2e1asnsl7br7b.cloudfront.net/7782e205e72f43aeb4a48ec97f66ebbe/index_5.m3u8?zshijd
+#EXTINF:-1 tvg-name="TVBS亚洲" group-title="🌊港·澳·台",TVBS亚洲
+http://38.64.72.148/hls/modn/list/4005/chunklist1.m3u8?
 #EXTINF:-1 tvg-name="Viutv" group-title="🌊港·澳·台",Viutv
 https://turkmedya-live.ercdn.net/tv360/tv360.m3u8
 #EXTINF:-1 tvg-name="CCTV5+" group-title="📺央视",CCTV5+
@@ -131,8 +131,6 @@ http://1.94.31.214/php/hntv.php?id=hnws#http://lxajh.top/tv/hn.php?id=hnws
 http://59.39.89.130:60901/tsfile/live/0125_15.m3u8?key=txiptv&playlive=1&authid=0
 #EXTINF:-1 tvg-name="🔄4K视频[刷新就是新内容]" group-title="🎬其它",🔄4K视频[刷新就是新内容]
 http://xjj1.716888.xyz/fenlei/4k/4k.php
-#EXTINF:-1 tvg-name="A Spor (1080p)" group-title="🎬其它",A Spor (1080p)
-https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8
 #EXTINF:-1 tvg-name="A2TV (1080p)" group-title="🎬其它",A2TV (1080p)
 https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/a2tv/a2tv.m3u8
 #EXTINF:-1 tvg-name="Altaghier TV (1080p)" group-title="🎬其它",Altaghier TV (1080p)
@@ -165,8 +163,6 @@ https://ssai.aniview.com/api/v1/hls/stream.m3u8?AVS_SSAIID=67c0c39764ad6f7dab07a
 https://cdnapi.kaltura.com/p/2158211/sp/327418300/playManifest/entryId/1_24gfa7qq/protocol/https/format/applehttp/a.m3u8
 #EXTINF:-1 tvg-name="GNN TV (1080p)" group-title="🎬其它",GNN TV (1080p)
 https://na.linear.zype.com/bf94f9f4-383c-40e0-9d49-279a4f33ab8d/f29b8836-d990-4c8d-b421-192a8f43edc4-zype/live.m3u8
-#EXTINF:-1 tvg-name="Gospel Truth TV (1080p)" group-title="🎬其它",Gospel Truth TV (1080p)
-https://na.linear.zype.com/bf94f9f4-383c-40e0-9d49-279a4f33ab8d/f29b8836-d990-4c8d-b421-192a8f43edc4-zype/manifest.m3u8
 #EXTINF:-1 tvg-name="HEi Now (1080p)" group-title="🎬其它",HEi Now (1080p)
 https://copacogen.desdeparaguay.net/heitv/heitv_py_alta/playlist.m3u8?admin=nacion
 #EXTINF:-1 tvg-name="Hala London (1080p)" group-title="🎬其它",Hala London (1080p)
@@ -183,16 +179,12 @@ https://copacotf.desdeparaguay.net/latele/latele_py_alta/playlist.m3u8?admin=tva
 https://redirector.rudo.video/hls-video/plus226/latina2/latina2.smil/playlist.m3u8
 #EXTINF:-1 tvg-name="NPY (1080p)" group-title="🎬其它",NPY (1080p)
 https://copacogen.desdeparaguay.net/npy/npy_py_alta/playlist.m3u8?admin=tvaccion
-#EXTINF:-1 tvg-name="Pauta (1080p)" group-title="🎬其它",Pauta (1080p)
-https://redirector.rudo.video/hls-video/ey6283je82983je9823je8jowowiekldk9838274/pautatv/pautatv.smil/playlist.m3u8
 #EXTINF:-1 tvg-name="RT India (1080p)" group-title="🎬其它",RT India (1080p)
 https://rt-india.rttv.com/dvr/rtindia/playlist.m3u8
 #EXTINF:-1 tvg-name="Real Wild (1080p)" group-title="🎬其它",Real Wild (1080p)
 https://lds-realwild-rakuten.amagi.tv/playlist.m3u8
 #EXTINF:-1 tvg-name="SQCS Canal 4 (1080p)" group-title="🎬其它",SQCS Canal 4 (1080p)
 https://video0.rogohosting.com:19360/4982/4982.m3u8
-#EXTINF:-1 tvg-name="TV 100 (1080p)" group-title="🎬其它",TV 100 (1080p)
-https://tv100-live.daioncdn.net/tv100/tv100.m3u8
 #EXTINF:-1 tvg-name="TV Latina (1080p)" group-title="🎬其它",TV Latina (1080p)
 https://castv10.plugstreaming.com:19360/redtv/redtv.m3u8
 #EXTINF:-1 tvg-name="TVMarineret (1080p)" group-title="🎬其它",TVMarineret (1080p)
@@ -222,13 +214,9 @@ http://live-hls-web-aja.getaj.net/AJA/02.m3u8?zshijd
 #EXTINF:-1 tvg-name="广东新闻" group-title="🎬其它",广东新闻
 http://183.62.8.58:50085/tsfile/live/1001_1.m3u8?key=txiptv&playlive=1&authid=0
 #EXTINF:-1 tvg-name="永嘉新闻综合" group-title="🎬其它",永嘉新闻综合
-http://l.cztvcloud.com/channels/lantian/SXyongjia1/720p.m3u8
-#EXTINF:-1 tvg-name="永嘉新闻综合" group-title="🎬其它",永嘉新闻综合
 http://l.cztvcloud.com/channels/lantian/SXyongjia1/720p.m3u8?zzhed&quot;
 #EXTINF:-1 tvg-name="永嘉新闻综合" group-title="🎬其它",永嘉新闻综合
 http://l.cztvcloud.com/channels/lantian/SXyongjia1/720p.m3u8?zzhed
-#EXTINF:-1 tvg-name="浙江|诸暨新闻综合" group-title="🎬其它",浙江|诸暨新闻综合
-http://l.cztvcloud.com/channels/lantian/SXzhuji3/720p.m3u8
 #EXTINF:-1 tvg-name="浙江公共新闻" group-title="🎬其它",浙江公共新闻
 http://ali-m-l.cztv.com/channels/lantian/channel07/1080p.m3u8
 #EXTINF:-1 tvg-name="浙江公共新闻 # Tier:A Score:10" group-title="🎬其它",浙江公共新闻 # Tier:A Score:10
@@ -239,5 +227,3 @@ https://ali-m-l.cztv.com/channels/lantian/channel07/1080p.m3u8
 http://l.cztvcloud.com/channels/lantian/SXxiaoshan1/720p.m3u8?cWlkPSZzPTg3OWMwYmMyZDMzYTFhZGY3NDQxMjgyYTg1MmUzNTY0JmVzPTE3MDY2Nzc4NzMmdXVpZD0yMjdiY2MzNGNiNGY0MThlYjRiY2IxYzcwNmZjODNkMS02NzQ3NDY2NyZ2PTImYXM9MCZjZG5leF9pZD10eF9waG9uZV9saXZl
 #EXTINF:-1 tvg-name="衢江新闻综合" group-title="🎬其它",衢江新闻综合
 http://l.cztvcloud.com/channels/lantian/SXqujiang1/720p.m3u8?zzhed
-#EXTINF:-1 tvg-name="诸暨新闻综合 # Tier:A Score:10" group-title="🎬其它",诸暨新闻综合 # Tier:A Score:10
-https://l.cztvcloud.com/channels/lantian/SXzhuji3/720p.m3u8
