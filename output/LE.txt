@@ -62,8 +62,8 @@ Yahoo! Finance (1080p),https://yahoo-plex.amagi.tv/playlist.m3u8
 TVBS亚洲,http://d2e1asnsl7br7b.cloudfront.net/7782e205e72f43aeb4a48ec97f66ebbe/index_5.m3u8?zshijd
 香港卫视,http://47.242.63.189:2203/1234.php?id=8&s=2
 纬来体育,http://47.242.63.189:2203/1234.php?id=28&s=4
-纬来育乐,http://47.242.63.189:2203/1234.php?id=31&s=4
 纬来育乐,http://47.242.63.189:2203/1234.php?id=26&s=4
+纬来育乐,http://47.242.63.189:2203/1234.php?id=31&s=4
 Viutv,https://turkmedya-live.ercdn.net/tv360/tv360.m3u8
 台视新闻,http://38.64.72.148:80/hls/modn/list/4013/chunklist0.m3u8?blog.ntnas.top
 无线新闻,http://mag.trexlive.me:80/play/live.php?extension=ts&mac=00:1A:79:06:9A:77&stream=153399
@@ -79,6 +79,7 @@ CCTV2,http://113.90.154.189:9901/tsfile/live/0002_1.m3u8?key=txiptv&playlive=1&a
 CCTV3,http://112.27.145.212:9902/tsfile/live/1502_1.m3u8?key=txiptv&playlive=1&authid=0
 CCTV3,http://113.90.154.189:9901/tsfile/live/0003_1.m3u8?key=txiptv&playlive=1&authid=0
 CCTV3,http://123.118.53.84:45237/tsfile/live/0003_1.m3u8?key=txiptv&playlive=1&authid=0
+CCTV3,http://123.118.55.165:45237/tsfile/live/0003_1.m3u8?key=txiptv&playlive=1&authid=0
 CCTV3,http://112.27.5.218:9901/tsfile/live/faacts/0003_1.m3u8?key=txiptv&playlive=1&authid=0
 CCTV4,http://113.90.154.189:9901/tsfile/live/0004_1.m3u8?key=txiptv&playlive=1&authid=0
 CCTV4,http://123.118.55.165:45237/tsfile/live/0004_1.m3u8?key=txiptv&playlive=1&authid=0
@@ -94,8 +95,8 @@ CCTV7,http://123.118.53.84:45237/tsfile/live/0007_1.m3u8?key=txiptv&playlive=1&a
 CCTV7,http://113.90.154.189:9901/tsfile/live/0007_1.m3u8?key=txiptv&playlive=1&authid=0
 CCTV7,http://111.59.24.227:8181/tsfile/live/0007_1.m3u8?key=txiptv&playlive=1&authid=0
 CCTV8,http://123.118.55.165:45237/tsfile/live/0008_1.m3u8?key=txiptv&playlive=1&authid=0
-CCTV8,http://113.90.154.189:9901/tsfile/live/0008_1.m3u8?key=txiptv&playlive=1&authid=0
 CCTV8,http://123.118.53.84:45237/tsfile/live/0008_1.m3u8?key=txiptv&playlive=1&authid=0
+CCTV8,http://113.90.154.189:9901/tsfile/live/0008_1.m3u8?key=txiptv&playlive=1&authid=0
 CCTV8K,http://47.242.63.189:2203/1234.php?id=9&s=9
 CCTV10,http://113.90.154.189:9901/tsfile/live/0010_1.m3u8?key=txiptv&playlive=1&authid=0
 CCTV-11,http://47.242.63.189:2203/1234.php?id=11&s=8
@@ -104,14 +105,13 @@ CCTV11,http://113.90.154.189:9901/tsfile/live/0011_1.m3u8?key=txiptv&playlive=1&
 CCTV-12,http://47.242.63.189:2203/1234.php?id=12&s=8
 CCTV12,http://123.118.55.165:45237/tsfile/live/0012_1.m3u8?key=txiptv&playlive=1&authid=0
 CCTV12,http://116.113.73.240:9901/tsfile/live/1034_1.m3u8?key=txiptv&playlive=1&authid=0
-CCTV12,http://47.242.63.189:2203/1234.php?id=12&s=8
 CCTV12,http://113.90.154.189:9901/tsfile/live/0012_1.m3u8?key=txiptv&playlive=1&authid=0
+CCTV12,http://47.242.63.189:2203/1234.php?id=12&s=8
 CCTV13,http://113.90.154.189:9901/tsfile/live/0013_1.m3u8?key=txiptv&playlive=1&authid=0
 CCTV14,http://113.90.154.189:9901/tsfile/live/0014_1.m3u8?key=txiptv&playlive=1&authid=0
 CCTV14,http://119.62.24.75:50085/tsfile/live/0015_1.m3u8?key=txiptv&playlive=0&authid=0
 CCTV-15,http://47.242.63.189:2203/1234.php?id=15&s=8
 CCTV15,http://47.242.63.189:2203/1234.php?id=15&s=8
-CCTV-16,http://112.27.5.218:9901/tsfile/live/faacts/1001_1.m3u8?key=txiptv&playlive=1&authid=0
 CCTV16,http://112.27.5.218:9901/tsfile/live/faacts/1001_1.m3u8?key=txiptv&playlive=1&authid=0
 CCTV-17,http://47.242.63.189:2203/1234.php?id=17&s=8
 CCTV17,http://47.242.63.189:2203/1234.php?id=17&s=8
@@ -155,10 +155,13 @@ CCTV音乐,http://112.99.195.122:65000/tsfile/live/1020_1.m3u8?key=txiptv&playli
 深圳卫视,http://113.90.154.189:9901/tsfile/live/0126_1.m3u8?key=txiptv&playlive=1&authid=0
 湖北卫视,http://47.242.63.189:2203/1234.php?id=24&s=8
 湖南卫视,http://47.242.63.189:2203/1234.php?id=23&s=8
+湖南卫视,http://112.123.243.37:50085/tsfile/live/1002_1.m3u8?key=txiptv&playlive=0&authid=0
 甘肃卫视,http://47.242.63.189:2203/1234.php?id=42&s=8
 西藏卫视,http://47.242.63.189:2203/1234.php?id=48&s=8
-贵州卫视,http://47.242.63.189:2203/1234.php?id=37&s=8
+西藏卫视,http://123.118.53.84:45237/tsfile/live/0111_1.m3u8?key=txiptv&playlive=1&authid=0
 贵州卫视,http://123.118.53.84:45237/tsfile/live/0120_1.m3u8?key=txiptv&playlive=1&authid=0
+贵州卫视,http://47.242.63.189:2203/1234.php?id=37&s=8
+辽宁卫视,http://112.123.243.37:50085/tsfile/live/0126_1.m3u8?key=txiptv&playlive=0&authid=0
 辽宁卫视,http://47.242.63.189:2203/1234.php?id=44&s=8
 重庆卫视,http://47.242.63.189:2203/1234.php?id=27&s=8
 青海卫视,http://47.242.63.189:2203/1234.php?id=49&s=8
@@ -188,12 +191,14 @@ Hala London (1080p),https://halalondon-live.ercdn.net/halalondon/halalondon.m3u8
 Jordan Satellite Channel (1080p),https://jrtv-live.ercdn.net/jordanhd/jordanhd.m3u8
 Josué TV (1080p),https://videoserver.tmcreativos.com:19360/abbftuhxxs/abbftuhxxs.m3u8
 Kanal D (1080p),https://demiroren.daioncdn.net/kanald/kanald.m3u8?app=kanald_web&ce=3
+La Nuestra (1080p),https://redirector.rudo.video/hls-video/339f69c6122f6d8f4574732c235f09b7683e31a5/ln/ln.smil/playlist.m3u8
 Latele (1080p),https://copacotf.desdeparaguay.net/latele/latele_py_alta/playlist.m3u8?admin=tvaccion
 Monumental TV (1080p),https://copacogen.desdeparaguay.net/monumentaltv/monumentaltv_alta/playlist.m3u8?admin=tvaccion
 NPY (1080p),https://copacogen.desdeparaguay.net/npy/npy_py_alta/playlist.m3u8?admin=tvaccion
 RT India (1080p),https://rt-india.rttv.com/dvr/rtindia/playlist.m3u8
 Radio Televizija Banovina (1080p) [Not 24/7],https://pool.alter-media.hr:1936/live/myStream/playlist.m3u8?DVR=
 Real Wild (1080p),https://lds-realwild-rakuten.amagi.tv/playlist.m3u8
+T13 En Vivo (1080p),https://redirector.dps.live/hls/t13/playlist.m3u8
 TV 8 (1080p),https://tv8.daioncdn.net/tv8/tv8.m3u8?app=7ddc255a-ef47-4e81-ab14-c0e5f2949788&ce=3
 TV Latina (1080p),https://castv10.plugstreaming.com:19360/redtv/redtv.m3u8
 Tropi Q 99.7 FM (1080p),https://www.streaming507.net:19360/videotropiq/videotropiq.m3u8
