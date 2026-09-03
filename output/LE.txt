@@ -82,6 +82,9 @@ CCTV8K,http://125.94.244.29:2101/1234.php?id=9&s=9
 
 
 🔄4K视频[刷新就是新内容],http://xjj1.716888.xyz/fenlei/4k/4k.php
+A Haber (1080p),https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/ahaber/ahaber.m3u8
+A Spor (1080p),https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8
+A2TV (1080p),https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/a2tv/a2tv.m3u8
 ATV (1080p),https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/atv/atv_1080p.m3u8
 Altaghier TV (1080p),https://jmc-live.ercdn.net/altaghier/altaghier.m3u8
 BUTV10 (Boston University) (1080p) [Not 24/7],https://cdnapisec.kaltura.com/p/2184561/sp/218456100/playManifest/entryId/1_68qxw4eu/format/applehttp/a.m3u8
@@ -101,8 +104,10 @@ Halk TV (1080p),https://halktv-live.daioncdn.net/halktv/halktv.m3u8
 Jordan Satellite Channel (1080p),https://jrtv-live.ercdn.net/jordanhd/jordanhd.m3u8
 Josué TV (1080p),https://videoserver.tmcreativos.com:19360/abbftuhxxs/abbftuhxxs.m3u8
 Kanal D (1080p),https://demiroren.daioncdn.net/kanald/kanald.m3u8?app=kanald_web&ce=3
+La Nuestra (1080p),https://redirector.rudo.video/hls-video/339f69c6122f6d8f4574732c235f09b7683e31a5/ln/ln.smil/playlist.m3u8
 Latele (1080p),https://copacotf.desdeparaguay.net/latele/latele_py_alta/playlist.m3u8?admin=tvaccion
 Lausitzwelle (1080p),https://h056.video-stream-hosting.de/easycast11-live/_definst_/mp4:livestreamhd2/playlist.m3u8?ref=
+MCI Televisión (1080p),https://video.ejeserver.com/live/mcitelevision.m3u8
 Monumental TV (1080p),https://copacogen.desdeparaguay.net/monumentaltv/monumentaltv_alta/playlist.m3u8?admin=tvaccion
 NPY (1080p),https://copacogen.desdeparaguay.net/npy/npy_py_alta/playlist.m3u8?admin=tvaccion
 RT India (1080p),https://rt-india.rttv.com/dvr/rtindia/playlist.m3u8
@@ -110,13 +115,13 @@ Real Wild (1080p),https://lds-realwild-rakuten.amagi.tv/playlist.m3u8
 T13 En Vivo (1080p),https://redirector.dps.live/hls/t13/playlist.m3u8
 TJK TV (1080p),https://tjktv-live.tjk.org/tjktv.m3u8
 TV 8 (1080p),https://tv8.daioncdn.net/tv8/tv8.m3u8?app=7ddc255a-ef47-4e81-ab14-c0e5f2949788&ce=3
+TV Latina (1080p),https://castv10.plugstreaming.com:19360/redtv/redtv.m3u8
 TVMarineret (1080p),http://sdream.info:8080/hls/livestream/index.m3u8
-Tropi Q 99.7 FM (1080p),https://www.streaming507.net:19360/videotropiq/videotropiq.m3u8
 amc电影台,http://125.94.244.29:2101/1234.php?id=5&s=6
 电影_斯坦森,http://cfss.cc/cdn/huya/21059588.flv
 纬来电影,http://125.94.244.29:2101/1234.php?id=30&s=4
-美亚电影台,http://125.94.244.29:2101/1234.php?id=36&s=3
 美亚电影台,http://125.94.244.29:2101/1234.php?id=19&s=1
+美亚电影台,http://125.94.244.29:2101/1234.php?id=36&s=3
 娱乐新闻台,http://125.94.244.29:2101/1234.php?id=7&s=2
 娱乐新闻台,http://125.94.244.29:2101/1234.php?id=36&s=2
 娱乐新闻台,http://125.94.244.29:2101/1234.php?id=16&s=1

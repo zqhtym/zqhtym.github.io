@@ -133,6 +133,12 @@ http://125.94.244.29:2101/1234.php?id=9&s=9
 http://173.208.187.18:82/live/fyzq.m3u8?jsbt=1760355398&jsbk=d838949ce8ba43fabfa8e16a02449bcf
 #EXTINF:-1 tvg-name="🔄4K视频[刷新就是新内容]" group-title="🎬其它",🔄4K视频[刷新就是新内容]
 http://xjj1.716888.xyz/fenlei/4k/4k.php
+#EXTINF:-1 tvg-name="A Haber (1080p)" group-title="🎬其它",A Haber (1080p)
+https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/ahaber/ahaber.m3u8
+#EXTINF:-1 tvg-name="A Spor (1080p)" group-title="🎬其它",A Spor (1080p)
+https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8
+#EXTINF:-1 tvg-name="A2TV (1080p)" group-title="🎬其它",A2TV (1080p)
+https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/a2tv/a2tv.m3u8
 #EXTINF:-1 tvg-name="ATV (1080p)" group-title="🎬其它",ATV (1080p)
 https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/atv/atv_1080p.m3u8
 #EXTINF:-1 tvg-name="Altaghier TV (1080p)" group-title="🎬其它",Altaghier TV (1080p)
@@ -171,10 +177,14 @@ https://jrtv-live.ercdn.net/jordanhd/jordanhd.m3u8
 https://videoserver.tmcreativos.com:19360/abbftuhxxs/abbftuhxxs.m3u8
 #EXTINF:-1 tvg-name="Kanal D (1080p)" group-title="🎬其它",Kanal D (1080p)
 https://demiroren.daioncdn.net/kanald/kanald.m3u8?app=kanald_web&ce=3
+#EXTINF:-1 tvg-name="La Nuestra (1080p)" group-title="🎬其它",La Nuestra (1080p)
+https://redirector.rudo.video/hls-video/339f69c6122f6d8f4574732c235f09b7683e31a5/ln/ln.smil/playlist.m3u8
 #EXTINF:-1 tvg-name="Latele (1080p)" group-title="🎬其它",Latele (1080p)
 https://copacotf.desdeparaguay.net/latele/latele_py_alta/playlist.m3u8?admin=tvaccion
 #EXTINF:-1 tvg-name="Lausitzwelle (1080p)" group-title="🎬其它",Lausitzwelle (1080p)
 https://h056.video-stream-hosting.de/easycast11-live/_definst_/mp4:livestreamhd2/playlist.m3u8?ref=
+#EXTINF:-1 tvg-name="MCI Televisión (1080p)" group-title="🎬其它",MCI Televisión (1080p)
+https://video.ejeserver.com/live/mcitelevision.m3u8
 #EXTINF:-1 tvg-name="Monumental TV (1080p)" group-title="🎬其它",Monumental TV (1080p)
 https://copacogen.desdeparaguay.net/monumentaltv/monumentaltv_alta/playlist.m3u8?admin=tvaccion
 #EXTINF:-1 tvg-name="NPY (1080p)" group-title="🎬其它",NPY (1080p)
@@ -189,10 +199,10 @@ https://redirector.dps.live/hls/t13/playlist.m3u8
 https://tjktv-live.tjk.org/tjktv.m3u8
 #EXTINF:-1 tvg-name="TV 8 (1080p)" group-title="🎬其它",TV 8 (1080p)
 https://tv8.daioncdn.net/tv8/tv8.m3u8?app=7ddc255a-ef47-4e81-ab14-c0e5f2949788&ce=3
+#EXTINF:-1 tvg-name="TV Latina (1080p)" group-title="🎬其它",TV Latina (1080p)
+https://castv10.plugstreaming.com:19360/redtv/redtv.m3u8
 #EXTINF:-1 tvg-name="TVMarineret (1080p)" group-title="🎬其它",TVMarineret (1080p)
 http://sdream.info:8080/hls/livestream/index.m3u8
-#EXTINF:-1 tvg-name="Tropi Q 99.7 FM (1080p)" group-title="🎬其它",Tropi Q 99.7 FM (1080p)
-https://www.streaming507.net:19360/videotropiq/videotropiq.m3u8
 #EXTINF:-1 tvg-name="amc电影台" group-title="🎬其它",amc电影台
 http://125.94.244.29:2101/1234.php?id=5&s=6
 #EXTINF:-1 tvg-name="电影_斯坦森" group-title="🎬其它",电影_斯坦森
@@ -200,9 +210,9 @@ http://cfss.cc/cdn/huya/21059588.flv
 #EXTINF:-1 tvg-name="纬来电影" group-title="🎬其它",纬来电影
 http://125.94.244.29:2101/1234.php?id=30&s=4
 #EXTINF:-1 tvg-name="美亚电影台" group-title="🎬其它",美亚电影台
-http://125.94.244.29:2101/1234.php?id=36&s=3
-#EXTINF:-1 tvg-name="美亚电影台" group-title="🎬其它",美亚电影台
 http://125.94.244.29:2101/1234.php?id=19&s=1
+#EXTINF:-1 tvg-name="美亚电影台" group-title="🎬其它",美亚电影台
+http://125.94.244.29:2101/1234.php?id=36&s=3
 #EXTINF:-1 tvg-name="娱乐新闻台" group-title="🎬其它",娱乐新闻台
 http://125.94.244.29:2101/1234.php?id=7&s=2
 #EXTINF:-1 tvg-name="娱乐新闻台" group-title="🎬其它",娱乐新闻台
