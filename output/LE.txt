@@ -62,8 +62,8 @@ Yahoo! Finance (1080p),https://yahoo-plex.amagi.tv/playlist.m3u8
 TVBS亚洲,http://d2e1asnsl7br7b.cloudfront.net/7782e205e72f43aeb4a48ec97f66ebbe/index_5.m3u8?zshijd
 香港卫视,http://125.94.244.29:2101/1234.php?id=8&s=2
 纬来体育,http://125.94.244.29:2101/1234.php?id=28&s=4
-纬来育乐,http://125.94.244.29:2101/1234.php?id=31&s=4
 纬来育乐,http://125.94.244.29:2101/1234.php?id=26&s=4
+纬来育乐,http://125.94.244.29:2101/1234.php?id=31&s=4
 Viutv,https://turkmedya-live.ercdn.net/tv360/tv360.m3u8
 无线新闻,http://125.94.244.29:2101/1234.php?id=46&s=3
 东森综合,http://125.94.244.29:2101/1234.php?id=19&s=4
@@ -84,7 +84,6 @@ CCTV8K,http://125.94.244.29:2101/1234.php?id=9&s=9
 🔄4K视频[刷新就是新内容],http://xjj1.716888.xyz/fenlei/4k/4k.php
 A Haber (1080p),https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/ahaber/ahaber.m3u8
 A Spor (1080p),https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8
-A2TV (1080p),https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/a2tv/a2tv.m3u8
 ATV (1080p),https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/atv/atv_1080p.m3u8
 Altaghier TV (1080p),https://jmc-live.ercdn.net/altaghier/altaghier.m3u8
 BUTV10 (Boston University) (1080p) [Not 24/7],https://cdnapisec.kaltura.com/p/2184561/sp/218456100/playManifest/entryId/1_68qxw4eu/format/applehttp/a.m3u8
@@ -92,7 +91,6 @@ Bravo TV (1080p),https://redirector.rudo.video/hls-video/c54ac2799874375c81c1672
 CINDIE TV (1080p),https://cc-hqw8u5r1nshjc.akamaized.net/scheduler/scheduleMaster/352.m3u8
 CNA(1080p),https://d2e1asnsl7br7b.cloudfront.net/7782e205e72f43aeb4a48ec97f66ebbe/index.m3u8?zshijd
 Canal 5 TV Cozumel (1080p),https://video0.rogohosting.com:19360/tvcozumel/tvcozumel.m3u8
-Canal 7 Salta (1080p),https://vivo.solumedia.com:19360/cooperativa/cooperativa.m3u8
 DraftKings Network (1080p),https://na.linear.zype.com/e0bd0e23-a958-4e43-8164-4f2fef8876a8/fd3614bd-90bf-4530-a277-65ae3a1720c8-zype/live.m3u8
 E40 (1080p),https://copacotf.desdeparaguay.net/e40tv/e40tv_py_alta/playlist.m3u8?admin=tvaccion
 Folketinget (1080p) [Not 24/7],https://cdnapi.kaltura.com/p/2158211/sp/327418300/playManifest/entryId/1_24gfa7qq/protocol/https/format/applehttp/a.m3u8
@@ -111,6 +109,7 @@ Monumental TV (1080p),https://copacogen.desdeparaguay.net/monumentaltv/monumenta
 NPY (1080p),https://copacogen.desdeparaguay.net/npy/npy_py_alta/playlist.m3u8?admin=tvaccion
 RT India (1080p),https://rt-india.rttv.com/dvr/rtindia/playlist.m3u8
 Real Wild (1080p),https://lds-realwild-rakuten.amagi.tv/playlist.m3u8
+T13 En Vivo (1080p),https://redirector.dps.live/hls/t13/playlist.m3u8
 TJK TV (1080p),https://tjktv-live.tjk.org/tjktv.m3u8
 TV 8 (1080p),https://tv8.daioncdn.net/tv8/tv8.m3u8?app=7ddc255a-ef47-4e81-ab14-c0e5f2949788&ce=3
 TV Latina (1080p),https://castv10.plugstreaming.com:19360/redtv/redtv.m3u8
@@ -134,6 +133,7 @@ CNA新闻,http://d2e1asnsl7br7b.cloudfront.net/7782e205e72f43aeb4a48ec97f66ebbe/
 亳州新闻,http://zbbf2.ahbztv.com/live/416.m3u8?zanhd
 半岛新闻,http://live-hls-web-aja.getaj.net/AJA/02.m3u8?zshijd
 永嘉新闻综合,http://l.cztvcloud.com/channels/lantian/SXyongjia1/720p.m3u8?zzhed&quot;
+浙江公共新闻,http://ali-m-l.cztv.com/channels/lantian/channel07/1080p.m3u8
 浙江新闻,https://ali-m-l.cztv.com/channels/lantian/channel07/1080p.m3u8
 诸暨新闻综合,http://l.cztvcloud.com/channels/lantian/SXzhuji3/720p.m3u8?zzhed
 DJ情歌《我就是这么可爱》,https://vd3.bdstatic.com/mda-nc6cy9nxk5e11v7b/sc/bd265_cae_delogo/1646679460838781470/mda-nc6cy9nxk5e11v7b.mp4#
