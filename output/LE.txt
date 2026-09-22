@@ -10,6 +10,7 @@ BBC America,https://bcovlive-a.akamaihd.net/7f5ec16d102f4b5d92e8e27bc95ff424/us-
 Bloomberg Quicktake (720p),https://aegis-cloudfront-1.tubi.video/c597e8ac-bfb2-4a1c-865c-cad55566f953/playlist.m3u8
 Bloomberg TV (720p),https://aegis-cloudfront-1.tubi.video/de29234d-1a53-4cf9-b6ba-9cf412b66d76/playlist.m3u8
 Camp Spoopy (576p),https://stream.ads.ottera.tv/playlist.m3u8?network_id=269
+El Mundo del Campo (720p),https://movil.ejeserver.com/live/elmundodelcampo.m3u8
 CBS News 24/7 (720p),https://cbsn-us.cbsnstream.cbsnews.com/out/v1/55a8648e8f134e82a470f83d562deeca/master.m3u8
 CBS News Baltimore (720p),https://lineup.cbsivideo.com/playout/8877a7d5-b094-4ac8-bc72-75a5fed68e5b/index.m3u8
 CBS News Bay Area (720p),https://cbsn-sf.cbsnstream.cbsnews.com/out/v1/dac63c1abb3f4a2dac9f508f44bb072a/master.m3u8
@@ -61,7 +62,6 @@ TVBS亚洲,http://d2e1asnsl7br7b.cloudfront.net/7782e205e72f43aeb4a48ec97f66ebbe
 Viutv,https://turkmedya-live.ercdn.net/tv360/tv360.m3u8
 📺央视,#genre#
 
-CCTV5+,http://223.78.65.165:9901/tsfile/live/0006_1.m3u8?key=txiptv&playlive=1&authid=0
 RCC TV (1080p) [Not 24/7],https://copacoradios.desdeparaguay.net/rcctv/rcctv/playlist.m3u8?admin=nacion
 风云足球,http://173.208.187.18:82/live/fyzq.m3u8?jsbt=1760355398&jsbk=d838949ce8ba43fabfa8e16a02449bcf
 📡卫视,#genre#
@@ -75,6 +75,7 @@ RCC TV (1080p) [Not 24/7],https://copacoradios.desdeparaguay.net/rcctv/rcctv/pla
 
 
 🔄4K视频[刷新就是新内容],http://xjj1.716888.xyz/fenlei/4k/4k.php
+&xplor HD (1080p) [Geo-blocked],http://dksmedia.tv/play/live.php?mac=00:1A:79:B6:60:3D&stream=209743&extension=ts&play_token=mR7FwO88sY
 ATV (1080p),https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/atv/atv_1080p.m3u8
 Altaghier TV (1080p),https://jmc-live.ercdn.net/altaghier/altaghier.m3u8
 BUTV10 (Boston University) (1080p) [Not 24/7],https://cdnapisec.kaltura.com/p/2184561/sp/218456100/playManifest/entryId/1_68qxw4eu/format/applehttp/a.m3u8
@@ -82,7 +83,6 @@ Bravo TV (1080p),https://redirector.rudo.video/hls-video/c54ac2799874375c81c1672
 CINDIE TV (1080p),https://cc-hqw8u5r1nshjc.akamaized.net/scheduler/scheduleMaster/352.m3u8
 CNA(1080p),https://d2e1asnsl7br7b.cloudfront.net/7782e205e72f43aeb4a48ec97f66ebbe/index.m3u8?zshijd
 Canal 5 TV Cozumel (1080p),https://video0.rogohosting.com:19360/tvcozumel/tvcozumel.m3u8
-Caribbean Advantage TV (1080p) [Not 24/7],https://video2.getstreamhosting.com:19360/8216/8216.m3u8
 DraftKings Network (1080p),https://na.linear.zype.com/e0bd0e23-a958-4e43-8164-4f2fef8876a8/fd3614bd-90bf-4530-a277-65ae3a1720c8-zype/live.m3u8
 E40 (1080p),https://copacotf.desdeparaguay.net/e40tv/e40tv_py_alta/playlist.m3u8?admin=tvaccion
 Folketinget (1080p) [Not 24/7],https://cdnapi.kaltura.com/p/2158211/sp/327418300/playManifest/entryId/1_24gfa7qq/protocol/https/format/applehttp/a.m3u8
@@ -93,7 +93,6 @@ Hala London (1080p),https://halalondon-live.ercdn.net/halalondon/halalondon.m3u8
 Halk TV (1080p),https://halktv-live.daioncdn.net/halktv/halktv.m3u8
 Jordan Satellite Channel (1080p),https://jrtv-live.ercdn.net/jordanhd/jordanhd.m3u8
 Josué TV (1080p),https://videoserver.tmcreativos.com:19360/abbftuhxxs/abbftuhxxs.m3u8
-Kan 11 (1080p),https://kancdn.medonecdn.net/livehls/oil/kancdn-live/live/kan11/live.livx/playlist.m3u8
 Kanal D (1080p),https://demiroren.daioncdn.net/kanald/kanald.m3u8?app=kanald_web&ce=3
 Latele (1080p),https://copacotf.desdeparaguay.net/latele/latele_py_alta/playlist.m3u8?admin=tvaccion
 MCI Televisión (1080p),https://video.ejeserver.com/live/mcitelevision.m3u8
@@ -113,18 +112,17 @@ Tropi Q 99.7 FM (1080p),https://www.streaming507.net:19360/videotropiq/videotrop
 韩国歌舞,https://vd3.bdstatic.com/mda-kasdx4z9kq62e918/sc/mda-kasdx4z9kq62e918.mp4?pd=19&vt=1&playlist=%5B%22hd%22%2C%22sc%22%5D
 高清舞曲,https://txmov2.a.kwimgs.com/upic/2022/03/25/20/BMjAyMjAzMjUyMDUyNTZfMjM0NDc1MTE5N183MDQ0NzkzMTQxOV8wXzM=_b_B383b34c7a7c97f97b5350f622d8da0a6.mp4?tag=1-1648554367-std-1-puqq96jiry-1167f7fd60758f88&clientCacheKey=3x3qtumzyu5rh6w_b.mp4&tt=b&di=79c43beb&bp=12681
 CNA新闻,http://d2e1asnsl7br7b.cloudfront.net/7782e205e72f43aeb4a48ec97f66ebbe/index_4.m3u8?zshijd
-「浙江」永嘉新闻综合,http://l.cztvcloud.com/channels/lantian/SXyongjia1/720p.m3u8?zzhed
 亳州新闻,http://zbbf2.ahbztv.com/live/416.m3u8?zanhd
 半岛新闻,http://live-hls-web-aja.getaj.net/AJA/02.m3u8?zshijd
 太谷新闻综合,https://p2.vzan.com/slowlive/596867413819827251/live.m3u8?zbid=1725814272&tpid=1516989100&type=0
 太谷新闻综合,https://p2.vzan.com/slowlive/596867413819827251/live.m3u8?zbid=1725814272&amp;amp;tpid=1516989100&amp;amp;type=0
+永嘉新闻综合,http://l.cztvcloud.com/channels/lantian/SXyongjia1/720p.m3u8?zzhed
 永嘉新闻综合,http://l.cztvcloud.com/channels/lantian/SXyongjia1/720p.m3u8
 永嘉新闻综合,http://l.cztvcloud.com/channels/lantian/SXyongjia1/720p.m3u8?zzhed&quot;
-永嘉新闻综合,http://l.cztvcloud.com/channels/lantian/SXyongjia1/720p.m3u8?zzhed
 浙江|诸暨新闻综合,http://l.cztvcloud.com/channels/lantian/SXzhuji3/720p.m3u8
 浙江公共新闻,http://ali-m-l.cztv.com/channels/lantian/channel07/1080p.m3u8
-浙江新闻,https://ali-m-l.cztv.com/channels/lantian/channel07/1080p.m3u8
 衢江新闻综合,http://l.cztvcloud.com/channels/lantian/SXqujiang1/720p.m3u8?zzhed
+诸暨新闻综合,http://l.cztvcloud.com/channels/lantian/SXzhuji3/720p.m3u8?zzhed
 DJ情歌《我就是这么可爱》,https://vd3.bdstatic.com/mda-nc6cy9nxk5e11v7b/sc/bd265_cae_delogo/1646679460838781470/mda-nc6cy9nxk5e11v7b.mp4#
 《没有那杯忘情水》DJ版,https://vd3.bdstatic.com/mda-nc9fzq74hdukrgjd/480p/h264_delogo/1646911280223966865/mda-nc9fzq74hdukrgjd.mp4?pd=19&vt=1#
 情歌DJ《红尘没有错＋你为何说了不算＋陪你千山万水》,https://vd3.bdstatic.com/mda-nadfng7qz0sr3ff3/sc/bd265_cae_delogo/1643480883586586354/mda-nadfng7qz0sr3ff3.mp4#
