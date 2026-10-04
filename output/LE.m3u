@@ -137,12 +137,8 @@ https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/ahaber/ahaber.m3u8
 https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8
 #EXTINF:-1 tvg-name="Altaghier TV (1080p)" group-title="🎬其它",Altaghier TV (1080p)
 https://jmc-live.ercdn.net/altaghier/altaghier.m3u8
-#EXTINF:-1 tvg-name="BUTV10 (1080p) [Not 24/7]" group-title="🎬其它",BUTV10 (1080p) [Not 24/7]
-https://cdnapisec.kaltura.com/p/2184561/sp/218456100/playManifest/entryId/1_68qxw4eu/format/applehttp/a.m3u8
 #EXTINF:-1 tvg-name="BUTV10 (Boston University) (1080p) [Not 24/7]" group-title="🎬其它",BUTV10 (Boston University) (1080p) [Not 24/7]
 https://cdnapisec.kaltura.com/p/2184561/sp/218456100/playManifest/entryId/1_68qxw4eu/format/applehttp/a.m3u8
-#EXTINF:-1 tvg-name="CAtv (1080p) [Not 24/7]" group-title="🎬其它",CAtv (1080p) [Not 24/7]
-https://video2.getstreamhosting.com:19360/8216/8216.m3u8
 #EXTINF:-1 tvg-name="CINDIE TV (1080p)" group-title="🎬其它",CINDIE TV (1080p)
 https://cc-hqw8u5r1nshjc.akamaized.net/scheduler/scheduleMaster/352.m3u8
 #EXTINF:-1 tvg-name="CNA(1080p)" group-title="🎬其它",CNA(1080p)
@@ -189,6 +185,8 @@ https://redirector.dps.live/hls/t13/playlist.m3u8
 https://cdnapi.kaltura.com/p/2158211/sp/327418300/playManifest/entryId/1_24gfa7qq/protocol/https/format/applehttp/a.m3u8
 #EXTINF:-1 tvg-name="TV8 (Turkiye) (1080p)" group-title="🎬其它",TV8 (Turkiye) (1080p)
 https://tv8.daioncdn.net/tv8/tv8.m3u8?app=7ddc255a-ef47-4e81-ab14-c0e5f2949788&ce=3
+#EXTINF:-1 tvg-name="TVMarineret (1080p)" group-title="🎬其它",TVMarineret (1080p)
+http://sdream.info:8080/hls/livestream/index.m3u8
 #EXTINF:-1 tvg-name="Tropi Q 99.7 FM (1080p)" group-title="🎬其它",Tropi Q 99.7 FM (1080p)
 https://www.streaming507.net:19360/videotropiq/videotropiq.m3u8
 #EXTINF:-1 tvg-name="电影_斯坦森" group-title="🎬其它",电影_斯坦森
