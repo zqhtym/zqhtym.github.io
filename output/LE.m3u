@@ -123,22 +123,20 @@ http://main.light-ott.net:80/play/live.php?extension=ts&mac=00:1B:79:42:10:51&st
 https://copacoradios.desdeparaguay.net/rcctv/rcctv/playlist.m3u8?admin=nacion
 #EXTINF:-1 tvg-name="风云足球" group-title="📺央视",风云足球
 http://173.208.187.18:82/live/fyzq.m3u8?jsbt=1760355398&jsbk=d838949ce8ba43fabfa8e16a02449bcf
-#EXTINF:-1 tvg-name="江西卫视" group-title="📡卫视",江西卫视
-http://112.27.5.218:9901/tsfile/live/faacts/0138_1.m3u8?key=txiptv&playlive=1&authid=0
 #EXTINF:-1 tvg-name="西藏卫视" group-title="📡卫视",西藏卫视
 http://112.27.5.218:9901/tsfile/live/0111_1.m3u8?key=txiptv&playlive=1&authid=0
 #EXTINF:-1 tvg-name="🔄4K视频[刷新就是新内容]" group-title="🎬其它",🔄4K视频[刷新就是新内容]
 http://xjj1.716888.xyz/fenlei/4k/4k.php
 #EXTINF:-1 tvg-name="A Haber (1080p)" group-title="🎬其它",A Haber (1080p)
 https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/ahaber/ahaber.m3u8
+#EXTINF:-1 tvg-name="A Spor SD (1080p)" group-title="🎬其它",A Spor SD (1080p)
+https://rnttwmjcin.turknet.ercdn.net/lcpmvefbyo/aspor/aspor.m3u8
 #EXTINF:-1 tvg-name="Altaghier TV (1080p)" group-title="🎬其它",Altaghier TV (1080p)
 https://jmc-live.ercdn.net/altaghier/altaghier.m3u8
 #EXTINF:-1 tvg-name="BUTV10 (1080p) [Not 24/7]" group-title="🎬其它",BUTV10 (1080p) [Not 24/7]
 https://cdnapisec.kaltura.com/p/2184561/sp/218456100/playManifest/entryId/1_68qxw4eu/format/applehttp/a.m3u8
 #EXTINF:-1 tvg-name="BUTV10 (Boston University) (1080p) [Not 24/7]" group-title="🎬其它",BUTV10 (Boston University) (1080p) [Not 24/7]
 https://cdnapisec.kaltura.com/p/2184561/sp/218456100/playManifest/entryId/1_68qxw4eu/format/applehttp/a.m3u8
-#EXTINF:-1 tvg-name="CAtv (1080p) [Not 24/7]" group-title="🎬其它",CAtv (1080p) [Not 24/7]
-https://video2.getstreamhosting.com:19360/8216/8216.m3u8
 #EXTINF:-1 tvg-name="CINDIE TV (1080p)" group-title="🎬其它",CINDIE TV (1080p)
 https://cc-hqw8u5r1nshjc.akamaized.net/scheduler/scheduleMaster/352.m3u8
 #EXTINF:-1 tvg-name="CNA(1080p)" group-title="🎬其它",CNA(1080p)
@@ -185,8 +183,6 @@ https://redirector.dps.live/hls/t13/playlist.m3u8
 https://cdnapi.kaltura.com/p/2158211/sp/327418300/playManifest/entryId/1_24gfa7qq/protocol/https/format/applehttp/a.m3u8
 #EXTINF:-1 tvg-name="TV8 (Turkiye) (1080p)" group-title="🎬其它",TV8 (Turkiye) (1080p)
 https://tv8.daioncdn.net/tv8/tv8.m3u8?app=7ddc255a-ef47-4e81-ab14-c0e5f2949788&ce=3
-#EXTINF:-1 tvg-name="TVMarineret (1080p)" group-title="🎬其它",TVMarineret (1080p)
-http://sdream.info:8080/hls/livestream/index.m3u8
 #EXTINF:-1 tvg-name="Tropi Q 99.7 FM (1080p)" group-title="🎬其它",Tropi Q 99.7 FM (1080p)
 https://www.streaming507.net:19360/videotropiq/videotropiq.m3u8
 #EXTINF:-1 tvg-name="电影_斯坦森" group-title="🎬其它",电影_斯坦森
@@ -203,6 +199,8 @@ http://zbbf2.ahbztv.com/live/416.m3u8?zanhd
 http://live-hls-web-aja.getaj.net/AJA/02.m3u8?zshijd
 #EXTINF:-1 tvg-name="太谷新闻综合" group-title="🎬其它",太谷新闻综合
 https://p2.vzan.com/slowlive/596867413819827251/live.m3u8?zbid=1725814272&amp;amp;tpid=1516989100&amp;amp;type=0
+#EXTINF:-1 tvg-name="浙江新闻" group-title="🎬其它",浙江新闻
+https://ali-m-l.cztv.com/channels/lantian/channel07/1080p.m3u8
 #EXTINF:-1 tvg-name="DJ《心在跳情在烧》" group-title="🎬其它",DJ《心在跳情在烧》
 https://vd4.bdstatic.com/mda-mhwf07t27w3gi1y7/1080p/cae_h264/1630406994590156367/mda-mhwf07t27w3gi1y7.mp4#
 #EXTINF:-1 tvg-name="DJ《我们不再是从前》" group-title="🎬其它",DJ《我们不再是从前》
