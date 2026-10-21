@@ -10,7 +10,6 @@ Bloomberg
 Camp
 CBS
 CityNews
-HBO
 FOX
 GO2Travel 
 France24English
