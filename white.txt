@@ -3,7 +3,6 @@
 [BD]al jazeera,https://t.freetv.fun/live/al-jazeera-3.m3u8
 ABC Australia,https://abc-news-dmd-streams-1.akamaized.net/out/v1/701126012d044971b3fa89406a440133/index.m3u8
 ABC WWAY 3,https://townnews.g-mana.live/media/027a05c7-43b6-49eb-ad10-a0c0f10a0754/main.m3u8
-[HD]bbc,https://t.freetv.fun/live/bbc-2.m3u8
 BBC America,https://bcovlive-a.akamaihd.net/7f5ec16d102f4b5d92e8e27bc95ff424/us-east-1/6240731308001/playlist.m3u8
 Bloomberg Quicktake (720p),https://aegis-cloudfront-1.tubi.video/c597e8ac-bfb2-4a1c-865c-cad55566f953/playlist.m3u8
 Bloomberg TV (720p),https://aegis-cloudfront-1.tubi.video/de29234d-1a53-4cf9-b6ba-9cf412b66d76/playlist.m3u8
@@ -30,14 +29,7 @@ CityNews Vancouver (720p),https://citynewsregional.akamaized.net/hls/live/102405
 GB News (1080p),https://rakutenaa-lightning-gbnews-rakuten-ccoa9.amagi.tv/playlist/rakutenAA-lightning-gbnews-rakuten/playlist.m3u8
 GB News (1080p),https://live-gbnews.simplestreamcdn.com/live5/gbnews/bitrate1.isml/manifest.m3u8
 Go2Travel (1080p),https://go2thls.wns.live/hls/stream.m3u8
-HBO HD,http://nor3live.win:80/livehttpplay?channel_id=23356
-HBO 2 HD,http://nor3live.win:80/livehttpplay?channel_id=23357
-HBO FAMILY HD,http://nor3live.win:80/livehttpplay?channel_id=23358
-HBO PLUS HD,http://nor3live.win:80/livehttpplay?channel_id=23359
-HBO SIGNATURE HD,http://nor3live.win:80/livehttpplay?channel_id=23360
-HBO MUNDI HD,http://nor3live.win:80/livehttpplay?channel_id=23361
-HBO POP HD,http://nor3live.win:80/livehttpplay?channel_id=23362
-HBO EXTREME HD,http://nor3live.win:80/livehttpplay?channel_id=23363
+
 LiveNOW from FOX (720p),https://fox-foxnewsnow-vizio.amagi.tv/playlist.m3u8
 NBC Comedy Vault,https://xumo-xumoent-vc-105-z0vpm.fast.nbcuni.com/live/master.m3u8
 NBC News Now,https://xumo-drct-nbcnn-ir8ze.fast.nbcuni.com/live/master.m3u8
