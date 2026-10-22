@@ -103,20 +103,10 @@ http://d2e1asnsl7br7b.cloudfront.net/7782e205e72f43aeb4a48ec97f66ebbe/index_5.m3
 https://turkmedya-live.ercdn.net/tv360/tv360.m3u8
 #EXTINF:-1 tvg-name="台视新闻" group-title="🌊港·澳·台",台视新闻
 http://38.64.72.148:80/hls/modn/list/4013/chunklist0.m3u8?blog.ntnas.top
-#EXTINF:-1 tvg-name="CCTV2" group-title="📺央视",CCTV2
-http://183.223.157.33:9901/tsfile/live/0002_1.m3u8?key=txiptv&playlive=1&authid=0
 #EXTINF:-1 tvg-name="CCTV3" group-title="📺央视",CCTV3
 http://112.27.145.212:9902/tsfile/live/1502_1.m3u8?key=txiptv&playlive=1&authid=0
 #EXTINF:-1 tvg-name="CCTV4" group-title="📺央视",CCTV4
 http://119.62.24.75:50085/tsfile/live/0005_1.m3u8?key=txiptv&playlive=0&authid=0
-#EXTINF:-1 tvg-name="CCTV5" group-title="📺央视",CCTV5
-http://183.223.157.33:9901/tsfile/live/0005_1.m3u8?key=txiptv&playlive=1&authid=0
-#EXTINF:-1 tvg-name="CCTV5+" group-title="📺央视",CCTV5+
-http://183.223.157.33:9901/tsfile/live/0018_1.m3u8?key=txiptv&playlive=1&authid=0
-#EXTINF:-1 tvg-name="CCTV5+体育赛事" group-title="📺央视",CCTV5+体育赛事
-http://223.78.65.165:9901/tsfile/live/0006_1.m3u8?key=txiptv&playlive=1&authid=0
-#EXTINF:-1 tvg-name="CCTV6" group-title="📺央视",CCTV6
-http://183.223.157.33:9901/tsfile/live/0006_1.m3u8?key=txiptv&playlive=1&authid=0
 #EXTINF:-1 tvg-name="CCTV7" group-title="📺央视",CCTV7
 http://119.62.24.75:50085/tsfile/live/0008_1.m3u8?key=txiptv&playlive=0&authid=0
 #EXTINF:-1 tvg-name="CCTV13" group-title="📺央视",CCTV13
@@ -191,8 +181,6 @@ https://video.ejeserver.com/live/mcitelevision.m3u8
 https://copacogen.desdeparaguay.net/monumentaltv/monumentaltv_alta/playlist.m3u8?admin=tvaccion
 #EXTINF:-1 tvg-name="NPY (1080p)" group-title="🎬其它",NPY (1080p)
 https://copacogen.desdeparaguay.net/npy/npy_py_alta/playlist.m3u8?admin=tvaccion
-#EXTINF:-1 tvg-name="News12 Long Island (1080p) [Geo-blocked]" group-title="🎬其它",News12 Long Island (1080p) [Geo-blocked]
-https://mdc.ott.alticeusa.net/live4.ott.optimum.net/live4-uploads/N12LH_WEST_A1/index_new.m3u8?omap=https
 #EXTINF:-1 tvg-name="RT India (1080p)" group-title="🎬其它",RT India (1080p)
 https://rt-india.rttv.com/dvr/rtindia/playlist.m3u8
 #EXTINF:-1 tvg-name="Radio Televizija Banovina (1080p) [Not 24/7]" group-title="🎬其它",Radio Televizija Banovina (1080p) [Not 24/7]
@@ -234,33 +222,21 @@ http://zbbf2.ahbztv.com/live/416.m3u8?zanhd
 #EXTINF:-1 tvg-name="半岛新闻" group-title="🎬其它",半岛新闻
 http://live-hls-web-aja.getaj.net/AJA/02.m3u8?zshijd
 #EXTINF:-1 tvg-name="永嘉新闻综合" group-title="🎬其它",永嘉新闻综合
-http://l.cztvcloud.com/channels/lantian/SXyongjia1/720p.m3u8?zzhed&quot;
-#EXTINF:-1 tvg-name="永嘉新闻综合" group-title="🎬其它",永嘉新闻综合
 http://l.cztvcloud.com/channels/lantian/SXyongjia1/720p.m3u8
-#EXTINF:-1 tvg-name="浙江|诸暨新闻综合" group-title="🎬其它",浙江|诸暨新闻综合
-http://l.cztvcloud.com/channels/lantian/SXzhuji3/720p.m3u8
 #EXTINF:-1 tvg-name="浙江公共新闻" group-title="🎬其它",浙江公共新闻
 http://ali-m-l.cztv.com/channels/lantian/channel07/1080p.m3u8
 #EXTINF:-1 tvg-name="浙江新闻" group-title="🎬其它",浙江新闻
 https://ali-m-l.cztv.com/channels/lantian/channel07/1080p.m3u8
 #EXTINF:-1 tvg-name="苍南新闻" group-title="🎬其它",苍南新闻
 http://l.cztvcloud.com/channels/lantian/SXcangnan1/720p.m3u8?zzhed?
-#EXTINF:-1 tvg-name="苍南新闻综合" group-title="🎬其它",苍南新闻综合
-http://l.cztvcloud.com/channels/lantian/SXcangnan1/720p.m3u8
-#EXTINF:-1 tvg-name="苍南新闻综合频道" group-title="🎬其它",苍南新闻综合频道
-http://l.cztvcloud.com/channels/lantian/SXcangnan1/720p.m3u8
-#EXTINF:-1 tvg-name="萧山新闻综合" group-title="🎬其它",萧山新闻综合
-http://l.cztvcloud.com/channels/lantian/SXxiaoshan1/720p.m3u8?zzhed
 #EXTINF:-1 tvg-name="萧山新闻综合" group-title="🎬其它",萧山新闻综合
 http://l.cztvcloud.com/channels/lantian/SXxiaoshan1/720p.m3u8?cWlkPSZzPTg3OWMwYmMyZDMzYTFhZGY3NDQxMjgyYTg1MmUzNTY0JmVzPTE3MDY2Nzc4NzMmdXVpZD0yMjdiY2MzNGNiNGY0MThlYjRiY2IxYzcwNmZjODNkMS02NzQ3NDY2NyZ2PTImYXM9MCZjZG5leF9pZD10eF9waG9uZV9saXZl
-#EXTINF:-1 tvg-name="萧山新闻综合" group-title="🎬其它",萧山新闻综合
-https://l.cztvcloud.com/channels/lantian/SXxiaoshan1/720p.m3u8
-#EXTINF:-1 tvg-name="萧山新闻综合 (720p) [Not 24/7]" group-title="🎬其它",萧山新闻综合 (720p) [Not 24/7]
-https://l.cztvcloud.com/channels/lantian/SXxiaoshan1/720p.m3u8
+#EXTINF:-1 tvg-name="衢江新闻综合" group-title="🎬其它",衢江新闻综合
+http://l.cztvcloud.com/channels/lantian/SXqujiang1/720p.m3u8?zzhed
+#EXTINF:-1 tvg-name="衢江新闻综合" group-title="🎬其它",衢江新闻综合
+http://l.cztvcloud.com/channels/lantian/SXqujiang1/720p.m3u8
 #EXTINF:-1 tvg-name="诸暨新闻综合" group-title="🎬其它",诸暨新闻综合
 http://l.cztvcloud.com/channels/lantian/SXzhuji3/720p.m3u8?zzhed
-#EXTINF:-1 tvg-name="诸暨新闻综合" group-title="🎬其它",诸暨新闻综合
-https://l.cztvcloud.com/channels/lantian/SXzhuji3/720p.m3u8
 #EXTINF:-1 tvg-name="6首好听情歌DJ" group-title="🎬其它",6首好听情歌DJ
 https://vdse.bdstatic.com//b9c765ede94b5d2bac8cb2a9afc70488.mp4#
 #EXTINF:-1 tvg-name="DJ《心在跳情在烧》" group-title="🎬其它",DJ《心在跳情在烧》
