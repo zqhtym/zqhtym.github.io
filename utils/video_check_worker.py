@@ -296,8 +296,8 @@ def check_video_changes(url):
         # Detect audio before detecting screen changes
         has_audio_detected = False
         try:
-            # Use local ffmpeg.exe and add better error handling for 4.3.1
-            ffmpeg_path = 'ffmpeg.exe' if os.path.exists('ffmpeg.exe') else 'ffmpeg'
+            # On Windows prefer a local ffmpeg.exe; elsewhere (e.g. GitHub Actions) use ffmpeg from PATH
+            ffmpeg_path = 'ffmpeg.exe' if os.name == 'nt' and os.path.exists('ffmpeg.exe') else 'ffmpeg'
             
             # Use legacy FFmpeg command (4.3.1 compatible) with additional error suppression
             cmd_audio_legacy = [

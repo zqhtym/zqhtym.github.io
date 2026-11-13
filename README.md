@@ -1,202 +1,107 @@
-# IPTV直播流检测工具
+# IPTV 直播源检测工具
 
-基于IPTV API框架的高效直播流检测工具，支持大规模并发检测和内存优化。
+从本地和远程直播源中收集频道，依次做黑名单过滤、去重、404 检测、测速、画面/声音检测，
+最后按分类模板生成可直接订阅的播放列表（txt + m3u）。整个流程由 GitHub Actions 定时运行，结果自动提交回仓库。
 
-## 🚀 特性
+## 检测流程
 
-- **基于IPTV API框架**: 采用经过验证的稳定架构
-- **异步并发检测**: 高效的异步网络检测
-- **智能内存管理**: 基于IPTV API的内存优化策略
-- **多阶段检测**: URL有效性 → 视频检测 → 速度测试
-- **GitHub Actions支持**: 自动化部署和检测
-- **结果分类**: 按速度和质量自动分类
+流程拆成三个脚本，各自由一个工作流驱动，通过 `output/` 下的步骤文件衔接：
 
-## 📋 检测流程
+| 脚本 | 步骤 | 输入 | 输出 |
+| --- | --- | --- | --- |
+| `first.py` | Step1 加载资源 | `resources.m3u`、`resources.txt`、`resources_remote.txt`（远程源地址列表） | `output/step1_all_resources.csv` |
+| | Step2 黑名单过滤 + 去掉 URL 中 `$` 之后的注释 | `black.txt` | `output/step2_deblack_deAnnotation.csv` |
+| | Step3 URL 去重 | | `output/step3_unique_resources.csv` |
+| | Step4 可访问性检测（先 HEAD，出错或不是 2xx/3xx 时再用 GET 确认） | | `output/step4_valid_resources.csv` |
+| | Step5 测速，保留 >= 0.2 MB/s | | `output/step5_speed_resources.csv` |
+| `second.py` | Step6 画面变化与声音检测（OpenCV + FFmpeg） | `step5_speed_resources.csv` | `output/step6_video_resources.csv` |
+| `third.py` | Step7 按模板分类，合并白名单 | `step6_video_resources.csv`、`name_filtering_rules.txt`、`white.txt` | `output/LE.txt`、`output/LU.txt` |
+| | Step8 转换成 m3u | | `output/LE.m3u`、`output/LU.m3u` |
 
-1. **URL有效性检测**: 检查链接是否可访问
-2. **视频有效性检测**: 检查是否包含有效视频流
-3. **速度测试**: 测试实际下载速度
-4. **结果分类**: 按速度自动分类输出
+## 输出结果
 
-## 🛠️ 安装和使用
+最新结果都在 `output/` 目录下：
 
-### 本地运行
+- `LE.txt` / `LE.m3u`：速度 >= 1.0 MB/s 的频道
+- `LU.txt` / `LU.m3u`：速度 >= 0.2 MB/s 的频道
+
+说明：
+
+- 只收录频道名能匹配 `name_filtering_rules.txt` 中某个关键词的频道；分类顺序、分类内的频道顺序都按模板中关键词的顺序排列，CCTV 频道再按编号排序。
+- `white.txt` 中的白名单频道不做检测，按 5 MB/s 计入，LE 和 LU 都会收录。
+- 仓库根目录下的 `LE.*` / `LU.*` 是 2026 年 4 月的旧文件，已不再更新，请使用 `output/` 下的文件。
+- 如果仓库开启了 GitHub Pages，可以直接订阅 `https://zqhtym.github.io/output/LE.m3u` 这样的地址。
+
+## 配置文件
+
+| 文件 | 作用 | 格式 |
+| --- | --- | --- |
+| `resources.m3u` / `resources.txt` | 本地直播源 | m3u，或每行 `名称,URL` |
+| `resources_remote.txt` | 远程直播源列表，Step1 会逐个下载 | 每行一个 URL |
+| `black.txt` | URL 黑名单，URL 包含其中任意一行即被过滤 | 每行一个关键字 |
+| `white.txt` | 白名单频道，不检测直接收录 | 每行 `名称,URL` |
+| `name_filtering_rules.txt` | 分类模板 | `分类名,#genre#` 行开始一个分类，下面每行一个频道名关键词 |
+
+## 本地运行
 
 ```bash
-# 克隆项目
-git clone <repository-url>
-cd iptv-check-master
-
-# 安装依赖
 pip install -r requirements.txt
 
-# 准备源文件
-echo "央视1,http://example.com/cctv1.m3u8" > resources.txt
-
-# 运行检测
-python main.py
+python first.py          # Step1 ~ Step5（也可以用 --step1 ... --step5 单独运行某一步，--all 运行全部）
+python second.py         # Step6
+python third.py          # Step7 ~ Step8
 ```
 
-### 配置文件
+- Step6 需要 FFmpeg：Windows 下可以把 `ffmpeg.exe` 放在项目根目录（已在 `.gitignore` 中忽略），其他系统使用 PATH 里的 `ffmpeg`。
+- 在终端里运行 `first.py` 时，Step1 会逐个询问是否处理远程源（回车处理、`skip` 跳过、`auto` 自动处理剩余、`quit` 退出）；非交互环境下自动全部处理。
 
-编辑 `config/config.ini` 文件：
+`second.py` 支持以下环境变量：
 
-```ini
-[Settings]
-source_file = resources.txt
-output_dir = output
-open_url_check = True
-open_video_check = True
-open_speed_test = True
-max_concurrent = 10
-batch_size = 50
-memory_threshold = 80
-```
+| 变量 | 默认值 | 说明 |
+| --- | --- | --- |
+| `VIDEO_CHECK_TIMEOUT` | 15 | 单个视频读帧检测时长（秒） |
+| `VIDEO_TOTAL_TIMEOUT` | 180 | 单个 URL 检测总超时（秒） |
+| `GITHUB_ACTIONS_WORKERS` | 3 | GitHub Actions 上的并发数（本地按 CPU 核数自动决定） |
 
-## 📊 输出结果
+## GitHub Actions
 
-检测结果会按速度分类输出到 `output/` 目录，**每个文件都包含所有分类内容**：
+| 工作流 | 运行脚本 | 定时（UTC / 北京时间） | push 触发文件 |
+| --- | --- | --- | --- |
+| `first-only.yml` | `first.py` | 每周一 22:00 / 周二 06:00 | `first.py`、`iptv_checker.py`、`resources.*`、`resources_remote.txt`、`white.txt`、`requirements.txt` |
+| `second-only.yml` | `second.py` | 每天 17:00 / 次日 01:00 | `second.py`、`iptv_checker.py`、`utils/video_check_worker.py`、`requirements.txt` |
+| `third-only.yml` | `third.py` | 每天 04:00 / 12:00 | `third.py`、`iptv_checker.py`、`requirements.txt` |
 
-- `live+excellent+{timestamp}.txt` - 速度 > 1MB/s (包含欧美、央视、卫视、港澳台、其它)
-- `live+wonderful+{timestamp}.txt` - 速度 > 700KB/s (包含欧美、央视、卫视、港澳台、其它)  
-- `live+good+{timestamp}.txt` - 速度 > 500KB/s (包含欧美、央视、卫视、港澳台、其它)
-- `live+useful+{timestamp}.txt` - 速度 > 200KB/s (包含欧美、央视、卫视、港澳台、其它)
+三个工作流都支持在 Actions 页面手动运行（workflow_dispatch），运行完会把结果文件提交回 `main` 分支。
 
-#### **文件格式示例**
-```
-#genre#欧美
-欧美1,http://example.com/us1.m3u8
-#genre#央视
-央视1,http://example.com/cctv1.m3u8
-#genre#卫视
-卫视1,http://example.com/tv1.m3u8
-#genre#港澳台
-港澳台1,http://example.com/hk1.m3u8
-#genre#其它
-其它1,http://example.com/other1.m3u8
-```
+注意：同时修改多个脚本再 push，会让多个工作流同时运行，它们各自提交结果时可能互相冲突导致推送失败（日志里显示“推送失败”）。
 
-**分类顺序**: 欧美 → 央视 → 卫视 → 港澳台 → 其它
-
-## 🔧 技术特性
-
-### IPTV API框架优势
-
-- **稳定架构**: 基于成功运行的IPTV API框架
-- **内存优化**: 智能缓存和垃圾回收机制
-- **并发控制**: 信号量控制防止资源竞争
-- **批次处理**: 分批处理避免内存溢出
-
-### GitHub Actions自动化
-
-- **定时运行**: 每天北京时间3:00自动检测 (UTC 19:00)
-- **手动触发**: 支持workflow_dispatch手动运行
-- **自动部署**: 检测完成后自动部署到GitHub Pages
-- **构建产物**: 自动保存检测结果到Artifacts
-
-### 异步检测
-
-```python
-# IPTV API风格的并发控制
-semaphore = asyncio.Semaphore(max_concurrent)
-
-async def check_url(url):
-    async with semaphore:
-        # 检测逻辑
-        pass
-
-# 批量并发执行
-tasks = [check_url(url) for url in urls]
-results = await asyncio.gather(*tasks)
-```
-
-### 内存管理
-
-```python
-# IPTV API风格的内存管理
-def check_memory():
-    memory_percent = psutil.virtual_memory().percent
-    if memory_percent > threshold:
-        # 多轮垃圾回收
-        for i in range(3):
-            gc.collect()
-            await asyncio.sleep(0.1)
-```
-
-## 🌍 GitHub Actions
-
-项目配置了自动化GitHub Actions工作流：
-
-- **定时运行**: 每天北京时间8:00自动检测
-- **资源限制**: 严格的内存和CPU限制
-- **自动部署**: 结果自动部署到GitHub Pages
-- **构建产物**: 自动上传检测结果
-
-## 📁 项目结构
+## 项目结构
 
 ```
-iptv-check-master/
-├── main.py                    # 主程序
-├── config/
-│   └── config.ini            # 配置文件
+├── first.py                    # Step1 ~ Step5
+├── second.py                   # Step6
+├── third.py                    # Step7 ~ Step8
+├── iptv_checker.py             # Step6 画面检测的调度（并发、分批、结果解析）
 ├── utils/
-│   ├── config.py             # 配置管理
-│   ├── types.py              # 类型定义
-│   ├── tools.py              # 工具函数
-│   ├── url_check.py          # URL检测
-│   ├── video_check.py        # 视频检测
-│   ├── video_check_worker.py # 画面检测worker
-│   └── video_check_worker_github.py # GitHub优化版本
-├── .github/workflows/
-│   └── auto-deploy.yml       # GitHub Actions工作流
-├── requirements.txt          # Python依赖
-└── README.md                # 说明文档
+│   ├── step_io.py              # 步骤文件读写等公共函数
+│   ├── video_check_worker.py   # 单个 URL 的画面/声音检测（每个 URL 一个独立进程）
+│   └── txt_to_m3u8b.py         # txt 转 m3u
+├── name_filtering_rules.txt    # 分类模板
+├── black.txt / white.txt       # 黑名单 / 白名单
+├── resources.m3u / resources.txt / resources_remote.txt   # 直播源
+├── output/                     # 各步骤输出和最终播放列表
+└── .github/workflows/          # 三个定时工作流
 ```
 
-## 🔍 检测原理
+以下文件是早期版本留下的，当前流程没有用到：`resource_manager.py`、`service/`、`config/config.ini`、
+`utils/config.py`、`utils/url_check.py`、`utils/video_check.py`、`utils/tools.py`、`utils/iptv_types.py`。
 
-### URL有效性检测
-- 使用HEAD请求检查链接可访问性
-- 支持HTTP/HTTPS/RTSP/RTMP等协议
-- 智能超时控制和错误处理
+## 许可证
 
-### 视频有效性检测
-- 使用FFmpeg检测视频流
-- 检查画面变化和音频轨道
-- 支持多种视频格式和编码
+本项目基于 MIT 许可证开源。
 
-### 速度测试
-- 下载前1MB数据测试实际速度
-- 计算平均下载速度和延迟
-- 按速度自动分类排序
+## 致谢
 
-## 📈 性能优化
-
-### 并发控制
-- 使用信号量控制并发数量
-- 防止过多连接导致服务器拒绝
-- 智能批次处理避免内存溢出
-
-### 内存管理
-- 基于IPTV API的智能缓存机制
-- 多轮垃圾回收释放内存
-- 深拷贝避免内存污染
-
-### 错误处理
-- 完善的异常捕获和处理
-- 智能重试和降级机制
-- 详细的错误日志和统计
-
-## 🤝 贡献
-
-欢迎提交Issue和Pull Request来改进项目。
-
-## 📄 许可证
-
-本项目基于MIT许可证开源。
-
-## 🙏 致谢
-
-- [IPTV-API](https://github.com/Guovin/iptv-api) - 提供稳定的框架基础
-- [FFmpeg](https://ffmpeg.org/) - 强大的多媒体处理工具
+- [IPTV-API](https://github.com/Guovin/iptv-api) - 提供框架基础
+- [FFmpeg](https://ffmpeg.org/) - 多媒体处理工具
 - [OpenCV](https://opencv.org/) - 计算机视觉库
