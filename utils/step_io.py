@@ -14,11 +14,29 @@
 
 import csv
 import re
+import zlib
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
 DEFAULT_CATEGORY = "默认分类"
+
+# Step6 拆成几部分，每部分由一个 GitHub Actions 工作流单独运行（second-partN.yml）。
+# 改这个数时要同步增减工作流文件。
+STEP6_PARTS = 2
+
+
+def step6_part_of(url: str) -> int:
+    """URL 属于 Step6 的第几部分（从 1 开始）。
+
+    按 URL 的 CRC32 划分，与 step5 文件里的顺序无关：step5 中途被 first.py 更新，
+    各部分也不会重叠或遗漏。
+    """
+    return zlib.crc32(url.encode('utf-8')) % STEP6_PARTS + 1
+
+
+def step6_part_file(part: int) -> Path:
+    return Path("output") / f"step6_part{part}.csv"
 
 _GROUP_RE = re.compile(r'^#\s*\[(.*?)\]\s*([\d.]+)\s*MB/s')
 

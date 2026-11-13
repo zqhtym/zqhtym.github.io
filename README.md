@@ -5,7 +5,7 @@
 
 ## 检测流程
 
-流程拆成三个脚本，各自由一个工作流驱动，通过 `output/` 下的步骤文件衔接：
+流程拆成三个脚本，由工作流驱动，通过 `output/` 下的步骤文件衔接：
 
 | 脚本 | 步骤 | 输入 | 输出 |
 | --- | --- | --- | --- |
@@ -14,8 +14,8 @@
 | | Step3 URL 去重 | | `output/step3_unique_resources.csv` |
 | | Step4 可访问性检测（先 HEAD，出错或不是 2xx/3xx 时再用 GET 确认） | | `output/step4_valid_resources.csv` |
 | | Step5 测速，保留 >= 0.2 MB/s | | `output/step5_speed_resources.csv` |
-| `second.py` | Step6 画面变化与声音检测（OpenCV + FFmpeg） | `step5_speed_resources.csv` | `output/step6_video_resources.csv` |
-| `third.py` | Step7 按模板分类，合并白名单 | `step6_video_resources.csv`、`name_filtering_rules.txt`、`white.txt` | `output/LE.txt`、`output/LU.txt` |
+| `second.py` | Step6 画面变化与声音检测（OpenCV + FFmpeg），分两部分运行 | `step5_speed_resources.csv` | `output/step6_part1.csv`、`output/step6_part2.csv` |
+| `third.py` | Step7 合并 Step6 各部分，按模板分类，合并白名单 | `step6_part*.csv`、`name_filtering_rules.txt`、`white.txt` | `output/LE.txt`、`output/LU.txt` |
 | | Step8 转换成 m3u | | `output/LE.m3u`、`output/LU.m3u` |
 
 ## 输出结果
@@ -48,7 +48,8 @@
 pip install -r requirements.txt
 
 python first.py          # Step1 ~ Step5（也可以用 --step1 ... --step5 单独运行某一步，--all 运行全部）
-python second.py         # Step6
+python second.py         # Step6，一次检测全部，写出 step6_part1.csv 和 step6_part2.csv
+python second.py --part 1   # 只检测第 1 部分（GitHub Actions 上就是这样分开跑的）
 python third.py          # Step7 ~ Step8
 ```
 
@@ -67,19 +68,24 @@ python third.py          # Step7 ~ Step8
 
 | 工作流 | 运行脚本 | 定时（UTC / 北京时间） | push 触发文件 |
 | --- | --- | --- | --- |
-| `first-only.yml` | `first.py` | 每周一 22:00 / 周二 06:00 | `first.py`、`iptv_checker.py`、`resources.*`、`resources_remote.txt`、`white.txt`、`requirements.txt` |
-| `second-only.yml` | `second.py` | 每天 17:00 / 次日 01:00 | `second.py`、`iptv_checker.py`、`utils/video_check_worker.py`、`requirements.txt` |
-| `third-only.yml` | `third.py` | 每天 04:00 / 12:00 | `third.py`、`iptv_checker.py`、`requirements.txt` |
+| `first-only.yml` | `first.py` | 每周一 22:00 / 周二 06:00 | `first.py`、`utils/step_io.py`、`iptv_checker.py`、`resources.*`、`resources_remote.txt`、`white.txt`、`requirements.txt` |
+| `second-part1.yml` | `second.py --part 1` | 每天 15:00 / 23:00 | `second.py`、`iptv_checker.py`、`utils/video_check_worker.py`、`utils/step_io.py`、`requirements.txt` |
+| `second-part2.yml` | `second.py --part 2` | 每天 21:00 / 次日 05:00 | 同上 |
+| `third-only.yml` | `third.py` | 每天 04:00 / 12:00 | `third.py`、`utils/step_io.py`、`iptv_checker.py`、`requirements.txt` |
 
-三个工作流都支持在 Actions 页面手动运行（workflow_dispatch），运行完会把结果文件提交回 `main` 分支。
+所有工作流都支持在 Actions 页面手动运行（workflow_dispatch），运行完会把结果文件提交回 `main` 分支；
+推送前会先 `git pull --rebase`，失败时重试 3 次，仍失败则该次运行标记为失败。
 
-注意：同时修改多个脚本再 push，会让多个工作流同时运行，它们各自提交结果时可能互相冲突导致推送失败（日志里显示“推送失败”）。
+**Step6 为什么分两部分**：GitHub Actions 单个 job 最长运行 6 小时。Step6 按 URL 的 CRC32 分成两半
+（规则见 `utils/step_io.py` 的 `step6_part_of`，与 step5 文件中的顺序无关），两个工作流错开 6 小时启动，
+各自只检测一半，各自写自己的部分文件；third.py 合并所有部分。某一部分某天没跑完，third.py 会用该部分上一次的结果。
+如果以后一半也跑不完，把 `STEP6_PARTS` 改成 3，并照着 `second-part2.yml` 加一个 `second-part3.yml` 即可。
 
 ## 项目结构
 
 ```
 ├── first.py                    # Step1 ~ Step5
-├── second.py                   # Step6
+├── second.py                   # Step6（--part N 只检测第 N 部分）
 ├── third.py                    # Step7 ~ Step8
 ├── iptv_checker.py             # Step6 画面检测的调度（并发、分批、结果解析）
 ├── utils/
@@ -90,7 +96,7 @@ python third.py          # Step7 ~ Step8
 ├── black.txt / white.txt       # 黑名单 / 白名单
 ├── resources.m3u / resources.txt / resources_remote.txt   # 直播源
 ├── output/                     # 各步骤输出和最终播放列表
-└── .github/workflows/          # 三个定时工作流
+└── .github/workflows/          # 定时工作流（first / second-part1 / second-part2 / third）
 ```
 
 ## 许可证

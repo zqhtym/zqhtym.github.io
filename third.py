@@ -3,7 +3,8 @@
 """
 third.py - Step7 ~ Step8
 
-Step7: 按 name_filtering_rules.txt 的分类顺序和关键词顺序，把 Step6 结果和 white.txt 白名单
+Step7: 合并 Step6 各部分结果（output/step6_part*.csv），
+       按 name_filtering_rules.txt 的分类顺序和关键词顺序，把 Step6 结果和 white.txt 白名单
        整理成 output/LE.txt（速度 >= 1.0 MB/s）和 output/LU.txt（速度 >= 0.2 MB/s）
 Step8: 调用 utils/txt_to_m3u8b.py 把 LE.txt / LU.txt 转成 LE.m3u / LU.m3u
 """
@@ -17,14 +18,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
 
-from utils.step_io import format_duration, read_step_resources
+from utils.step_io import STEP6_PARTS, format_duration, read_step_resources, step6_part_file
 
 for _stream in (sys.stdout, sys.stderr):
     if hasattr(_stream, 'reconfigure'):
         _stream.reconfigure(encoding='utf-8')
 
 OUTPUT_DIR = Path("output")
-STEP6_FILE = OUTPUT_DIR / "step6_video_resources.csv"
 RULES_FILE = Path("name_filtering_rules.txt")
 WHITELIST_FILE = Path("white.txt")
 CONVERTER = Path("utils/txt_to_m3u8b.py")
@@ -40,6 +40,21 @@ _URL_SPEED_RE = re.compile(r'\.speed=(\d+(?:\.\d+)?)')
 
 
 # ---------------------------------------------------------------- 输入
+
+def load_step6() -> List[Dict]:
+    """按顺序读取并合并 Step6 各部分文件；缺失的部分跳过并提示"""
+    resources = []
+    for part in range(1, STEP6_PARTS + 1):
+        part_file = step6_part_file(part)
+        if not part_file.exists():
+            print(f"⚠️ 缺少 Step6 第{part}部分: {part_file}，本次不包含这部分频道")
+            continue
+        part_resources = read_step_resources(part_file)
+        modified = datetime.fromtimestamp(part_file.stat().st_mtime).strftime('%Y-%m-%d %H:%M:%S')
+        print(f"📋 Step6 第{part}部分: {len(part_resources)} 个资源（{part_file}，修改时间 {modified}）")
+        resources.extend(part_resources)
+    return resources
+
 
 def load_whitelist() -> List[Dict]:
     """读取 white.txt（格式：名称,URL）"""
@@ -229,15 +244,11 @@ def run():
     print("=" * 80)
     start_time = time.time()
 
-    if not STEP6_FILE.exists():
-        print(f"❌ Step6 文件不存在: {STEP6_FILE}")
-        return
-
-    video_resources = read_step_resources(STEP6_FILE)
+    video_resources = load_step6()
     if not video_resources:
-        print(f"❌ Step6 文件为空或格式不对: {STEP6_FILE}")
+        print("❌ 没有可用的 Step6 结果（output/step6_part*.csv 都不存在或为空）")
         return
-    print(f"📋 读取 Step6 资源: {len(video_resources)} 个")
+    print(f"📋 合并后 Step6 资源: {len(video_resources)} 个")
 
     print("\n📊 Step7: 按模板分类生成 LE.txt / LU.txt")
     print("-" * 50)

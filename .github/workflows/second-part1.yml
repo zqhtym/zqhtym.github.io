@@ -1,0 +1,130 @@
+name: Run second.py Part 1 (Step6 第1部分)
+
+# Step6 按 URL 拆成两部分（规则见 utils/step_io.py 的 step6_part_of），
+# 两个工作流错开 6 小时启动，每部分各自有 6 小时的运行上限。
+# 第2部分见 second-part2.yml；third.py 会合并 output/step6_part*.csv。
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'second.py'
+      - 'iptv_checker.py'
+      - 'utils/video_check_worker.py'
+      - 'utils/step_io.py'
+      - 'requirements.txt'
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'second.py'
+      - 'iptv_checker.py'
+      - 'utils/video_check_worker.py'
+      - 'utils/step_io.py'
+      - 'requirements.txt'
+  schedule:
+    - cron: '0 15 * * *'  # 每天 15:00 UTC（北京时间 23:00）
+
+# 同一部分不重叠运行（例如定时运行时又有 push 触发），后来的排队等待
+concurrency:
+  group: second-part1
+  cancel-in-progress: false
+
+jobs:
+  run-second:
+    name: Run second.py --part 1 (Step6)
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      PART: 1
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Python environment
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ffmpeg
+        # Install minimal required packages for OpenCV
+        sudo apt-get install -y libglib2.0-0 libsm6 libxext6 libxrender-dev libgomp1
+
+    - name: Install Python dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Check for required files
+      run: |
+        ffmpeg -version | head -1
+        if [ -f "output/step5_speed_resources.csv" ]; then
+          echo "✅ 找到 step5_speed_resources.csv"
+          ls -la output/step5_speed_resources.csv
+        else
+          echo "❌ 未找到 output/step5_speed_resources.csv，请先运行 first-only.yml"
+          exit 1
+        fi
+
+    - name: Run second.py --part ${{ env.PART }}
+      run: |
+        # 优化GitHub Actions环境性能
+        export GITHUB_ACTIONS=true
+        ulimit -v 2097152
+        ulimit -t 44000
+        ulimit -m 1048576
+        ulimit -s 8192
+
+        export PYTHONOPTIMIZE=2
+        export PYTHONHASHSEED=0
+        export MALLOC_TRIM_THRESHOLD_=30000
+        export PYTHONMALLOC=malloc
+
+        # 设置更适合GitHub Actions的参数
+        export VIDEO_CHECK_TIMEOUT=60    # 单个视频读帧检测时长（秒）
+        export VIDEO_TOTAL_TIMEOUT=180   # 单个 URL 检测总超时（秒）
+        export GITHUB_ACTIONS_WORKERS=10 # 并发数
+
+        echo "🚀 开始运行 second.py --part ${PART}"
+        echo "   Python版本: $(python --version)"
+        echo "   OpenCV版本: $(python -c 'import cv2; print(cv2.__version__)')"
+
+        python second.py --part "${PART}"
+
+    - name: Upload Step6 results
+      uses: actions/upload-artifact@v4
+      with:
+        name: second-part${{ env.PART }}-results
+        path: output/step6_part${{ env.PART }}.csv
+        retention-days: 7
+      if: always()
+
+    - name: Commit Step6 part file to repository
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+
+        git add "output/step6_part${PART}.csv"
+        if git diff --staged --quiet; then
+          echo "没有变化，无需提交"
+          exit 0
+        fi
+        git commit -m "Auto update second.py Step6 part ${PART} - $(date '+%Y-%m-%d %H:%M:%S')"
+
+        # 其他工作流可能在这期间推送了新提交，先 rebase 再推送，最多重试 3 次
+        for i in 1 2 3; do
+          if git pull --rebase --autostash origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}"; then
+            echo "✅ 推送成功"
+            exit 0
+          fi
+          git rebase --abort 2>/dev/null || true
+          echo "⚠️ 推送失败，10 秒后重试 (${i}/3)"
+          sleep 10
+        done
+        echo "❌ 推送失败"
+        exit 1

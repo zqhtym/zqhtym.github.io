@@ -6,12 +6,14 @@ on:
     branches: [ main, master ]
     paths:
       - 'third.py'
+      - 'utils/step_io.py'
       - 'iptv_checker.py'
       - 'requirements.txt'
   pull_request:
     branches: [ main, master ]
     paths:
       - 'third.py'
+      - 'utils/step_io.py'
       - 'iptv_checker.py'
       - 'requirements.txt'
   schedule:
@@ -56,17 +58,10 @@ jobs:
         echo "📁 创建output目录"
         mkdir -p output/
         
-    - name: Verify step6_video_resources.csv exists
+    - name: Verify Step6 part files exist
       run: |
-        echo "🔍 检查step6_video_resources.csv文件"
-        if [ -f "output/step6_video_resources.csv" ]; then
-          echo "✅ step6_video_resources.csv存在"
-          ls -la output/step6_video_resources.csv
-        else
-          echo "❌ step6_video_resources.csv不存在，从Git中检出"
-          # 确保文件存在，如果不在output目录，可能需要从Git中获取
-          find . -name "step6_video_resources.csv" -type f 2>/dev/null || echo "在仓库中未找到step6_video_resources.csv"
-        fi
+        echo "🔍 检查 Step6 各部分文件（由 second-part1.yml / second-part2.yml 生成）"
+        ls -la output/step6_part*.csv || echo "❌ 未找到 output/step6_part*.csv"
         
     - name: Run third.py (Step7-Step8)
       run: |
@@ -116,7 +111,21 @@ jobs:
         git status
         
         echo "📝 提交更改"
-        git diff --staged --quiet || git commit -m "Auto update third.py final CSV - $(date '+%Y-%m-%d %H:%M:%S')"
-        
-        echo "🚀 推送到仓库"
-        git push || echo "推送失败"
+        if git diff --staged --quiet; then
+          echo "没有变化，无需提交"
+          exit 0
+        fi
+        git commit -m "Auto update third.py final CSV - $(date '+%Y-%m-%d %H:%M:%S')"
+
+        # 其他工作流可能在这期间推送了新提交，先 rebase 再推送，最多重试 3 次
+        for i in 1 2 3; do
+          if git pull --rebase --autostash origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}"; then
+            echo "✅ 推送成功"
+            exit 0
+          fi
+          git rebase --abort 2>/dev/null || true
+          echo "⚠️ 推送失败，10 秒后重试 (${i}/3)"
+          sleep 10
+        done
+        echo "❌ 推送失败"
+        exit 1

@@ -6,6 +6,7 @@ on:
     branches: [ main, master ]
     paths:
       - 'first.py'
+      - 'utils/step_io.py'
       - 'iptv_checker.py'
       - 'resources.txt'
       - 'resources.m3u'
@@ -16,6 +17,7 @@ on:
     branches: [ main, master ]
     paths:
       - 'first.py'
+      - 'utils/step_io.py'
       - 'iptv_checker.py'
       - 'resources.txt'
       - 'resources.m3u'
@@ -110,7 +112,22 @@ jobs:
         git status
         
         echo "📝 提交更改"
-        git diff --staged --quiet || git commit -m "Auto update first.py CSV files - $(date '+%Y-%m-%d %H:%M:%S')"
-        
-        echo "🚀 推送到仓库"
-        git push || echo "推送失败"
+        if git diff --staged --quiet; then
+          echo "没有变化，无需提交"
+          exit 0
+        fi
+        git commit -m "Auto update first.py CSV files - $(date '+%Y-%m-%d %H:%M:%S')"
+
+        # 其他工作流可能在这期间推送了新提交，先 rebase 再推送，最多重试 3 次
+        # （开头清理了 output/*.csv，step6 部分文件的删除不会提交，用 --autostash 暂存）
+        for i in 1 2 3; do
+          if git pull --rebase --autostash origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}"; then
+            echo "✅ 推送成功"
+            exit 0
+          fi
+          git rebase --abort 2>/dev/null || true
+          echo "⚠️ 推送失败，10 秒后重试 (${i}/3)"
+          sleep 10
+        done
+        echo "❌ 推送失败"
+        exit 1
