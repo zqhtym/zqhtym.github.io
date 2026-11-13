@@ -93,9 +93,6 @@ python third.py          # Step7 ~ Step8
 └── .github/workflows/          # 三个定时工作流
 ```
 
-以下文件是早期版本留下的，当前流程没有用到：`resource_manager.py`、`service/`、`config/config.ini`、
-`utils/config.py`、`utils/url_check.py`、`utils/video_check.py`、`utils/tools.py`、`utils/iptv_types.py`。
-
 ## 许可证
 
 本项目基于 MIT 许可证开源。

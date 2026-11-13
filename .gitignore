@@ -1,0 +1,6 @@
+# Python 缓存
+__pycache__/
+*.py[cod]
+
+# 本地 Windows 运行用的 ffmpeg（GitHub Actions 上用 apt 安装的 ffmpeg）
+ffmpeg.exe
