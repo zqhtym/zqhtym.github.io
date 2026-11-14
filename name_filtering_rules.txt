@@ -3,6 +3,10 @@
 ☘️欧美,#genre#
 Al Jazeera English
 ABC
+ABN China
+Action Hollywood Movies
+Akaku
+AKC TV
 BBC
 BeIN Sports
 BEK TV
@@ -13,6 +17,7 @@ CityNews
 FOX
 GO2Travel 
 France24English
+HBO
 HollywoodMovies
 Kartoon Channel
 GB News 
@@ -29,6 +34,7 @@ SPORTSMAX
 Trace Sport Stars
 TRT World
 UN Web TV
+VOA美国之音
 Yahoo!Finance
 
 🌊港·澳·台,#genre#
@@ -44,6 +50,8 @@ TVBS亚洲
 香港卫视
 纬来体育
 纬来育乐
+纬来
+緯來
 Viutv
 亚洲新闻
 台视新闻
@@ -51,24 +59,54 @@ Viutv
 无线新闻
 无线财经
 无线星河
-中视经典
-中視经典
-中视新闻
-中視新聞
+中视
+中視
 中天娱乐
 三立新闻
-东森综合
-东森超视
-东森电影
+三立
+东森
 Now剧集
 Now华剧
 大湾区卫视
 环球奇观新闻
 靖天资讯
+靖天国际
 星卫娱乐
 天映
 華視
+华视
 民視
+民视
+人间卫视
+公视
+公視
+八大
+博斯
+大爱
+大愛
+唯心
+好消息
+GOODTV
+年代much
+龙华
+龍華
+美亚
+美亞
+国家地理
+國家地理
+尼克
+世新
+国会频道
+國會頻道
+生命电视
+生命電視
+音樂欣賞
+HISTORY频道
+HISTORY頻道
+TVB J2
+NewsWorld
+Pet Club
+Beautiful Life
 
 卫视卡式
 
@@ -98,7 +136,6 @@ chc
 
 🎬其它,#genre#
 4k
-1080p
 睛彩
 咪咕
 NewTV
@@ -112,6 +149,7 @@ HOT
 靖天映画
 靖天戏剧
 老高与小茉
+面包台
 琴
 棋
 体育
@@ -126,4 +164,7 @@ DJ
 女
 春晚
 
+
+🎬其它1080p,#genre#
+1080p
 
