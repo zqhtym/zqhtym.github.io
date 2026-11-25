@@ -127,6 +127,10 @@ jobs:
         fi
         git commit -m "Auto update first.py CSV files - $(date '+%Y-%m-%d %H:%M:%S')"
 
+        # 结果文件整份以本次运行为准：逐行合并会冲突，或者混入另一次运行的旧结果
+        git config --local merge.this-run.driver 'cp -f %B %A'
+        echo 'output/* merge=this-run' >> .git/info/attributes
+
         # 其他工作流可能在这期间推送了新提交，先 rebase 再推送，最多重试 3 次
         for i in 1 2 3; do
           if git pull --rebase --autostash origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}"; then

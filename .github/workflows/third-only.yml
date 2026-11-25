@@ -127,6 +127,10 @@ jobs:
         fi
         git commit -m "Auto update third.py final CSV - $(date '+%Y-%m-%d %H:%M:%S')"
 
+        # 结果文件整份以本次运行为准：逐行合并会冲突，或者混入另一次运行的旧结果
+        git config --local merge.this-run.driver 'cp -f %B %A'
+        echo 'output/* merge=this-run' >> .git/info/attributes
+
         # 其他工作流可能在这期间推送了新提交，先 rebase 再推送，最多重试 3 次
         for i in 1 2 3; do
           if git pull --rebase --autostash origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}"; then
@@ -176,6 +180,9 @@ jobs:
           exit 0
         fi
         git commit -m "自动更新 LX 播放列表 - $(date '+%Y-%m-%d %H:%M:%S')"
+        # 同上：整份以本次运行为准
+        git config --local merge.this-run.driver 'cp -f %B %A'
+        echo '/LX.* merge=this-run' >> .git/info/attributes
         for i in 1 2 3; do
           if git pull --rebase origin main && git push origin HEAD:main; then
             echo "✅ LX 推送成功"

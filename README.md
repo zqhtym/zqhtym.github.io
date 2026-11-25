@@ -90,7 +90,7 @@ python third.py          # Step7 ~ Step8
 | `third-only.yml` | `third.py` | 每天 04:00 / 12:00 | `third.py`、`utils/step_io.py`、`utils/name_rules.py`、`white.txt`、`requirements.txt` |
 
 所有工作流都支持在 Actions 页面手动运行（workflow_dispatch），运行完会把结果文件提交回 `main` 分支；
-推送前会先 `git pull --rebase`，失败时重试 3 次，仍失败则该次运行标记为失败。
+推送前会先 `git pull --rebase`，失败时重试 3 次，仍失败则该次运行标记为失败。如果另一次运行改过同一个结果文件，整份以本次运行为准，不逐行合并。
 
 **Step6 为什么分两部分**：GitHub Actions 单个 job 最长运行 6 小时。Step6 按 URL 的 CRC32 分成两半
 （规则见 `utils/step_io.py` 的 `step6_part_of`，与 step5 文件中的顺序无关），两个工作流错开 6 小时启动，

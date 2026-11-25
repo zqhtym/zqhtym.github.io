@@ -49,6 +49,9 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        # 默认检出触发时的提交；排队等上一次运行结束后，那个提交已经过时，所以检出分支最新提交
+        ref: ${{ github.ref }}
 
     - name: Setup Python environment
       uses: actions/setup-python@v5
@@ -124,6 +127,10 @@ jobs:
           exit 0
         fi
         git commit -m "Auto update second.py Step6 part ${PART} - $(date '+%Y-%m-%d %H:%M:%S')"
+
+        # 结果文件整份以本次运行为准：逐行合并会冲突，或者混入另一次运行的旧结果
+        git config --local merge.this-run.driver 'cp -f %B %A'
+        echo 'output/* merge=this-run' >> .git/info/attributes
 
         # 其他工作流可能在这期间推送了新提交，先 rebase 再推送，最多重试 3 次
         for i in 1 2 3; do
