@@ -2,30 +2,42 @@ name: Run first.py Only (Updated Dependencies - v2)
 
 on:
   workflow_dispatch:
+    inputs:
+      skip_drop_check:
+        description: '跳过结果骤降检查（确认是正常变化时才勾选）'
+        type: boolean
+        default: false
   push:
     branches: [ main, master ]
     paths:
       - 'first.py'
       - 'utils/step_io.py'
-      - 'iptv_checker.py'
+      - 'utils/name_rules.py'
       - 'resources.txt'
       - 'resources.m3u'
       - 'resources_remote.txt'
-      - 'white.txt'
+      - 'black.txt'
+      - 'name_filtering_rules.txt'
       - 'requirements.txt'
   pull_request:
     branches: [ main, master ]
     paths:
       - 'first.py'
       - 'utils/step_io.py'
-      - 'iptv_checker.py'
+      - 'utils/name_rules.py'
       - 'resources.txt'
       - 'resources.m3u'
       - 'resources_remote.txt'
-      - 'white.txt'
+      - 'black.txt'
+      - 'name_filtering_rules.txt'
       - 'requirements.txt'
   schedule:
     - cron: '0 22 * * 1'  # 每周一22:00 UTC
+
+# 连续修改模板或直播源时，只保留最后一次运行
+concurrency:
+  group: first-only-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   run-first:
@@ -34,6 +46,7 @@ jobs:
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
       CACHE_INVALIDATION: $(date +%s)
+      SKIP_DROP_CHECK: ${{ inputs.skip_drop_check }}
     
     steps:
     - name: Checkout code
@@ -61,10 +74,6 @@ jobs:
         echo "🔍 检查ffmpeg安装位置"
         which ffmpeg || echo "ffmpeg不在PATH中"
         ffmpeg -version || echo "ffmpeg版本检查失败"
-        
-    - name: Clean old CSV files
-      run: |
-        rm -f output/*.csv || true
         
     - name: Run first.py (Step1-Step5)
       run: |
@@ -119,7 +128,6 @@ jobs:
         git commit -m "Auto update first.py CSV files - $(date '+%Y-%m-%d %H:%M:%S')"
 
         # 其他工作流可能在这期间推送了新提交，先 rebase 再推送，最多重试 3 次
-        # （开头清理了 output/*.csv，step6 部分文件的删除不会提交，用 --autostash 暂存）
         for i in 1 2 3; do
           if git pull --rebase --autostash origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}"; then
             echo "✅ 推送成功"

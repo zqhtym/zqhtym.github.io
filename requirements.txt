@@ -8,6 +8,8 @@ requests>=2.31.0
 urllib3>=2.0.0
 
 # utils/video_check_worker.py：Step6 画面与声音检测
-opencv-python>=4.8.0
+# 锁定版本：5.1.0.95 内置的 FFmpeg 9 默认校验 TLS 证书，但在 GitHub Actions 上找不到 CA 证书，
+# 所有 https 流都打不开（2026-11-17 起 Step6 通过率从 83% 掉到 20%）。升级前先确认 https 流能打开。
+opencv-python==5.0.0.93
 numpy>=1.24.0
 pymediainfo>=6.0.1

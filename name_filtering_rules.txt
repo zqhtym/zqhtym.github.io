@@ -8,6 +8,7 @@ Action Hollywood Movies
 Akaku
 AKC TV
 BBC
+CBBC
 BeIN Sports
 BEK TV
 Bloomberg
@@ -133,6 +134,7 @@ chc
 咪咕
 NewTV
 HOT
+iHOT
 影院
 电影
 電影
@@ -161,3 +163,15 @@ DJ
 🎬其它1080p,#genre#
 1080p
 
+
+🔞成人_654321,#genre#
+url:v.imgstream2.com
+url:.cdn2020.com
+Tokyo Hot
+Porn
+麻豆
+豆传媒
+无码
+無碼
+色情
+情色

@@ -7,7 +7,6 @@ import sys
 import json
 import cv2
 import time
-import shutil
 import threading
 import numpy as np
 import subprocess
@@ -40,6 +39,7 @@ class Config:
         '404_check': 3,
         'speed_test': 5,
         'stream_read': 5,
+        'audio_check': 20,  # ffprobe audio detection timeout (seconds)
         'video_check': int(os.environ.get('VIDEO_CHECK_TIMEOUT', 15)),  # Video detection timeout (seconds), configurable via environment variable
         'video_total_timeout': int(os.environ.get('VIDEO_TOTAL_TIMEOUT', 180))  # Video detection total timeout, configurable via environment variable
     }
@@ -55,6 +55,41 @@ class Config:
 
 # Global variables for timeout control
 timeout_flag = False
+
+def detect_audio(url):
+    """Return True/False if the stream has/has no audio track, None if it cannot be determined"""
+    # On Windows prefer a local ffprobe.exe; elsewhere (e.g. GitHub Actions) use ffprobe from PATH
+    ffprobe_path = 'ffprobe.exe' if os.name == 'nt' and os.path.exists('ffprobe.exe') else 'ffprobe'
+    cmd = [
+        ffprobe_path, '-v', 'error',
+        '-user_agent', Config.HEADERS['User-Agent'],
+        '-show_entries', 'stream=codec_type',
+        '-of', 'csv=p=0',
+        url,
+    ]
+    try:
+        probe = subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            timeout=Config.TIMEOUT['audio_check'],
+        )
+    except subprocess.TimeoutExpired:
+        print(f"[Debug] Audio detection timeout | URL: {url}")
+        return None
+    except FileNotFoundError:
+        print(f"[Debug] ffprobe not found, skipping audio detection | URL: {url}")
+        return None
+    except Exception as e:
+        print(f"[Debug] Audio detection exception | URL: {url} | Error: {e}")
+        return None
+
+    codec_types = {line.strip().rstrip(',') for line in probe.stdout.decode('utf-8', 'ignore').splitlines()}
+    if 'audio' in codec_types:
+        return True
+    # "No audio" is only trusted when ffprobe did see the video track
+    return False if 'video' in codec_types else None
+
 
 def check_video_changes(url):
     """Detect screen changes within 15 seconds"""
@@ -103,14 +138,6 @@ def check_video_changes(url):
 
         if not url_valid:
             result['reason'] = f"URL: {url} | Error: URL validation failed"
-            return result
-
-        # Pre-check 2: Determine if it's a ts segment (avoid single segment playback issues)
-        url_lower = url.lower()
-        if url_lower.endswith('.ts'):
-            reason = f"URL: {url} | Note: TS segments need to be played through m3u8 index, cannot parse screen individually"
-            print(f"[Debug] Detected TS single segment | {reason}")
-            result['reason'] = reason
             return result
 
         # Try to read video stream with improved retry mechanism and error handling
@@ -293,48 +320,14 @@ def check_video_changes(url):
             'avg_diff': round(avg_diff, 2)
         }
 
-        # Detect audio before detecting screen changes
-        has_audio_detected = False
-        try:
-            # On Windows prefer a local ffmpeg.exe; elsewhere (e.g. GitHub Actions) use ffmpeg from PATH
-            ffmpeg_path = 'ffmpeg.exe' if os.name == 'nt' and os.path.exists('ffmpeg.exe') else 'ffmpeg'
-            
-            # Use legacy FFmpeg command (4.3.1 compatible) with additional error suppression
-            cmd_audio_legacy = [
-                ffmpeg_path, '-i', url,
-                '-hide_banner', '-v', 'error', '-nostats'
-            ]
-            result_audio = subprocess.run(
-                cmd_audio_legacy,
-                stderr=subprocess.PIPE,  # Capture stderr separately
-                stdout=subprocess.PIPE,
-                text=True,
-                timeout=10  # Reduce timeout to avoid hanging
-            )
-            
-            # Check both stderr and stdout for audio information
-            output_audio = result_audio.stderr.strip() + ' ' + result_audio.stdout.strip()
-            
-            # Look for various audio indicators in FFmpeg output
-            audio_indicators = ['Audio:', 'Stream #0:1: Audio', 'Stream #0:0: Audio', 'aac', 'mp3', 'opus']
-            if any(indicator in output_audio for indicator in audio_indicators):
-                has_audio_detected = True
-                print(f"[Debug] Audio detection successful (legacy) | URL: {url}")
-            else:
-                print(f"[Debug] No audio detected | URL: {url}")
-                    
-        except subprocess.TimeoutExpired:
-            print(f"[Debug] Audio detection timeout | URL: {url}")
-        except FileNotFoundError:
-            print(f"[Debug] FFmpeg not found, skipping audio detection | URL: {url}")
-        except Exception as e:
-            print(f"[Debug] Audio detection exception | URL: {url} | Error: {e}")
+        # Detect audio (None = could not be determined)
+        has_audio = detect_audio(url)
 
         # Output JSON format result for easy parsing by external programs
         output_result = {
             'success': True,
             'has_video': True,
-            'has_audio': bool(has_audio_detected),  # Convert to Python bool
+            'has_audio': has_audio,                  # True / False / None (unknown)
             'video_changing': bool(is_changing),     # Convert to Python bool
             'changing': bool(is_changing),          # Add backward compatibility
             'error': None

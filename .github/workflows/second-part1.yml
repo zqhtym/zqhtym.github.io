@@ -6,6 +6,11 @@ name: Run second.py Part 1 (Step6 第1部分)
 
 on:
   workflow_dispatch:
+    inputs:
+      skip_drop_check:
+        description: '跳过结果骤降检查（确认是正常变化时才勾选）'
+        type: boolean
+        default: false
   push:
     branches: [ main, master ]
     paths:
@@ -13,6 +18,7 @@ on:
       - 'iptv_checker.py'
       - 'utils/video_check_worker.py'
       - 'utils/step_io.py'
+      - 'utils/name_rules.py'
       - 'requirements.txt'
   pull_request:
     branches: [ main, master ]
@@ -21,6 +27,7 @@ on:
       - 'iptv_checker.py'
       - 'utils/video_check_worker.py'
       - 'utils/step_io.py'
+      - 'utils/name_rules.py'
       - 'requirements.txt'
   schedule:
     - cron: '0 15 * * *'  # 每天 15:00 UTC（北京时间 23:00）
@@ -37,6 +44,7 @@ jobs:
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
       PART: 1
+      SKIP_DROP_CHECK: ${{ inputs.skip_drop_check }}
 
     steps:
     - name: Checkout code
@@ -62,6 +70,7 @@ jobs:
     - name: Check for required files
       run: |
         ffmpeg -version | head -1
+        ffprobe -version | head -1
         if [ -f "output/step5_speed_resources.csv" ]; then
           echo "✅ 找到 step5_speed_resources.csv"
           ls -la output/step5_speed_resources.csv

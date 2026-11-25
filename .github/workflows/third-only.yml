@@ -2,19 +2,26 @@ name: Run third.py Only
 
 on:
   workflow_dispatch:
+    inputs:
+      skip_drop_check:
+        description: '跳过结果骤降检查（确认是正常变化时才勾选）'
+        type: boolean
+        default: false
   push:
     branches: [ main, master ]
     paths:
       - 'third.py'
       - 'utils/step_io.py'
-      - 'iptv_checker.py'
+      - 'utils/name_rules.py'
+      - 'white.txt'
       - 'requirements.txt'
   pull_request:
     branches: [ main, master ]
     paths:
       - 'third.py'
       - 'utils/step_io.py'
-      - 'iptv_checker.py'
+      - 'utils/name_rules.py'
+      - 'white.txt'
       - 'requirements.txt'
   schedule:
     - cron: '0 4 * * *'  # 每天04:00 UTC
@@ -25,6 +32,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      SKIP_DROP_CHECK: ${{ inputs.skip_drop_check }}
+      HAS_LX_KEY: ${{ secrets.LX_DEPLOY_KEY != '' }}
     
     steps:
     - name: Checkout code
@@ -87,6 +96,7 @@ jobs:
         name: third-results
         path: |
           output/
+          !output/LX.*
         retention-days: 7
       if: always()
         
@@ -128,4 +138,52 @@ jobs:
           sleep 10
         done
         echo "❌ 推送失败"
+        exit 1
+
+    # LX（成人内容）推送到私有仓库 zqhtym/translate，需要在本仓库配置 LX_DEPLOY_KEY
+    # （translate 仓库里一个有写权限的 Deploy Key 的私钥）
+    - name: Check LX deploy key
+      if: github.ref == 'refs/heads/main' && env.HAS_LX_KEY != 'true'
+      run: echo "::warning::未配置 LX_DEPLOY_KEY，跳过推送 LX"
+
+    - name: Checkout LX target repository
+      if: github.ref == 'refs/heads/main' && env.HAS_LX_KEY == 'true'
+      uses: actions/checkout@v4
+      with:
+        repository: zqhtym/translate
+        ssh-key: ${{ secrets.LX_DEPLOY_KEY }}
+        path: lx-target
+        sparse-checkout: |
+          /LX.txt
+          /LX.m3u
+        sparse-checkout-cone-mode: false
+
+    - name: Push LX playlists
+      if: github.ref == 'refs/heads/main' && env.HAS_LX_KEY == 'true'
+      run: |
+        if [ ! -f output/LX.txt ] || [ ! -f output/LX.m3u ]; then
+          echo "本次没有生成 LX，跳过"
+          exit 0
+        fi
+        cp output/LX.txt output/LX.m3u lx-target/
+        cd lx-target
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        # translate 的 .gitignore 默认忽略所有文件，要加 -f
+        git add -f --sparse LX.txt LX.m3u
+        if git diff --staged --quiet; then
+          echo "LX 没有变化，无需提交"
+          exit 0
+        fi
+        git commit -m "自动更新 LX 播放列表 - $(date '+%Y-%m-%d %H:%M:%S')"
+        for i in 1 2 3; do
+          if git pull --rebase origin main && git push origin HEAD:main; then
+            echo "✅ LX 推送成功"
+            exit 0
+          fi
+          git rebase --abort 2>/dev/null || true
+          echo "⚠️ LX 推送失败，10 秒后重试 (${i}/3)"
+          sleep 10
+        done
+        echo "❌ LX 推送失败"
         exit 1

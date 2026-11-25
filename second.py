@@ -19,15 +19,18 @@ import argparse
 import os
 import sys
 import time
-import traceback
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set
 
 from iptv_checker import check_videos, print_step_stats
+from utils.name_rules import NameRules
 from utils.step_io import (
     STEP6_PARTS,
+    ResultDropError,
+    check_pass_rate,
     format_duration,
+    read_pass_rate,
     read_step_resources,
     step6_part_file,
     step6_part_of,
@@ -35,6 +38,9 @@ from utils.step_io import (
 )
 
 STEP5_FILE = Path("output/step5_speed_resources.csv")
+
+# 通过率下限，低于它视为检测环境异常（正常约 80%，OpenCV 打不开 https 时约 20%）
+STEP6_MIN_PASS_RATE = 0.35
 
 
 def _setup_encoding():
@@ -46,17 +52,23 @@ def _setup_encoding():
         sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 
 
-def _save_part(part: int, resources: List[Dict]) -> None:
+def _save_part(part: int, resources: List[Dict], tested: int) -> bool:
+    """写出一个部分的结果；通过率骤降时不覆盖上一次的结果，返回 False"""
     output_file = step6_part_file(part)
-    if not resources:
-        # 全部失败多半是网络被限制，不要用空结果覆盖上一次的结果
-        print(f"⚠️ 第{part}部分没有任何资源通过画面检测，保留原有的 {output_file} 不覆盖")
-        return
+    try:
+        check_pass_rate(f"Step6 第{part}部分", len(resources), tested,
+                        STEP6_MIN_PASS_RATE, read_pass_rate(output_file))
+    except ResultDropError as e:
+        print(f"❌ {e}")
+        print(f"❌ 保留原有的 {output_file} 不覆盖")
+        return False
     write_step_resources(output_file, resources,
-                         f"Step6 第{part}/{STEP6_PARTS}部分: 画面变化与声音筛查后资源")
+                         f"Step6 第{part}/{STEP6_PARTS}部分: 画面变化与声音筛查后资源", tested)
+    return True
 
 
-def run_step6(part: Optional[int] = None):
+def run_step6(part: Optional[int] = None) -> bool:
+    """返回是否全部成功"""
     start_time = time.time()
     scope = f"第{part}/{STEP6_PARTS}部分" if part else f"全部（{STEP6_PARTS}个部分）"
     print("=" * 80)
@@ -67,15 +79,26 @@ def run_step6(part: Optional[int] = None):
     if not STEP5_FILE.exists():
         print(f"❌ Step5结果文件不存在：{STEP5_FILE}")
         print("请先运行 first.py 完成 Step1~Step5")
-        return
+        return False
 
     all_resources = read_step_resources(STEP5_FILE)
     if not all_resources:
         print("❌ Step5 CSV文件读取失败或为空")
-        return
+        return False
 
-    speed_resources = [r for r in all_resources if part is None or step6_part_of(r['url']) == part]
-    print(f"📋 Step5 共 {len(all_resources)} 个资源，本次检测 {scope}: {len(speed_resources)} 个")
+    # Step3 已经筛过名称、去过重；这里再筛一次，模板删了关键词时不必等下一次 first.py
+    rules = NameRules.load()
+    speed_resources = []
+    seen: Set[str] = set()
+    for resource in all_resources:
+        url = resource['url']
+        if url in seen or not rules.matches(resource['name'], url):
+            continue
+        if part is None or step6_part_of(url) == part:
+            seen.add(url)
+            speed_resources.append(resource)
+    print(f"📋 Step5 共 {len(all_resources)} 个资源，"
+          f"本次检测 {scope}: {len(speed_resources)} 个（已去掉模板不收录的频道和重复 URL）")
     print_step_stats("Step5(从文件)", len(speed_resources), speed_resources, "从CSV文件加载")
 
     print("\n📊 Step6: 画面变化与有声音项目筛查")
@@ -86,11 +109,16 @@ def run_step6(part: Optional[int] = None):
     print()
     print_step_stats("Step6", len(speed_resources), video_resources, f"画面检测成功率: {success_rate:.1f}%")
 
+    ok = True
     for current in ([part] if part else range(1, STEP6_PARTS + 1)):
-        _save_part(current, [r for r in video_resources if step6_part_of(r['url']) == current])
+        passed = [r for r in video_resources if step6_part_of(r['url']) == current]
+        tested = sum(step6_part_of(r['url']) == current for r in speed_resources)
+        ok = _save_part(current, passed, tested) and ok
 
-    print(f"\n🎉 Step6 {scope}完成！耗时 {format_duration(time.time() - start_time)}")
+    print(f"\n{'🎉' if ok else '❌'} Step6 {scope}{'完成' if ok else '结果异常'}！"
+          f"耗时 {format_duration(time.time() - start_time)}")
     print("👉 third.py 会合并所有部分文件，继续 Step7 及以后的步骤")
+    return ok
 
 
 def main():
@@ -100,11 +128,8 @@ def main():
     args = parser.parse_args()
 
     _setup_encoding()
-    try:
-        run_step6(args.part)
-    except Exception as e:
-        print(f"❌ Step6 失败: {e}")
-        traceback.print_exc()
+    if not run_step6(args.part):
+        sys.exit(1)
 
 
 if __name__ == "__main__":

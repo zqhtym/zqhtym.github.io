@@ -4,3 +4,7 @@ __pycache__/
 
 # 本地 Windows 运行用的 ffmpeg（GitHub Actions 上用 apt 安装的 ffmpeg）
 ffmpeg.exe
+ffprobe.exe
+
+# 成人内容播放列表：只推送到私有仓库
+output/LX.*

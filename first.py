@@ -3,10 +3,12 @@
 """
 IPTV Resource Processing Pipeline - Step1 ~ Step5
   Step1: 加载 resources.m3u / resources.txt / resources_remote.txt 中的所有资源
-  Step2: 按 black.txt 过滤，去掉 URL 中 $ 之后的注释
-  Step3: URL 去重
+  Step2: 拆开“url1#url2”多源写法，按 black.txt 过滤，去掉 URL 中 $ 之后的注释
+  Step3: 只保留名称能匹配 name_filtering_rules.txt 的频道，并按 URL 去重
   Step4: 404 检测
   Step5: 测速（>= 0.2 MB/s 保留）
+
+任何一步出错或结果骤降都会以非 0 状态退出，不会用坏结果覆盖上一次的结果。
 """
 
 import sys
@@ -21,17 +23,33 @@ import codecs
 import multiprocessing
 import re
 import requests
-import traceback
 from datetime import datetime
 from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, TimeoutError as FutureTimeoutError
 from multiprocessing import Manager
 from functools import partial
+from urllib.parse import urljoin
 from urllib.request import Request, urlopen
 
-from utils.step_io import format_duration, read_csv_rows, write_csv_rows
+from utils.name_rules import NameRules
+from utils.step_io import (
+    check_count_drop,
+    check_pass_rate,
+    format_duration,
+    read_csv_rows,
+    write_csv_rows,
+)
 
 CSV_HEADER = ['resource_name', 'url']
+
+# 通过率下限，低于它视为检测环境异常（正常时 Step4、Step5 都在 50% 左右）
+STEP4_MIN_PASS_RATE = 0.2
+STEP5_MIN_PASS_RATE = 0.2
+
+# “http://a#http://b” 是一行写多个源
+_MULTI_URL_RE = re.compile(r'#(?=https?://)', re.IGNORECASE)
+# $ 后面出现这些字符时，$ 是 URL 的一部分（如 LIVE$BFM_LYON/index.m3u8），不是注释
+_URL_TAIL_RE = re.compile(r'[/&=]')
 
 CHECK_HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -319,6 +337,17 @@ def extract_extinf_name(line):
     comma = line.find(',')
     return line[comma + 1:].strip() if comma != -1 else None
 
+def split_urls(raw):
+    """拆开“url1#http://url2”，并去掉每个 URL 中 $ 之后的注释，返回 [(原始URL, URL)]"""
+    result = []
+    for part in _MULTI_URL_RE.split(raw):
+        part = part.strip()
+        head, dollar, tail = part.partition('$')
+        url = head if dollar and not _URL_TAIL_RE.search(tail) else part
+        if url:
+            result.append((part, url))
+    return result
+
 class IPTVResourceProcessor:
     """ IPTV Resource Processing Pipeline """
     
@@ -454,6 +483,8 @@ class IPTVResourceProcessor:
         
         # Save all resources to CSV
         csv_path = self.output_dir / "step1_all_resources.csv"
+        previous = len(read_csv_rows(csv_path)) if csv_path.exists() else 0
+        check_count_drop("Step1 加载资源", sum(len(urls) for urls in all_resources.values()), previous)
         await self._save_resources_to_csv(all_resources, csv_path)
         
         # Print completion summary
@@ -899,12 +930,9 @@ class IPTVResourceProcessor:
     def _save_csv(filepath, rows, label):
         """保存步骤 CSV（resource_name,url）"""
         rows = list(rows)
-        try:
-            write_csv_rows(filepath, CSV_HEADER, rows)
-            print(f"  Saved file: {filepath}")
-            print(f"  Valid URLs: {len(rows)}")
-        except Exception as e:
-            print(f"  Error saving {label} CSV: {e}")
+        write_csv_rows(filepath, CSV_HEADER, rows)
+        print(f"  Saved {label} file: {filepath}")
+        print(f"  Valid URLs: {len(rows)}")
 
     @staticmethod
     def _rows_from_dict(resources):
@@ -965,9 +993,8 @@ class IPTVResourceProcessor:
             # 读取Step1的输出文件
             step1_file = self.output_dir / "step1_all_resources.csv"
             if not step1_file.exists():
-                print(f"  Error: Step1 output file not found: {step1_file}")
                 print("  Please run Step1 first using: python first.py --step1")
-                return
+                raise FileNotFoundError(step1_file)
             
             # 加载black.txt文件
             black_patterns = []
@@ -993,26 +1020,23 @@ class IPTVResourceProcessor:
             for row in read_csv_rows(step1_file):
                 if len(row) < 2:
                     continue
-                name, url = row[0], row[1]
                 total_urls_before += 1
 
-                # 1. 过滤black.txt网址特征
-                url_lower = url.lower()
-                if any(pattern in url_lower for pattern in black_patterns):
-                    black_filtered += 1
-                    continue
+                # 1. 拆开多源写法，按IPTV规则去掉URL注释部分（$及以后内容）
+                for original_url, url in split_urls(row[1]):
+                    # 2. 过滤black.txt网址特征
+                    url_lower = original_url.lower()
+                    if any(pattern in url_lower for pattern in black_patterns):
+                        black_filtered += 1
+                        continue
 
-                # 2. 按IPTV规则去掉URL注释部分（$及以后内容）
-                original_url = url
-                if '$' in url:
-                    url = url.split('$')[0]
-                    annotation_removed += 1
-
-                all_resources.append({
-                    'name': name,
-                    'url': url,
-                    'original_url': original_url
-                })
+                    if url != original_url:
+                        annotation_removed += 1
+                    all_resources.append({
+                        'name': row[0],
+                        'url': url,
+                        'original_url': original_url
+                    })
 
             print(f"  Loaded {len(all_resources)} channels")
             print(f"  Total URLs before filtering: {total_urls_before}")
@@ -1028,7 +1052,7 @@ class IPTVResourceProcessor:
             
         except Exception as e:
             print(f"  Error in Step2: {e}")
-            traceback.print_exc()
+            raise
     
     def _print_step2_summary(self, resources, urls_before, black_filtered, annotation_removed):
         """打印Step2完成摘要"""
@@ -1069,7 +1093,7 @@ class IPTVResourceProcessor:
                     print(f"  {i}. [Chinese channel]")
     
     async def run_step3_deduplicate(self):
-        """Step3: URL去重处理"""
+        """Step3: 只保留模板会收录的频道，并按 URL 去重（每个 URL 只留一个名称）"""
         try:
             print("=" * 80)
             print(f" IPTV Resource Processing - Step3: URL Deduplication")
@@ -1080,41 +1104,49 @@ class IPTVResourceProcessor:
             # 读取Step2的输出文件
             step2_file = self.output_dir / "step2_deblack_deAnnotation.csv"
             if not step2_file.exists():
-                print(f"  Error: Step2 output file not found: {step2_file}")
                 print("  Please run Step2 first using: python first.py --step2")
-                return
+                raise FileNotFoundError(step2_file)
             
-            # 加载所有资源
-            all_resources = {}
+            # 先按名称筛选：Step7 不会收录的频道不必再做 404 检测、测速和画面检测
+            rules = NameRules.load()
+            names_by_url = {}  # {url: {名称: 出现次数}}
             total_urls_before = 0
-            duplicate_urls = 0
-            
+            forbidden_urls = set()
+            unmatched = 0
+
             print(f"  Loading Step2 output: {step2_file}")
             for row in read_csv_rows(step2_file):
                 if len(row) < 2:
                     continue
-                name, url = row[0], row[1]
+                name, url = row[0].strip(), row[1].strip()
+                if rules.is_forbidden(name, url):
+                    forbidden_urls.add(url)
+                    continue
+                if not rules.matches(name, url):
+                    unmatched += 1
+                    continue
                 total_urls_before += 1
+                names = names_by_url.setdefault(url, {})
+                names[name] = names.get(name, 0) + 1
 
-                urls = all_resources.setdefault(name, set())  # 使用set来去重
-                if url in urls:
-                    duplicate_urls += 1
-                else:
-                    urls.add(url)
+            # 同一个 URL 只要有一个名称不允许收录，整个 URL 都不收录
+            for url in forbidden_urls:
+                names_by_url.pop(url, None)
 
-            print(f"  Loaded {len(all_resources)} channels")
+            print(f"  Skipped (name not in name_filtering_rules.txt): {unmatched}")
+            print(f"  Skipped (forbidden): {len(forbidden_urls)}")
             print(f"  Total URLs before deduplication: {total_urls_before}")
-            print(f"  Duplicate URLs found: {duplicate_urls}")
-            
-            # 转换set回list
+
+            # 同一个 URL 有多个名称时，取出现次数最多的；次数相同取模板中靠前的
             unique_resources = {}
-            total_urls_after = 0
-            
-            for name, url_set in all_resources.items():
-                unique_resources[name] = list(url_set)
-                total_urls_after += len(url_set)
-            
+            for url, names in names_by_url.items():
+                best = min(names, key=lambda n: (-names[n], rules.rank(n, url)))
+                unique_resources.setdefault(best, []).append(url)
+
+            total_urls_after = len(names_by_url)
             removed_urls = total_urls_before - total_urls_after
+            if not total_urls_after:
+                raise ValueError("Step3 筛选后没有任何资源")
             print(f"  Total URLs after deduplication: {total_urls_after}")
             print(f"  URLs removed: {removed_urls}")
             print(f"  Deduplication rate: {(removed_urls/total_urls_before*100):.2f}%")
@@ -1128,7 +1160,7 @@ class IPTVResourceProcessor:
             
         except Exception as e:
             print(f"  Error in Step3: {e}")
-            traceback.print_exc()
+            raise
     
     def _print_step3_summary(self, resources, urls_before, urls_after, removed_urls):
         """打印Step3完成摘要"""
@@ -1167,31 +1199,26 @@ class IPTVResourceProcessor:
             # 读取Step3的输出文件
             step3_file = self.output_dir / "step3_unique_resources.csv"
             if not step3_file.exists():
-                print(f"  Error: Step3 output file not found: {step3_file}")
                 print("  Please run Step3 first using: python first.py --step3")
-                return
+                raise FileNotFoundError(step3_file)
             
             # 加载所有资源
-            try:
-                unique_resources = self._load_checked_resources(step3_file)
-                print(f"  Loaded {len(unique_resources)} unique resources from Step3")
-                
-            except Exception as e:
-                print(f"  Error loading Step3 file: {e}")
-                return
-            
+            unique_resources = self._load_checked_resources(step3_file)
+            print(f"  Loaded {len(unique_resources)} unique resources from Step3")
+
             # Step4: 404 Detection
             print(f"  Performing 404 detection...")
             valid_resources = await self._step4_check_404(unique_resources)
             
             print(f"  Step4 completed, valid resources: {len(valid_resources)}")
+            check_pass_rate("Step4 可访问性检测", len(valid_resources), len(unique_resources), STEP4_MIN_PASS_RATE)
             self._save_csv(self.output_dir / "step4_valid_resources.csv",
                            self._rows_from_list(valid_resources), "Step4")
             await self._print_step4_summary(valid_resources, len(unique_resources))
             
         except Exception as e:
             print(f"  Error in Step4: {e}")
-            traceback.print_exc()
+            raise
     
     async def _step4_check_404(self, resources):
         """Step4: 使用异步HTTP请求检测URL可访问性（非404）"""
@@ -1316,33 +1343,29 @@ class IPTVResourceProcessor:
             # 读取Step4的输出文件
             step4_file = self.output_dir / "step4_valid_resources.csv"
             if not step4_file.exists():
-                print(f"  error: Step4 file not found: {step4_file}")
                 print("  please run Step4 first: python first.py --step4")
-                return
+                raise FileNotFoundError(step4_file)
             
             print(f"\n Step5: speed testing...")
             print(f" loading Step4 results from {step4_file}...")
             
             # 加载所有有效资源
-            try:
-                valid_resources = self._load_checked_resources(step4_file)
-                print(f" loaded {len(valid_resources)} valid resources from Step4")
-                
-            except Exception as e:
-                print(f" error loading Step4 file: {e}")
-                return
-            
+            valid_resources = self._load_checked_resources(step4_file)
+            print(f" loaded {len(valid_resources)} valid resources from Step4")
+
             # 使用url-check-v-pro.py风格的速度测试
             speed_resources = await self._step5_test_speed_url_check_style(valid_resources)
             
             # 保存结果
+            check_pass_rate("Step5 测速", len(speed_resources), len(valid_resources), STEP5_MIN_PASS_RATE)
             await self._save_step5_output_url_check_style(speed_resources, len(valid_resources))
             
         except KeyboardInterrupt:
             print("\n  Step5 interrupted by user")
+            raise
         except Exception as e:
             print(f"  Error in Step5: {e}")
-            traceback.print_exc()
+            raise
     
     async def _step5_test_speed_url_check_style(self, valid_resources):
         """使用url-check-v-pro.py风格的速度测试"""
@@ -1462,66 +1485,66 @@ class IPTVResourceProcessor:
                 return -1
     
     def _get_stream_url(self, m3u8, depth=1):
-        """解析M3U8流URL - url-check-v-pro.py风格"""
-        
-        MAX_RECURSION_DEPTH = 2
+        """解析 m3u8，返回可以直接下载的分片地址（最多 3 个）；不是 m3u8 时返回地址本身"""
+
+        MAX_RECURSION_DEPTH = 3
+        MAX_LINES = 200
+        MAX_VARIANTS = 3
         urls = []
-        
+
         if depth > MAX_RECURSION_DEPTH:
             return urls
-        
+
         try:
             req = Request(m3u8, headers={'User-Agent': 'Mozilla/5.0'})
             with urlopen(req, timeout=5) as resp:
-                prefix = ''
-                if '/' in m3u8:
-                    prefix = m3u8[:m3u8.rindex('/') + 1]
-                
-                firstLine = True
-                top = False
-                second = False
+                # 相对地址要以跳转之后的地址为基准，不能用原地址
+                base_url = resp.geturl()
+                first_line = True
+                expecting = None  # 上一个标签要求接下来的地址是 'variant' 还是 'segment'
+                variants = 0
                 lines_processed = 0
-                max_lines = 100
-                
+
                 for line in resp:
                     lines_processed += 1
-                    if lines_processed > max_lines:
+                    if lines_processed > MAX_LINES:
                         break
-                        
-                    line = line.decode('utf-8', errors='ignore').strip()
+
+                    line = line.decode('utf-8', errors='ignore').strip().lstrip('\ufeff')
                     if not line:
                         continue
-                    
-                    if firstLine:
-                        if line != '#EXTM3U':
+
+                    if first_line:
+                        # 后面可以带属性，例如 #EXTM3U x-tvg-url="..."
+                        if not line.startswith('#EXTM3U'):
                             urls.append(m3u8)
                             break
-                        firstLine = False
-                        continue
-                    
-                    if top:
-                        if not line.lower().startswith('http'):
-                            line = prefix + line
-                        nested_urls = self._get_stream_url(line, depth + 1)
-                        urls.extend(nested_urls)
-                        top = False
-                    elif second:
-                        if not line.lower().startswith('http'):
-                            line = prefix + line
-                        urls.append(line)
-                        second = False
+                        first_line = False
                     elif line.startswith('#EXT-X-STREAM-INF:'):
-                        top = True
+                        expecting = 'variant'
                     elif line.startswith('#EXTINF:'):
-                        second = True
-                
-                urls = list(dict.fromkeys(urls))[:3]
-        
+                        expecting = 'segment'
+                    elif line.startswith('#'):
+                        continue  # 地址前面可能还有其他标签，例如 #EXT-X-PROGRAM-DATE-TIME
+                    elif expecting == 'variant':
+                        expecting = None
+                        variants += 1
+                        urls = self._get_stream_url(urljoin(base_url, line), depth + 1)
+                        if urls or variants >= MAX_VARIANTS:
+                            break
+                    elif expecting == 'segment':
+                        expecting = None
+                        urls.append(urljoin(base_url, line))
+                        if len(urls) >= 3:
+                            break
+
+                urls = list(dict.fromkeys(urls))
+
         except Exception:
             pass
-        
+
         return urls
-    
+
     def _download_tester(self, downloader):
         """下载速度测试器 - url-check-v-pro.py风格"""
         
@@ -1586,7 +1609,7 @@ class IPTVResourceProcessor:
         
         except Exception as e:
             print(f" error saving file: {e}")
-            traceback.print_exc()
+            raise
     
     async def run_complete_pipeline(self):
         """执行完整的IPTV资源处理流程：Step1 → Step2 → Step3 → Step4 → Step5"""
@@ -1638,7 +1661,7 @@ class IPTVResourceProcessor:
             
         except Exception as e:
             print(f"  Error in complete pipeline: {e}")
-            traceback.print_exc()
+            raise
 
 USAGE = """Usage:
   python first.py --step1    # Run Step1: Resource loading (no deduplication)

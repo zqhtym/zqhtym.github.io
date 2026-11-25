@@ -89,6 +89,17 @@ def check_video_changes(url: str) -> Dict:
     }
 
 
+def is_valid_stream(result: Dict) -> bool:
+    """能读到画面，并且画面有变化或有声音。
+
+    静止画面 + 确认没有声音的多半是“频道已停播”之类的占位图，予以淘汰；
+    没能判断出有没有声音（has_audio 为 None）时不淘汰。
+    """
+    if not result['success'] or not result['has_video']:
+        return False
+    return bool(result.get('video_changing')) or result['has_audio'] is not False
+
+
 def _diagnose(reason: str) -> str:
     """GitHub Actions 上给失败原因加一句诊断，方便看日志"""
     lower = reason.lower()
@@ -115,7 +126,7 @@ def _worker_count() -> int:
 
 
 def check_videos(resources: List[Dict]) -> List[Dict]:
-    """并发检测所有资源，返回有画面或有声音的资源（附带检测结果字段）"""
+    """并发检测所有资源，返回通过 is_valid_stream 的资源（附带检测结果字段）"""
     total = len(resources)
     print(f"开始画面变化与声音检测，共{total}个URL...")
     if not total:
@@ -145,13 +156,13 @@ def check_videos(resources: List[Dict]) -> List[Dict]:
                     print(f"❌ 处理检测结果异常: {e}")
                     continue
 
-                if result['success'] and (result['has_video'] or result['has_audio']):
+                if is_valid_stream(result):
                     valid.append({**resource, **result})
                     batch_valid += 1
                     print(f"✅ [{processed}/{total}] {name} - 画面变化: {result.get('video_changing', False)}, "
                           f"有声音: {result['has_audio']}", flush=True)
                 else:
-                    reason = result.get('reason', '')
+                    reason = result.get('reason', '') or ('静止画面且没有声音' if result['success'] else '')
                     print(f"❌ [{processed}/{total}] {name} - {reason[:40]}", flush=True)
                     if on_github:
                         print(f"🔍 GitHub Actions诊断: {_diagnose(reason)}")

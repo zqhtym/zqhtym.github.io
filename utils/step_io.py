@@ -13,6 +13,7 @@
 """
 
 import csv
+import os
 import re
 import zlib
 from datetime import datetime
@@ -37,6 +38,44 @@ def step6_part_of(url: str) -> int:
 
 def step6_part_file(part: int) -> Path:
     return Path("output") / f"step6_part{part}.csv"
+
+
+class ResultDropError(RuntimeError):
+    """结果骤降，疑似检测环境出问题：不应覆盖上一次的结果"""
+
+
+# 低于上一次的这个比例视为骤降
+MIN_KEEP_RATIO = 0.5
+
+
+def _report_drop(message: str) -> None:
+    if os.environ.get('SKIP_DROP_CHECK', '').strip().lower() in ('1', 'true', 'yes'):
+        print(f"⚠️ {message}（已设置 SKIP_DROP_CHECK，继续）")
+        return
+    raise ResultDropError(f"{message}。确认是正常变化时，设置环境变量 SKIP_DROP_CHECK=1 再运行")
+
+
+def check_pass_rate(label: str, passed: int, tested: int, minimum: float,
+                    previous: Optional[float] = None) -> None:
+    """通过率低于 minimum，或不到上一次的一半时抛出 ResultDropError。
+
+    用通过率而不是数量：输入变少（例如删了直播源、改了关键词）时不会误报。
+    """
+    rate = passed / tested if tested else 0.0
+    limit = max(minimum, (previous or 0.0) * MIN_KEEP_RATIO)
+    if tested and rate >= limit:
+        return
+    message = f"{label}: 通过率 {rate:.1%}（{passed}/{tested}）低于下限 {limit:.1%}"
+    if previous:
+        message += f"，上一次为 {previous:.1%}"
+    _report_drop(message)
+
+
+def check_count_drop(label: str, current: int, previous: int) -> None:
+    """数量不到上一次的一半时抛出 ResultDropError（没有上一次的结果时不检查）"""
+    if previous and current < previous * MIN_KEEP_RATIO:
+        _report_drop(f"{label}: 数量从 {previous} 骤降到 {current}")
+
 
 _GROUP_RE = re.compile(r'^#\s*\[(.*?)\]\s*([\d.]+)\s*MB/s')
 
@@ -132,8 +171,31 @@ def _average_speed(resources: Iterable[Dict]) -> float:
     return sum(speeds) / len(speeds) if speeds else 0.0
 
 
-def write_step_resources(path, resources: List[Dict], description: str) -> None:
-    """按分组格式写出步骤文件，每行为 “名称,URL,速度”"""
+_PASSED_RE = re.compile(r'^#\s*资源数量:\s*(\d+)')
+_TESTED_RE = re.compile(r'^#\s*检测数量:\s*(\d+)')
+
+
+def read_pass_rate(path) -> Optional[float]:
+    """从分组格式的文件头读取上一次的通过率；文件不存在或没记录检测数量时返回 None"""
+    if not Path(path).exists():
+        return None
+    passed = tested = None
+    with open(path, 'r', encoding='utf-8-sig') as f:
+        for line in f:
+            if not line.startswith('#'):
+                break
+            passed_match = _PASSED_RE.match(line)
+            if passed_match:
+                passed = int(passed_match.group(1))
+            tested_match = _TESTED_RE.match(line)
+            if tested_match:
+                tested = int(tested_match.group(1))
+    return passed / tested if passed is not None and tested else None
+
+
+def write_step_resources(path, resources: List[Dict], description: str,
+                         tested: Optional[int] = None) -> None:
+    """按分组格式写出步骤文件，每行为 “名称,URL,速度”。tested 是本次检测的总数"""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -145,6 +207,8 @@ def write_step_resources(path, resources: List[Dict], description: str) -> None:
         f.write(f"# {description}\n")
         f.write(f"# 生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
         f.write(f"# 资源数量: {len(resources)}\n")
+        if tested:
+            f.write(f"# 检测数量: {tested}\n")
         if resources:
             f.write(f"# 平均速度: {_average_speed(resources):.3f} MB/s\n")
         f.write("#" * 50 + "\n\n")
