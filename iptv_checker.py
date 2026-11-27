@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-IPTV 检测核心模块：Step6 画面变化与声音检测，供 second.py 使用。
+IPTV 检测核心模块：Step6 画面变化检测，供 second.py 使用。
 
-每个 URL 都在独立进程里调用 utils/video_check_worker.py 检测，
-避免 OpenCV / FFmpeg 卡住或崩溃时拖垮主进程。
+每个 URL 都在独立进程里调用 utils/video_check_worker.py 检测（ffmpeg 取帧比较），
+避免 ffmpeg 卡住或崩溃时拖垮主进程。
 Author: chaichunyang@outlook.com
 """
 
@@ -51,11 +51,11 @@ def _parse_worker_json(output: str):
 
 
 def _failure(reason: str) -> Dict:
-    return {'has_video': False, 'has_audio': False, 'reason': reason, 'success': False}
+    return {'has_video': False, 'video_changing': False, 'reason': reason, 'success': False}
 
 
 def check_video_changes(url: str) -> Dict:
-    """检测单个 URL 的画面变化与声音（调用 utils/video_check_worker.py）"""
+    """检测单个 URL 的画面有没有变化（调用 utils/video_check_worker.py）"""
     timeout = int(os.environ.get('VIDEO_TOTAL_TIMEOUT', 180))
     try:
         result = subprocess.run(
@@ -73,31 +73,27 @@ def check_video_changes(url: str) -> Dict:
     if result.returncode != 0:
         # worker 失败时会把原因写在 JSON 的 error 字段里
         reason = (video_result or {}).get('error') or _decode(result.stderr).strip() or '未知错误'
-        reason = reason.replace(f"URL: {url} | ", "")  # 日志里每行已有频道名，去掉重复的 URL
-        return _failure(f'脚本执行失败: {reason}')
+        return _failure(f'取帧失败: {reason}')
 
     if video_result is None:
         return _failure(f'无法解析JSON输出: {_decode(result.stdout)}')
 
     return {
         'has_video': video_result.get('has_video', False),
-        'has_audio': video_result.get('has_audio', False),
-        'video_changing': video_result.get('video_changing', False) or video_result.get('changing', False),
+        'video_changing': video_result.get('video_changing', False),
         'frame_info': video_result.get('frame_info', {}),
-        'reason': video_result.get('reason', '') or video_result.get('error', '') or '',
+        'reason': video_result.get('error') or '',
         'success': video_result.get('success', False),
     }
 
 
 def is_valid_stream(result: Dict) -> bool:
-    """能读到画面，并且画面有变化或有声音。
+    """能读到画面，并且画面不是静止的。
 
-    静止画面 + 确认没有声音的多半是“频道已停播”之类的占位图，予以淘汰；
-    没能判断出有没有声音（has_audio 为 None）时不淘汰。
+    静止画面多半是“频道已停播”“流媒体测试源”之类的占位图，即使带着背景音乐也淘汰；
+    网速太慢、取到的帧不够判断（video_changing 为 None）时不淘汰。
     """
-    if not result['success'] or not result['has_video']:
-        return False
-    return bool(result.get('video_changing')) or result['has_audio'] is not False
+    return bool(result['success'] and result['has_video']) and result['video_changing'] is not False
 
 
 def _diagnose(reason: str) -> str:
@@ -109,8 +105,10 @@ def _diagnose(reason: str) -> str:
         return "网络超时 (可能被限制)"
     if 'connect' in lower:
         return "连接失败 (网络限制)"
-    if '无法打开视频流' in reason:
-        return "流媒体访问被阻 (可能IP被限制)"
+    if '403' in reason:
+        return "访问被拒绝 (403，可能IP被限制)"
+    if 'ffmpeg not found' in reason:
+        return "没有安装 ffmpeg"
     return f"其他错误 - {reason}"
 
 
@@ -128,7 +126,7 @@ def _worker_count() -> int:
 def check_videos(resources: List[Dict]) -> List[Dict]:
     """并发检测所有资源，返回通过 is_valid_stream 的资源（附带检测结果字段）"""
     total = len(resources)
-    print(f"开始画面变化与声音检测，共{total}个URL...")
+    print(f"开始画面变化检测，共{total}个URL...")
     if not total:
         return []
 
@@ -156,14 +154,21 @@ def check_videos(resources: List[Dict]) -> List[Dict]:
                     print(f"❌ 处理检测结果异常: {e}")
                     continue
 
+                info = result.get('frame_info', {})
+                ratio = info.get('changed_ratio')
                 if is_valid_stream(result):
                     valid.append({**resource, **result})
                     batch_valid += 1
-                    print(f"✅ [{processed}/{total}] {name} - 画面变化: {result.get('video_changing', False)}, "
-                          f"有声音: {result['has_audio']}", flush=True)
+                    detail = (f"画面变化 {ratio}%" if result['video_changing']
+                              else f"只取到 {info.get('frames')} 帧，未确定是否静止")
+                    print(f"✅ [{processed}/{total}] {name} - {detail}", flush=True)
+                elif result['success']:
+                    # 附上 URL，方便人工核对是不是真的静止
+                    print(f"❌ [{processed}/{total}] {name} - 静止画面（变化像素 {ratio}%） "
+                          f"{resource['url']}", flush=True)
                 else:
-                    reason = result.get('reason', '') or ('静止画面且没有声音' if result['success'] else '')
-                    print(f"❌ [{processed}/{total}] {name} - {reason[:40]}", flush=True)
+                    reason = result.get('reason', '')
+                    print(f"❌ [{processed}/{total}] {name} - {reason[:60]}", flush=True)
                     if on_github:
                         print(f"🔍 GitHub Actions诊断: {_diagnose(reason)}")
 

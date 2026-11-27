@@ -61,9 +61,8 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
+        # Step6 用 ffmpeg 取帧检测画面变化
         sudo apt-get install -y ffmpeg
-        # Install minimal required packages for OpenCV
-        sudo apt-get install -y libglib2.0-0 libsm6 libxext6 libxrender-dev libgomp1
 
     - name: Install Python dependencies
       run: |
@@ -73,7 +72,6 @@ jobs:
     - name: Check for required files
       run: |
         ffmpeg -version | head -1
-        ffprobe -version | head -1
         if [ -f "output/step5_speed_resources.csv" ]; then
           echo "✅ 找到 step5_speed_resources.csv"
           ls -la output/step5_speed_resources.csv
@@ -97,13 +95,13 @@ jobs:
         export PYTHONMALLOC=malloc
 
         # 设置更适合GitHub Actions的参数
-        export VIDEO_CHECK_TIMEOUT=60    # 单个视频读帧检测时长（秒）
+        export VIDEO_CHECK_TIMEOUT=60    # 单次取帧时长上限（秒）
         export VIDEO_TOTAL_TIMEOUT=180   # 单个 URL 检测总超时（秒）
         export GITHUB_ACTIONS_WORKERS=10 # 并发数
 
         echo "🚀 开始运行 second.py --part ${PART}"
         echo "   Python版本: $(python --version)"
-        echo "   OpenCV版本: $(python -c 'import cv2; print(cv2.__version__)')"
+        echo "   ffmpeg版本: $(ffmpeg -version | head -1)"
 
         python second.py --part "${PART}"
 

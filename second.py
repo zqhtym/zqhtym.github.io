@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-IPTV检测工具 - Step6：画面变化与声音检测
+IPTV检测工具 - Step6：画面变化检测（淘汰打不开的流和静止画面）
 输入 output/step5_speed_resources.csv（first.py 生成），
 输出 output/step6_part1.csv、output/step6_part2.csv ...（供 third.py 合并使用）
 
@@ -39,7 +39,7 @@ from utils.step_io import (
 
 STEP5_FILE = Path("output/step5_speed_resources.csv")
 
-# 通过率下限，低于它视为检测环境异常（正常约 80%，OpenCV 打不开 https 时约 20%）
+# 通过率下限，低于它视为检测环境异常（正常约 80%；以前 OpenCV 打不开 https 流时约 20%）
 STEP6_MIN_PASS_RATE = 0.35
 
 
@@ -63,7 +63,7 @@ def _save_part(part: int, resources: List[Dict], tested: int) -> bool:
         print(f"❌ 保留原有的 {output_file} 不覆盖")
         return False
     write_step_resources(output_file, resources,
-                         f"Step6 第{part}/{STEP6_PARTS}部分: 画面变化与声音筛查后资源", tested)
+                         f"Step6 第{part}/{STEP6_PARTS}部分: 画面变化筛查后资源", tested)
     return True
 
 
@@ -101,7 +101,7 @@ def run_step6(part: Optional[int] = None) -> bool:
           f"本次检测 {scope}: {len(speed_resources)} 个（已去掉模板不收录的频道和重复 URL）")
     print_step_stats("Step5(从文件)", len(speed_resources), speed_resources, "从CSV文件加载")
 
-    print("\n📊 Step6: 画面变化与有声音项目筛查")
+    print("\n📊 Step6: 画面变化筛查")
     print("-" * 50)
     video_resources = check_videos(speed_resources)
 
@@ -122,7 +122,7 @@ def run_step6(part: Optional[int] = None) -> bool:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Step6：画面变化与声音检测")
+    parser = argparse.ArgumentParser(description="Step6：画面变化检测")
     parser.add_argument('--part', type=int, choices=range(1, STEP6_PARTS + 1),
                         help=f"只检测第几部分（1~{STEP6_PARTS}），不填则检测全部")
     args = parser.parse_args()

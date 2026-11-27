@@ -1,6 +1,6 @@
 # IPTV 直播源检测工具
 
-从本地和远程直播源中收集频道，依次做黑名单过滤、按分类模板筛选、去重、404 检测、测速、画面/声音检测，
+从本地和远程直播源中收集频道，依次做黑名单过滤、按分类模板筛选、去重、404 检测、测速、画面变化检测，
 最后按分类模板生成可直接订阅的播放列表（txt + m3u）。整个流程由 GitHub Actions 定时运行，结果自动提交回仓库。
 
 ## 检测流程
@@ -14,7 +14,7 @@
 | | Step3 只保留模板会收录的频道 + URL 去重（每个 URL 只留一个名称） | `name_filtering_rules.txt` | `output/step3_unique_resources.csv` |
 | | Step4 可访问性检测（先 HEAD，出错或不是 2xx/3xx 时再用 GET 确认） | | `output/step4_valid_resources.csv` |
 | | Step5 测速，保留 >= 0.2 MB/s | | `output/step5_speed_resources.csv` |
-| `second.py` | Step6 画面变化与声音检测（OpenCV + ffprobe），分两部分运行；淘汰打不开的流，以及静止画面且没有声音的流 | `step5_speed_resources.csv` | `output/step6_part1.csv`、`output/step6_part2.csv` |
+| `second.py` | Step6 画面变化检测（ffmpeg 取帧比较），分两部分运行；淘汰打不开的流和静止画面（有声音也淘汰） | `step5_speed_resources.csv` | `output/step6_part1.csv`、`output/step6_part2.csv` |
 | `third.py` | Step7 合并 Step6 各部分，按模板分类，合并白名单 | `step6_part*.csv`、`name_filtering_rules.txt`、`white.txt` | `output/LE.txt`、`output/LU.txt` |
 | | Step8 过滤成人内容（分类名以 🔞 开头的分类），转换成 m3u | | `output/LE.m3u`、`output/LU.m3u`；成人内容写到 `LX.txt`、`LX.m3u`，不提交到本仓库，推送到私有仓库 |
 
@@ -56,7 +56,10 @@ python second.py --part 1   # 只检测第 1 部分（GitHub Actions 上就是�
 python third.py          # Step7 ~ Step8
 ```
 
-- Step6 的声音检测需要 `ffprobe`（FFmpeg 自带）：Windows 下可以把 `ffprobe.exe` 放在项目根目录（已在 `.gitignore` 中忽略），其他系统使用 PATH 里的 `ffprobe`。没有 `ffprobe` 时不判断声音。
+- Step6 需要 `ffmpeg`：Windows 下可以把 `ffmpeg.exe` 放在项目根目录（已在 `.gitignore` 中忽略），或者装到 PATH 里。
+- Step6 怎样判断静止画面：按流的时间戳每 2 秒取一帧，任意两帧之间灰度变化超过 15 的像素达到 0.1%，就算画面在变；
+  一直没变化就继续取，取到 10 帧（约 18 秒）都没变化才判为静止。“频道已停播”“流媒体测试源”之类的占位画面即使带着背景音乐也会被淘汰；
+  网速太慢、不到 5 帧（约 8 秒）就超时的不下结论，予以保留。被判为静止的流会在日志里打印 URL，方便核对。
 - 在终端里运行 `first.py` 时，Step1 会逐个询问是否处理远程源（回车处理、`skip` 跳过、`auto` 自动处理剩余、`quit` 退出）；非交互环境下自动全部处理。
 
 ### 结果骤降保护
@@ -72,7 +75,7 @@ python third.py          # Step7 ~ Step8
 
 | 变量 | 默认值 | 说明 |
 | --- | --- | --- |
-| `VIDEO_CHECK_TIMEOUT` | 15 | 单个视频读帧检测时长（秒） |
+| `VIDEO_CHECK_TIMEOUT` | 30 | 单次取帧的时长上限（秒），超时后用已经取到的帧判断 |
 | `VIDEO_TOTAL_TIMEOUT` | 180 | 单个 URL 检测总超时（秒） |
 | `GITHUB_ACTIONS_WORKERS` | 3 | GitHub Actions 上的并发数（本地按 CPU 核数自动决定） |
 
@@ -106,7 +109,7 @@ python third.py          # Step7 ~ Step8
 ├── iptv_checker.py             # Step6 画面检测的调度（并发、分批、结果解析）
 ├── utils/
 │   ├── step_io.py              # 步骤文件读写等公共函数
-│   ├── video_check_worker.py   # 单个 URL 的画面/声音检测（每个 URL 一个独立进程）
+│   ├── video_check_worker.py   # 单个 URL 的画面变化检测（每个 URL 一个独立进程）
 │   └── txt_to_m3u8b.py         # txt 转 m3u
 ├── name_filtering_rules.txt    # 分类模板
 ├── black.txt / white.txt       # 黑名单 / 白名单
@@ -123,4 +126,3 @@ python third.py          # Step7 ~ Step8
 
 - [IPTV-API](https://github.com/Guovin/iptv-api) - 提供框架基础
 - [FFmpeg](https://ffmpeg.org/) - 多媒体处理工具
-- [OpenCV](https://opencv.org/) - 计算机视觉库

@@ -1,387 +1,158 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Step6 单个 URL 的画面变化检测，由 iptv_checker.py 在独立进程里调用：
 
-# video_check_worker.py - Independent video detection process
+    python utils/video_check_worker.py <url>
 
-import os
-import sys
+用 ffmpeg 解码视频，按流自身的时间戳每隔 SAMPLE_INTERVAL 秒取一帧（缩小成灰度图），
+每取到一帧就和之前的帧比较：灰度变化超过 PIXEL_DIFF 的像素占比达到 MIN_CHANGED_RATIO 即判为画面有变化，
+立刻结束（正常节目通常 2 帧就够了）。一直没有变化就继续取，最多 MAX_FRAMES 帧（约 18 秒）；
+取满 STATIC_MIN_FRAMES 帧（约 8 秒）都没有变化才判为静止画面，网速太慢没取够时不下结论。
+
+只数变化明显的像素，是为了不把压缩噪声当成画面变化：静止的占位画面（例如“流媒体测试源”）
+相邻两帧之间会有上万个像素差 1~2 个灰度级，但几乎没有超过 15 的。
+
+不用 OpenCV 读流：GitHub Actions 上 OpenCV 读 1080p、50/60 帧、MPEG-2 的流时会反复返回同一帧，
+约 12% 正常播放的流被误判为静止。
+
+结果以一行 JSON 输出到 stdout：
+    {"success": true, "has_video": true, "video_changing": true/false/null, "frame_info": {...}}
+    {"success": false, "error": "..."}   （同时以非 0 状态退出）
+"""
+
 import json
-import cv2
-import time
-import threading
-import numpy as np
+import os
 import subprocess
-from urllib.request import Request, urlopen
-from urllib.error import HTTPError, URLError
+import sys
+import tempfile
+import threading
+import time
 
-# Environment detection
-IS_GITHUB_ACTIONS = os.environ.get('GITHUB_ACTIONS') == 'true'
+import numpy as np
 
-try:
-    from pymediainfo import MediaInfo
-except ImportError:
-    MediaInfo = None
-    if IS_GITHUB_ACTIONS:
-        print("[GitHub Actions] Warning: pymediainfo not available, will use fallback detection")
+USER_AGENT = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+              '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
 
-# ======================== Global configuration module ========================
+SAMPLE_INTERVAL = 2        # 取帧间隔（秒，按流的时间戳）
+MAX_FRAMES = 10            # 一直没有变化时最多取几帧（约 18 秒）
+STATIC_MIN_FRAMES = 5      # 至少取到几帧（约 8 秒）都没有变化，才判为静止画面
+WIDTH, HEIGHT = 320, 180   # 缩小后比较，顺便平均掉一部分噪声
+PIXEL_DIFF = 15            # 灰度变化超过它的像素才算“变了”
+MIN_CHANGED_RATIO = 0.001  # 变了的像素占比达到 0.1% 才算画面有变化（静止画面为 0，正常节目 >= 0.8%）
 
-class Config:
-    """Global configuration class"""
+# 单次取帧的时长上限（秒）；超时后用已经取到的帧判断
+SAMPLE_TIMEOUT = int(os.environ.get('VIDEO_CHECK_TIMEOUT', 30))
+MAX_ATTEMPTS = 2
 
-    # Request headers
-    HEADERS = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    }
 
-    # Timeout configuration
-    TIMEOUT = {
-        'remote_fetch': 10,
-        '404_check': 3,
-        'speed_test': 5,
-        'stream_read': 5,
-        'audio_check': 20,  # ffprobe audio detection timeout (seconds)
-        'video_check': int(os.environ.get('VIDEO_CHECK_TIMEOUT', 15)),  # Video detection timeout (seconds), configurable via environment variable
-        'video_total_timeout': int(os.environ.get('VIDEO_TOTAL_TIMEOUT', 180))  # Video detection total timeout, configurable via environment variable
-    }
+# ffmpeg 7.1 起 HLS 分片地址必须带常见扩展名（.ts 等），amagi 等不带扩展名的跳转地址会被拒绝。
+# 这两个是 HLS 专用选项，用在 flv、mp4 等输入上会报 “Option not found”，所以只在被拒绝后加上重试。
+HLS_ANY_SEGMENT = ['-allowed_segment_extensions', 'ALL', '-extension_picky', '0']
+HLS_SEGMENT_REJECTED = 'allowed_segment_extensions'
 
-    # Video detection configuration
-    VIDEO_CHECK = {
-        'frame_interval': 2,  # Take one frame every 2 seconds (faster sampling)
-        'min_diff': 1000,     # Frame difference threshold (significantly lower threshold to adapt to GitHub Actions environment)
-        'min_width': 160,     # Minimum effective width (further lower requirements)
-        'min_height': 120,    # Minimum effective height (further lower requirements)
-        'audio_check': True    # Enable audio detection
-    }
 
-# Global variables for timeout control
-timeout_flag = False
-
-def detect_audio(url):
-    """Return True/False if the stream has/has no audio track, None if it cannot be determined"""
-    # On Windows prefer a local ffprobe.exe; elsewhere (e.g. GitHub Actions) use ffprobe from PATH
-    ffprobe_path = 'ffprobe.exe' if os.name == 'nt' and os.path.exists('ffprobe.exe') else 'ffprobe'
-    cmd = [
-        ffprobe_path, '-v', 'error',
-        '-user_agent', Config.HEADERS['User-Agent'],
-        '-show_entries', 'stream=codec_type',
-        '-of', 'csv=p=0',
-        url,
+def _ffmpeg_cmd(url, any_segment=False):
+    return [
+        'ffmpeg', '-hide_banner', '-nostats', '-loglevel', 'error',
+        '-user_agent', USER_AGENT,
+        '-rw_timeout', '10000000',  # 10 秒收不到数据就放弃（微秒）
+        *(HLS_ANY_SEGMENT if any_segment else []),
+        '-i', url,
+        '-map', '0:v:0',
+        # 选第一帧，之后每隔 SAMPLE_INTERVAL 秒选一帧；passthrough 防止按恒定帧率补出重复帧
+        '-vf', (f"select='isnan(prev_selected_t)+gte(t-prev_selected_t,{SAMPLE_INTERVAL})',"
+                f"scale={WIDTH}:{HEIGHT}:flags=area,format=gray"),
+        '-fps_mode', 'passthrough',
+        '-frames:v', str(MAX_FRAMES),
+        '-f', 'rawvideo', 'pipe:1',
     ]
-    try:
-        probe = subprocess.run(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
-            timeout=Config.TIMEOUT['audio_check'],
-        )
-    except subprocess.TimeoutExpired:
-        print(f"[Debug] Audio detection timeout | URL: {url}")
-        return None
-    except FileNotFoundError:
-        print(f"[Debug] ffprobe not found, skipping audio detection | URL: {url}")
-        return None
-    except Exception as e:
-        print(f"[Debug] Audio detection exception | URL: {url} | Error: {e}")
-        return None
-
-    codec_types = {line.strip().rstrip(',') for line in probe.stdout.decode('utf-8', 'ignore').splitlines()}
-    if 'audio' in codec_types:
-        return True
-    # "No audio" is only trusted when ffprobe did see the video track
-    return False if 'video' in codec_types else None
 
 
-def check_video_changes(url):
-    """Detect screen changes within 15 seconds"""
-    result = {
-        'success': False,
-        'changing': False,
-        'reason': '',
-        'frame_info': {
-            'total_read': 0,
-            'valid_frames': 0,
-            'avg_diff': 0.0
-        }
-    }
-    
-    # Set timeout timer (3 minutes)
-    def timeout_handler():
-        global timeout_flag
-        timeout_flag = True
-    
-    timer = threading.Timer(Config.TIMEOUT['video_total_timeout'], timeout_handler)
-    timer.start()
-    
-    try:
-        # Pre-check 1: 404 detection
+def _changed_ratio(a, b) -> float:
+    """灰度变化超过 PIXEL_DIFF 的像素占比"""
+    return float(np.mean(np.abs(a - b) > PIXEL_DIFF))
+
+
+def sample(url, any_segment=False):
+    """边取帧边比较。返回 (取到的帧数, 最大变化占比, ffmpeg 的错误输出, 是否超时)"""
+    frame_size = WIDTH * HEIGHT
+    frames, max_ratio = [], 0.0
+    with tempfile.TemporaryFile() as stderr:  # 不用管道，免得错误输出太多把 ffmpeg 堵住
         try:
-            req = Request(url, headers=Config.HEADERS)
-            with urlopen(req, timeout=Config.TIMEOUT['404_check']) as resp:
-                if resp.status == 404:
-                    reason = f"URL: {url} | Error: 404 Not Found (link invalid)"
-                    print(f"[Debug] Screen change detection failed | {reason}")
-                    result['reason'] = reason
-                    return result
-                url_valid = True
-        except HTTPError as e:
-            if e.code == 404:
-                reason = f"URL: {url} | Error: 404 Not Found (link invalid)"
-                print(f"[Debug] Screen change detection failed | {reason}")
-                result['reason'] = reason
-                return result
-            url_valid = True  # Non-404 errors (like 500) still attempt to read
-        except (URLError, TimeoutError):
-            reason = f"URL: {url} | Error: Unable to connect (network timeout/link unreachable)"
-            print(f"[Debug] Screen change detection failed | {reason}")
-            result['reason'] = reason
-            return result
+            proc = subprocess.Popen(_ffmpeg_cmd(url, any_segment), stdout=subprocess.PIPE, stderr=stderr)
+        except FileNotFoundError:
+            return 0, 0.0, 'ffmpeg not found', False
 
-        if not url_valid:
-            result['reason'] = f"URL: {url} | Error: URL validation failed"
-            return result
-
-        # Try to read video stream with improved retry mechanism and error handling
-        max_retries = 2  # Reduce retries to speed up processing
-        cap = None
-        
-        for retry in range(max_retries):
-            try:
-                # Set OpenCV log level to reduce noise (if available)
-                try:
-                    cv2.setLogLevel(3)  # ERROR level only
-                except AttributeError:
-                    # Older OpenCV versions don't have setLogLevel
-                    pass
-                
-                cap = cv2.VideoCapture(url)
-                
-                # Set environment variables in GitHub Actions to avoid GUI-related errors
-                if IS_GITHUB_ACTIONS:
-                    os.environ['OPENCV_LOG_LEVEL'] = 'ERROR'
-                
-                # Set timeout and buffer parameters for better reliability
-                cap.set(cv2.CAP_PROP_OPEN_TIMEOUT_MSEC, 5000)  # 5-second open timeout
-                cap.set(cv2.CAP_PROP_READ_TIMEOUT_MSEC, 5000)   # 5-second read timeout
-                cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  # Minimize buffer size
-
-                if not cap.isOpened():
-                    if retry < max_retries - 1:
-                        print(f"[Debug] Retry {retry + 1}/{max_retries} - Unable to open video stream | URL: {url}")
-                        time.sleep(2)  # Wait longer before retry
-                        continue
-                    else:
-                        reason = f"URL: {url} | Error: Unable to open video stream after {max_retries} attempts (format not supported/link invalid)"
-                        print(f"[Debug] Screen change detection failed | {reason}")
-                        result['reason'] = reason
-                        if cap:
-                            cap.release()
-                        return result
-                
-                # Test if we can actually read frames (try multiple times)
-                test_success = False
-                for test_attempt in range(3):
-                    test_ret, test_frame = cap.read()
-                    if test_ret and test_frame is not None:
-                        test_success = True
-                        break
-                    elif not test_ret:
-                        time.sleep(0.5)  # Brief wait between attempts
-                
-                if not test_success:
-                    if retry < max_retries - 1:
-                        print(f"[Debug] Retry {retry + 1}/{max_retries} - Cannot read frame, stream may be ending | URL: {url}")
-                        cap.release()
-                        time.sleep(3)  # Wait longer before retry
-                        continue
-                    else:
-                        reason = f"URL: {url} | Error: Cannot read video frames (stream ended prematurely or format not supported)"
-                        print(f"[Debug] Screen change detection failed | {reason}")
-                        result['reason'] = reason
-                        cap.release()
-                        return result
-                
-                # If we can read a frame, break the retry loop
-                print(f"[Debug] Successfully opened video stream on attempt {retry + 1} | URL: {url}")
-                break
-                
-            except Exception as e:
-                if retry < max_retries - 1:
-                    print(f"[Debug] Retry {retry + 1}/{max_retries} - Exception during open: {str(e)} | URL: {url}")
-                    if cap:
-                        cap.release()
-                    time.sleep(2)
-                    continue
-                else:
-                    reason = f"URL: {url} | Error: Exception during video stream opening: {str(e)}"
-                    print(f"[Debug] Screen change detection failed | {reason}")
-                    result['reason'] = reason
-                    if cap:
-                        cap.release()
-                    return result
-
-        # 3. Read frames and detect changes (with improved error handling)
-        frames = []
-        start_time = time.time()
-        last_frame_time = start_time
-        frame_read_count = 0  # Count successfully read frames
-        consecutive_failures = 0  # Track consecutive read failures
-        max_consecutive_failures = 3  # Reduce to speed up failure detection
-        stream_ended = False
-
-        while time.time() - start_time < Config.TIMEOUT['video_check']:
-            # Check if timeout (3 minutes)
-            if timeout_flag:
-                reason = f"URL: {url} | Reason: Forced termination after 3 minutes"
-                print(f"[Debug] Video detection timeout | {reason}")
-                result['reason'] = reason
-                cap.release()
-                return result
-
-            try:
-                ret, frame = cap.read()
-                
-                if not ret or frame is None:
-                    consecutive_failures += 1
-                    if consecutive_failures >= max_consecutive_failures:
-                        print(f"[Debug] Stream ended after {frame_read_count} frames (consecutive failures: {consecutive_failures}) | URL: {url}")
-                        stream_ended = True
-                        break  # Stream ended or having persistent issues
-                    else:
-                        # Try to continue reading, might be temporary issue
-                        time.sleep(0.2)  # Slightly longer delay before retry
-                        continue
-                else:
-                    consecutive_failures = 0  # Reset failure counter on successful read
-
-                frame_read_count += 1
-                current_time = time.time()
-                
-                # Take one frame at specified intervals (reduce computation)
-                if current_time - last_frame_time >= Config.VIDEO_CHECK['frame_interval']:
-                    try:
-                        # Convert to grayscale and shrink with error checking
-                        if len(frame.shape) >= 2 and frame.size > 0:
-                            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                            gray = cv2.resize(gray, (320, 240))
-                            frames.append(gray)
-                            last_frame_time = current_time
-                        else:
-                            print(f"[Debug] Invalid frame shape, skipping | URL: {url}")
-                            continue
-                    except Exception as e:
-                        print(f"[Debug] Frame processing error: {str(e)} | URL: {url}")
-                        continue  # Skip this frame but continue with others
-
-                # Take at most 5 frames (enough to determine changes, avoid long time)
-                if len(frames) >= 5:
+        timer = threading.Timer(SAMPLE_TIMEOUT, proc.kill)  # 超时后杀掉 ffmpeg，下面的 read 随即返回
+        timer.start()
+        try:
+            while len(frames) < MAX_FRAMES:
+                data = proc.stdout.read(frame_size)
+                if len(data) < frame_size:
                     break
-                    
-            except Exception as e:
-                consecutive_failures += 1
-                if consecutive_failures >= max_consecutive_failures:
-                    print(f"[Debug] Frame reading exception after {frame_read_count} frames: {str(e)} | URL: {url}")
-                    stream_ended = True
+                frame = np.frombuffer(data, np.uint8).reshape(HEIGHT, WIDTH).astype(np.int16)
+                max_ratio = max([max_ratio] + [_changed_ratio(frame, f) for f in frames])
+                frames.append(frame)
+                if max_ratio >= MIN_CHANGED_RATIO:
                     break
-                time.sleep(0.2)
-                continue
+        finally:
+            timed_out = not timer.is_alive()
+            timer.cancel()
+            proc.kill()
+            proc.wait()
+            proc.stdout.close()
 
-        cap.release()
+        stderr.seek(0)
+        errors = stderr.read().decode('utf-8', 'ignore')
+    return len(frames), max_ratio, errors, timed_out
 
-        # Exception handling
-        if frame_read_count == 0:
-            reason = f"URL: {url} | Error: No video frames read (possibly invalid stream/format not supported)"
-            print(f"[Debug] Screen change detection failed | {reason}")
-            result['reason'] = reason
-            return result
 
-        if len(frames) < 2:
-            reason = f"URL: {url} | Error: Insufficient valid frames (read {frame_read_count} frames total, need at least 2 for comparison)"
-            print(f"[Debug] Screen change detection failed | {reason}")
-            result['reason'] = reason
-            return result
+def check(url):
+    any_segment = False
+    attempts = 0
+    while True:
+        count, ratio, errors, timed_out = sample(url, any_segment)
+        if count >= 2 or timed_out:
+            break
+        if not any_segment and HLS_SEGMENT_REJECTED in errors:
+            any_segment = True  # 不算一次重试
+            continue
+        attempts += 1
+        if attempts >= MAX_ATTEMPTS:
+            break
+        time.sleep(2)
 
-        # Calculate adjacent frame differences
-        total_diff = 0
-        for i in range(1, len(frames)):
-            diff = cv2.absdiff(frames[i-1], frames[i])
-            non_zero = np.count_nonzero(diff)
-            total_diff += non_zero
+    if count < 2:
+        lines = [line.strip() for line in errors.splitlines() if line.strip()]
+        error = lines[-1][:200] if lines else ''
+        if timed_out:
+            error = f'timeout after {SAMPLE_TIMEOUT}s' + (f' ({error})' if error else '')
+        reason = f'only {count} frame(s) decoded'
+        return {'success': False, 'error': f'{reason}: {error}' if error else reason}
 
-        avg_diff = total_diff / (len(frames) - 1)
-        is_changing = avg_diff > Config.VIDEO_CHECK['min_diff']
+    if ratio >= MIN_CHANGED_RATIO:
+        changing = True
+    elif count >= STATIC_MIN_FRAMES:
+        changing = False
+    else:
+        changing = None  # 取到的帧太少，判断不了是不是静止
+    return {
+        'success': True,
+        'has_video': True,
+        'video_changing': changing,
+        'frame_info': {'frames': count, 'changed_ratio': round(ratio * 100, 3)},  # 百分比
+    }
 
-        # Fill success result
-        result['success'] = True
-        result['changing'] = is_changing
-        result['reason'] = "Detection successful"
-        result['frame_info'] = {
-            'total_read': frame_read_count,
-            'valid_frames': len(frames),
-            'avg_diff': round(avg_diff, 2)
-        }
 
-        # Detect audio (None = could not be determined)
-        has_audio = detect_audio(url)
-
-        # Output JSON format result for easy parsing by external programs
-        output_result = {
-            'success': True,
-            'has_video': True,
-            'has_audio': has_audio,                  # True / False / None (unknown)
-            'video_changing': bool(is_changing),     # Convert to Python bool
-            'changing': bool(is_changing),          # Add backward compatibility
-            'error': None
-        }
-
-        print(json.dumps(output_result, ensure_ascii=True))
-        print(f"[Debug] Screen change detection successful | URL: {url} | Frames read: {frame_read_count} | Valid comparison frames: {len(frames)} | Average frame difference: {avg_diff:.0f} | Changing: {is_changing}")
-
-        return result
-
-    except Exception as e:
-        # Check if timeout on exception
-        if timeout_flag:
-            reason = f"URL: {url} | Reason: Forced termination after 3 minutes"
-            print(f"[Debug] Video detection timeout | {reason}")
-        else:
-            reason = f"URL: {url} | Error: {str(e)}"
-            print(f"[Debug] Video detection exception | {reason}")
-            import traceback
-            traceback.print_exc()
-
-        result['reason'] = reason
-        return result
-
-    finally:
-        # Stop timer (avoid memory leak)
-        timer.cancel()
-
-if __name__ == "__main__":
+def main():
     if len(sys.argv) != 2:
-        output = {
-            'success': False,
-            'reason': 'invalid_args',
-            'changing': False,
-            'frame_info': {
-                'total_read': 0,
-                'valid_frames': 0,
-                'avg_diff': 0.0
-            }
-        }
-        print(json.dumps(output, ensure_ascii=True))
+        print(json.dumps({'success': False, 'error': 'usage: video_check_worker.py <url>'}))
         sys.exit(1)
+    result = check(sys.argv[1])
+    print(json.dumps(result, ensure_ascii=True))
+    sys.exit(0 if result['success'] else 1)
 
-    url = sys.argv[1]
-    result = check_video_changes(url)
 
-    if not result['success']:
-        output_result = {
-            'has_video': False,
-            'has_audio': False,
-            'video_changing': False,
-            'error': result['reason']
-        }
-        print(json.dumps(output_result, ensure_ascii=True))
-        sys.exit(1)
-    
-    sys.exit(0)
+if __name__ == '__main__':
+    main()
